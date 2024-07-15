@@ -4,7 +4,40 @@
 {% block body %}
     <div class="container">
         <h1>My Leaflet Map</h1>
+        {% for label, messages in app.flashes %}
+            <div class="alert alert-{{ label }}">
+                {% for message in messages %}
+                    {{ message }}
+                {% endfor %}
+            </div>
+        {% endfor %}
         <div id="mapid" style="height: 600px;"></div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="nameModal" tabindex="-1" aria-labelledby="nameModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="nameModalLabel">Enter Location Name</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="nameForm">
+                        <div class="mb-3">
+                            <label for="locationName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="locationName" required>
+                        </div>
+                        <input type="hidden" id="latitude" name="latitude">
+                        <input type="hidden" id="longitude" name="longitude">
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveLocation">Save</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -18,12 +51,20 @@
 
 
         //code pour envoyer les coordonnées
-        mymap.on('click', function(e) {
-            var lat = e.latlng.lat;
-            var lng = e.latlng.lng;
-            var name = prompt("Enter the name for this location:");
-            if (name !== null && name !== "") {
-                // Appeler la fonction pour envoyer les coordonnées et le nom
+        var lat;
+        var lng;
+
+        mymap.on('dblclick', function(e) {
+            lat = e.latlng.lat;
+            lng = e.latlng.lng;
+            var nameModal = new bootstrap.Modal(document.getElementById('nameModal'), {});
+            nameModal.show();
+        });
+
+        // Fonction pour envoyer les coordonnées et le nom au serveur
+        document.getElementById('saveLocation').addEventListener('click', function() {
+            var name = document.getElementById('locationName').value;
+            if (name !== "") {
                 sendCoordinates(lat, lng, name);
             }
         });
@@ -58,22 +99,11 @@
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+         //Affichage
         // Ajouter un marqueur (marker)
         {% for point in allPoints %}
         L.marker([{{ point.latitude}}, {{point.longitude}}]).addTo(mymap)
-            .bindPopup('Se trouve à {{point.nom}}')
+            .bindPopup('{{point.nom}}')
             .closePopup();
         {% endfor %}
 
@@ -93,6 +123,13 @@
                 .setContent("You clicked the map at " + e.latlng.toString())
                 .openOn(mymap);
         }
+        // Cacher le message flash après 5 secondes
+        setTimeout(function() {
+            var alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.display = 'none';
+            });
+        }, 5000);
 
         mymap.on('click', onMapClick);
     </script>

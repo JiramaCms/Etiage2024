@@ -42,4 +42,13 @@ class MapController extends AbstractController
 
         return $this->redirectToRoute('app_map');
     }
+
+    #[Route('/editMap', name: 'app_map_edit')]
+    public function editMap(ManagerRegistry $mr): Response
+    {
+        $allPoints = $mr->getRepository(Point::class)->findAll();
+        return $this->render('map/editMap.html.twig', [
+            'allPoints' => $allPoints,
+        ]);
+    }
 }
