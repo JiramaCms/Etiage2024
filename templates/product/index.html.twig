@@ -1,0 +1,19 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello ProductController!{% endblock %}
+
+{% block body %}
+
+
+<div class="example-wrapper">
+    <ul>
+        {% for tabs in allProduct %}
+            <li>{{tabs.name}}</li>
+            <li>{{tabs.quantity}}</li>
+            <li>{{tabs.classGroup.name}}</li>
+            <a href={{path('app_delete_product',{'id':tabs.id})}}><input type="button" value="deleted product"  class"btn btn-primary"> </a>
+            
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

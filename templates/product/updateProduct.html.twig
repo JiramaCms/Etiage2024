@@ -1,0 +1,60 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row row-cols-2">
+            <div class="col-md-4">
+                {{form_start(form)}}
+                <div class='form-control'>
+                    {{form_label(form.name,"Name")}}
+                    {{form_widget(form.name, {"attr" : {"placeholder": "mettez votre nom ici"}})}}
+
+                    <small> {{form_help(form.name)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.name)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.quantity,"Quantity")}}
+                    {{form_widget(form.quantity)}}
+
+                    <small> {{form_help(form.quantity)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.quantity)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.description,"Description")}}
+                    {{form_widget(form.description, {"attr" : {"placeholder": "Description du produit"}})}}
+
+                    <small> {{form_help(form.description)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.description)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.expiredAt,"Date d_expiration")}}
+                    {{form_widget(form.expiredAt)}}
+
+                    <small> {{form_help(form.expiredAt)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.expiredAt)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.classGroup,"Name")}}
+                    {{form_widget(form.classGroup)}}
+
+                    <small> {{form_help(form.classGroup)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.classGroup)}}
+                    </div>
+                </div>
+                <div class="form-control" >
+                    <input type="submit" value="Update product" class="btn btn-primary">
+                </div>
+                {{form_end(form)}}
+            </div>
+        </div>
+    </div>
+{% endblock %}
