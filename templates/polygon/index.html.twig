@@ -1,0 +1,24 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Polygons</h1>
+
+    <div id="mapid" style="height: 600px;"></div>
+
+    <script>
+        var mymap = L.map('mapid').setView([-18.917923, 47.522342], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mymap);
+
+        {% for polygon in polygons %}
+            var coordinates = JSON.parse('{{ polygon.coordinates|e('js') }}');
+            var latlngs = coordinates.map(function(point) {
+                return [point[0], point[1]];
+            });
+
+            L.polygon(latlngs).addTo(mymap).bindPopup('{{ polygon.name }}');
+        {% endfor %}
+    </script>
+{% endblock %}

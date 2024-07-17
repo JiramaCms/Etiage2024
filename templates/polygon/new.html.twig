@@ -1,43 +1,26 @@
-{# templates/map.html.twig #}
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <div class="container">
-        <h1>My Leaflet Map</h1>
-        <div id="mapid" style="height: 600px;"></div>
-    </div>
+    <h1>Create new Polygon</h1>
 
+    {{ form_start(form) }}
+        <div class="form-group">
+            {{ form_label(form.name) }}
+            {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+        </div>
+        {{ form_widget(form.coordinates) }}
+        <button type="submit" class="btn btn-primary">Save</button>
+    {{ form_end(form) }}
+
+    <div id="mapid" style="height: 600px;"></div>
 
     <script>
-        // Initialiser la carte
         var mymap = L.map('mapid').setView([-18.917923, 47.522342], 13);
 
-        // Ajouter une couche de tuiles (tiles layer)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(mymap);
 
-
-         //Affichage
-        // Ajouter les marqueurs (marker)
-        {% for point in allPoints %}
-        L.marker([{{ point.latitude}}, {{point.longitude}}]).addTo(mymap)
-            .bindPopup('{{point.nom}}')
-            .closePopup();
-        {% endfor %}
-
-        L.circle([-18.919095, 47.525500], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5,
-            radius: 200
-        }).addTo(mymap)
-            .bindPopup('cette zone est demilitarisé')
-            .closePopup()
-
-        
-
-        // Initialiser Leaflet.draw
         var drawnItems = new L.FeatureGroup();
         mymap.addLayer(drawnItems);
 
@@ -58,11 +41,15 @@
         });
         mymap.addControl(drawControl);
 
-        // Écouter l'événement de création de polygone
         mymap.on(L.Draw.Event.CREATED, function(event) {
             var layer = event.layer;
             drawnItems.addLayer(layer);
-        });
 
+            var coordinates = layer.getLatLngs()[0].map(function(point) {
+                return [point.lat, point.lng];
+            });
+
+            document.getElementById('polygon_coordinates').value = JSON.stringify(coordinates);
+        });
     </script>
 {% endblock %}
