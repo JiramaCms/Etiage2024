@@ -100,29 +100,39 @@
 
 
          //Affichage
-        // Ajouter un marqueur (marker)
-        {% for point in allPoints %}
-        L.marker([{{ point.latitude}}, {{point.longitude}}]).addTo(mymap)
-            .bindPopup('{{point.nom}}')
-            .closePopup();
+        
+
+        var polygons = []; 
+        {% for polygon in polygones %}
+            var coordinates = JSON.parse('{{ polygon.coordinates|e('js') }}');
+            var latlngs = coordinates.map(function(point) {
+                return [point[0], point[1]];
+            });
+
+            var poly = L.polygon(latlngs).addTo(mymap).bindPopup('{{ polygon.name }}');
+            polygons.push(poly);
         {% endfor %}
 
-        L.circle([-18.919095, 47.525500], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.5,
-            radius: 200
-        }).addTo(mymap)
-            .bindPopup('cette zone est demilitarisé')
-            .closePopup()
+        // Ajouter les points et les différencier par leur couleur
+        {% for point in pointsData %}
 
-        var popup = L.popup();
-        function onMapClick(e) {
-            popup
-                .setLatLng(e.latlng)
-                .setContent("You clicked the map at " + e.latlng.toString())
-                .openOn(mymap);
-        }
+            {% set iconUrl %}
+                {% if point.isInside %}
+                    "/images/marker-green.svg"
+                {% else %}
+                    "/images/marker-blue.svg"
+                {% endif %}
+            {% endset %}
+
+            var markerIcon = L.icon({
+                iconUrl: {{ iconUrl }},
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            });
+            L.marker([{{ point.latitude }}, {{ point.longitude }}], { icon: markerIcon }).addTo(mymap).bindPopup("{{ point.name }}");
+        {% endfor %}
+
         // Cacher le message flash après 5 secondes
         setTimeout(function() {
             var alerts = document.querySelectorAll('.alert');
@@ -131,6 +141,5 @@
             });
         }, 5000);
 
-        mymap.on('click', onMapClick);
     </script>
 {% endblock %}

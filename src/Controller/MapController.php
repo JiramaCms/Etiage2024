@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Point;
+use App\Entity\Polygon;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,8 +16,28 @@ class MapController extends AbstractController
     public function index(ManagerRegistry $mr): Response
     {
         $allPoints = $mr->getRepository(Point::class)->findAll();
+        $polygons = $mr->getRepository(Polygon::class)->findAll();
+
+
+        $pointsData = [];
+        foreach ($allPoints as $point) {
+            $isInside = false;
+            foreach ($polygons as $polygon) {
+                if ($polygon->isPointInPolygon([$point->getLatitude(), $point->getLongitude()])) {
+                    $isInside = true;
+                    break;
+                }
+            }
+            $pointsData[] = [
+                'latitude' => $point->getLatitude(),
+                'longitude' => $point->getLongitude(),
+                'name' => $point->getNom(),
+                'isInside' => $isInside,
+            ];
+        }
         return $this->render('map/index.html.twig', [
-            'allPoints' => $allPoints,
+            'pointsData' => $pointsData,
+            'polygones' => $polygons,
         ]);
     }
 
