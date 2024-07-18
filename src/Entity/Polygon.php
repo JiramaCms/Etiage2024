@@ -64,6 +64,7 @@ class Polygon
             $xj = $coordinates[$j][0];
             $yj = $coordinates[$j][1];
 
+            //algorithme du ray-casting
             $intersect = (($yi > $y) != ($yj > $y)) && ($x < ($xj - $xi) * ($y - $yi) / ($yj - $yi) + $xi);
             if ($intersect) {
                 $inside = !$inside;
