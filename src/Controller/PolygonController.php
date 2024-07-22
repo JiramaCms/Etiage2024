@@ -18,9 +18,15 @@ class PolygonController extends AbstractController
     public function index(ManagerRegistry $mr): Response
     {
         $polygons = $mr->getRepository(Polygon::class)->findAll();
+        // Transform polygons to arrays
+        $polygonsArray = array_map(fn($polygon) => $polygon->toArray(), $polygons);
+
+        // Encode polygons as JSON
+        $polygonsJson = json_encode($polygonsArray, JSON_THROW_ON_ERROR);
 
         return $this->render('polygon/index.html.twig', [
-            'polygons' => $polygons,
+            'polygons' => $polygonsJson,
+            'polygonsName' =>$polygons,
         ]);
     }
 

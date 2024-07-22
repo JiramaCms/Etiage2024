@@ -51,6 +51,21 @@ class Polygon
         return $this;
     }
 
+    public function __toString()
+    {
+        return $this->name;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'name' =>$this->getName(),
+            'coordinates' => $this->getCoordinates(), // Assumes getCoordinates() returns an array
+            // Ajoute d'autres propriétés si nécessaire
+        ];
+    }
+
     public function isPointInPolygon($point)
     {
         $coordinates = json_decode($this->coordinates, true);

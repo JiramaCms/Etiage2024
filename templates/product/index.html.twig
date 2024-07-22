@@ -11,7 +11,9 @@
             <li>{{tabs.name}}</li>
             <li>{{tabs.quantity}}</li>
             <li>{{tabs.classGroup.name}}</li>
-            <a href={{path('app_delete_product',{'id':tabs.id})}}><input type="button" value="deleted product"  class"btn btn-primary"> </a>
+            {% if is_granted('ROLE_USER') %}
+                <a href={{path('app_delete_product',{'id':tabs.id})}}><input type="button" value="deleted product"  class"btn btn-primary"> </a>
+            {% endif %}
             
         {% endfor %}
     </ul>
