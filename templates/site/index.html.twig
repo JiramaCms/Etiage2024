@@ -1,0 +1,113 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello SiteController!{% endblock %}
+
+{% block body %}
+<style>
+        /* Styles for the sidebar */
+        #mapid {
+            position: relative;
+        }
+        .hidden2 {
+            display: none;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        @keyframes animate {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0.6;
+            }
+        }
+    </style>
+
+    <!-- Form -->
+        <div>
+            <div id="tabsContent2" class="card-body tab-content p-0">
+                <div class="tab-pane fade show active" id="tabs2-tab1" role="tabpanel">
+                    <div>
+                        <form method="post" action="{{ path('site_insert') }}">
+                            <div class="form-row">
+                                <div class="form-group col-12 col-md-6">
+                                    <label for="name">Libelle</label>
+                                    <input type="text" class="form-control" value="" id="name" name="libelle">
+                                </div>
+                                <div class="form-group col-12 col-md-6">
+                                    <label for="name">Adresse</label>
+                                    <input type="text" class="form-control" value="" id="name" name="adresse">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-12 col-md-12">
+                                    <label for="name">coordonnées</label>
+                                    <input type="text" class="form-control" value="" id="coord" name="coord">
+                                </div>
+                            </div>
+                            <div id="mapid" style="height: 500px;">
+                                <!-- Div de la carte -->
+                                  
+                            </div>
+                            </div>
+                            <br><br>
+                            <button type="submit" class="btn btn-primary float-right">Confirmer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <!-- End Form -->
+
+<script>
+        // Initialiser la carte
+        var mymap = L.map('mapid').setView([-18.917923, 47.522342], 13);
+
+        // Ajouter une couche de tuiles (tiles layer)
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(mymap);
+
+
+         mymap.pm.addControls({
+            position: "topleft", // Position de la barre d'outils
+            drawMarker: true, // adds button to draw markers
+            drawRectangle: false, // adds button to draw a polygon
+            drawPolygon: false, // adds button to draw a polygon
+            drawPolyline: false, // adds button to draw a polyline
+            drawCircle: false, // adds button to draw a cricle
+            drawCircleMarker: false, // adds button to draw a cricle
+            editPolygon: false, // adds button to toggle global edit mode
+            deleteLayer: true, // adds a button to delete layers
+        });
+
+        var currentMarker = null;
+
+        // Événement lors de la création d'un marqueur
+        mymap.on('pm:create', function(e) {
+            // Vérifier si un marqueur existe déjà
+            if (currentMarker) {
+                // Supprimer le marqueur précédent
+                map.removeLayer(currentMarker);
+            }
+            // Ajouter le nouveau marqueur
+            currentMarker = e.layer;
+            document.getElementById('coord').value = currentMarker.getLatLng();
+
+            console.log('Marqueur ajouté: ' +  currentMarker.getLatLng());
+        });
+
+
+</script>
+
+
+
+{% endblock %}

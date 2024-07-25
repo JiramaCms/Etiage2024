@@ -1,0 +1,181 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello LocationController!{% endblock %}
+
+{% block menuactive %}map{% endblock %}
+
+{% block body %}
+    <style>
+        /* Styles for the sidebar */
+        #map {
+            position: relative;
+            height: 500px; 
+        }
+        .sidebar-info {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent */
+            padding: 20px;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+            overflow-y: auto;
+            z-index: 1000;
+            margin: 2px;
+        }
+        .hidden2 {
+            display: none;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .marker-icon-jump {
+            height: 500px; 
+        }
+        @keyframes jumpMarker {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+
+    <div class="content">
+        <div class="py-4 px-3 px-md-4">
+            <div class="card mb-3 mb-md-4">
+                <div class="card-body">
+                    <!-- Breadcrumb -->
+                    <nav class="d-none d-md-block" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="/">Propriete</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Detail</li>
+                        </ol>
+                    </nav>
+                    <!-- End Breadcrumb -->
+
+                    <div class="mb-3 mb-md-4 d-flex justify-content-between">
+                        <div class="h3 mb-0">Descriptions</div>
+                    </div>
+
+                    <!-- Form -->
+                <!--    <div>
+                        <div id="tabsContent2" class="card-body tab-content p-0">
+                            <div class="tab-pane fade show active" id="tabs2-tab1" role="tabpanel">
+                                <div>
+                                    <form method="post" action="#TraitementServlet">
+                                        <div class="form-row">
+                                            <div class="form-group col-12 col-md-6">
+                                                <label for="adresse">Adresse</label>
+                                                <input type="text" class="form-control" id="adresse" name="adresse" readonly>
+                                            </div>
+                                            <div class="form-group col-12 col-md-6">
+                                                <label for="type">Type Propriete</label>
+                                                <input type="text" class="form-control" id="type" name="type" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-12 col-md-6">
+                                                <label for="perimetre">Perimetre (m)</label>
+                                                <input type="text" class="form-control" id="perimetre" name="perimetre" readonly>
+                                            </div>
+                                            <div class="form-group col-12 col-md-6">
+                                                <label for="superficie">Superficie (m<sup>2</sup>)</label>
+                                                <input type="text" class="form-control" id="superficie" name="superficie" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-12">
+                                                <label for="description">Description</label>
+                                                <textarea id="description" class="form-control" name="description" rows="2" cols="50" readonly></textarea>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="btn btnReset avatar-sm btn-primary p-0 ml-3" style="position: relative; z-index: 9999; margin-bottom: -8%;">
+                                            <i class="gd-pin-alt"></i>
+                                        </button> -->
+                                        <div id="map">
+                                            <!-- Div de la carte -->
+                                            <div class="sidebar-info hidden2" id="sidebar-info">
+                                                <button class="close-btn" onclick="closeSidebar()">×</button>
+                                                <h3>Details</h3>
+                                                <p id="sidebar-info-content"></p>
+                                            </div>
+                                        </div><!--
+                                        <br><br>
+                                        <button type="submit" class="btn btn-primary float-right">Modifier</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>-->
+                    <!-- End Form -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
+    <script src="https://unpkg.com/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
+    <script>
+        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 10);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Définir l'icône personnalisée
+        var customIcon = L.icon({
+            iconUrl: "/images/marker-blue.svg",
+            iconSize: [25, 41], // taille de l'icône
+            iconAnchor: [12, 41], // point d'ancrage de l'icône
+            popupAnchor: [1, -34], // point d'ancrage de la popup relative à l'icône
+        });
+
+        var sidebar = document.getElementById('sidebar-info');
+        var sidebarContent = document.getElementById('sidebar-info-content');
+        var currentSelectedMarker = null;
+
+        function closeSidebar() {
+            sidebar.classList.add('hidden2');
+        }
+
+        {% for pv in sites %}
+            var marker = L.marker([{{ pv.getLatitude() }}, {{ pv.getLongitude() }}], { icon: customIcon }).addTo(map);
+
+            marker.on('click', function(e) {
+                map.setView(e.latlng, 16); // Centre la carte sur le marqueur
+
+                map.eachLayer(function(layer) {
+                    if (layer instanceof L.Marker) {
+                        layer._icon.style.animation = ''; // Retirez l'animation
+                    }
+                });
+
+                // Appliquez l'animation au marqueur cliqué
+                e.target._icon.style.animation = 'jumpMarker 0.5s infinite alternate';
+
+                sidebarContent.innerHTML = '<strong>Nom : {{ pv.libelle }}</strong><br>Adresse : {{ pv.adresse }}<br> {{pv.coord.latitude}}'; // Affiche les détails
+                sidebar.classList.remove('hidden2'); // Affiche la barre latérale
+            });
+        {% endfor %}
+
+        map.on('click', function(e) {
+            var latlng = e.latlng;
+            alert('Coordonnées : ' + latlng.lng + ' ' + latlng.lat);
+        });
+
+        map.zoomControl.setPosition('bottomright');
+
+    </script>
+{% endblock %}
