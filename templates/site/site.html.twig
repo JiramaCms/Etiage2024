@@ -23,6 +23,8 @@
             overflow-y: auto;
             z-index: 1000;
             margin: 2px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
         }
         .hidden2 {
             display: none;
@@ -37,16 +39,17 @@
             cursor: pointer;
         }
         .marker-icon-jump {
-            height: 500px; 
+        animation: jumpMarker 0.8s infinite alternate;
         }
         @keyframes jumpMarker {
             from {
-                transform: translateY(0);
+                opacity: 1;
             }
             to {
-                transform: translateY(-10px);
+                opacity: 0.3;
             }
         }
+        
     </style>
 
     <div class="content">
@@ -132,13 +135,6 @@
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Définir l'icône personnalisée
-        var customIcon = L.icon({
-            iconUrl: "/images/marker-blue.svg",
-            iconSize: [25, 41], // taille de l'icône
-            iconAnchor: [12, 41], // point d'ancrage de l'icône
-            popupAnchor: [1, -34], // point d'ancrage de la popup relative à l'icône
-        });
 
         var sidebar = document.getElementById('sidebar-info');
         var sidebarContent = document.getElementById('sidebar-info-content');
@@ -148,30 +144,45 @@
             sidebar.classList.add('hidden2');
         }
 
+        var markers = [];
+
         {% for pv in sites %}
-            var marker = L.marker([{{ pv.getLatitude() }}, {{ pv.getLongitude() }}], { icon: customIcon }).addTo(map);
 
+            {% set iconUrl = "" %}
+            {% if pv.etat == '1' %}
+                {% set iconUrl = "/images/marker-blue.svg" %}
+            {% elseif pv.etat == '2' %}
+                {% set iconUrl = "/images/marker-green.svg" %}
+            {% elseif pv.etat == '3' %}
+                {% set iconUrl = "/images/marker-orange.svg" %}
+            {% endif %}
+
+            var markerIcon = L.icon({
+                iconUrl: "{{ iconUrl}}",
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            });
+            var marker = L.marker([{{ pv.getLatitude() }}, {{ pv.getLongitude() }}], { icon: markerIcon }).addTo(map);
+            markers.push(marker); // Ajoute le marqueur au tableau
+
+            //Sur clique d'un point
             marker.on('click', function(e) {
-                map.setView(e.latlng, 16); // Centre la carte sur le marqueur
+                map.setView(e.latlng, 12); // Centre la carte sur le marqueur
 
-                map.eachLayer(function(layer) {
-                    if (layer instanceof L.Marker) {
-                        layer._icon.style.animation = ''; // Retirez l'animation
-                    }
+               // Retirer l'animation de tous les autres marqueurs
+                markers.forEach(function(m) {
+                    m.getElement().classList.remove('marker-icon-jump');
                 });
 
                 // Appliquez l'animation au marqueur cliqué
-                e.target._icon.style.animation = 'jumpMarker 0.5s infinite alternate';
+                e.target.getElement().classList.add('marker-icon-jump');
 
-                sidebarContent.innerHTML = '<strong>Nom : {{ pv.libelle }}</strong><br>Adresse : {{ pv.adresse }}<br> {{pv.coord.latitude}}'; // Affiche les détails
+
+                sidebarContent.innerHTML = '<strong>Nom : {{ pv.libelle }}</strong><br>Adresse : {{ pv.adresse }}<br> Latitude : {{pv.coord.latitude}} <br>  Longitude : {{pv.coord.longitude}}'; // Affiche les détails
                 sidebar.classList.remove('hidden2'); // Affiche la barre latérale
             });
         {% endfor %}
-
-        map.on('click', function(e) {
-            var latlng = e.latlng;
-            alert('Coordonnées : ' + latlng.lng + ' ' + latlng.lat);
-        });
 
         map.zoomControl.setPosition('bottomright');
 

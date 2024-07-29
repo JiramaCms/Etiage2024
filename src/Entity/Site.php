@@ -22,6 +22,9 @@ class Site
     #[ORM\Column(type: 'point')]
     private $coord = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $Etat = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -70,5 +73,17 @@ class Site
     public function getLongitude(): ?float
     {
         return $this->coord['longitude'] ?? null;
+    }
+
+    public function getEtat(): ?int
+    {
+        return $this->Etat;
+    }
+
+    public function setEtat(?int $Etat): static
+    {
+        $this->Etat = $Etat;
+
+        return $this;
     }
 }
