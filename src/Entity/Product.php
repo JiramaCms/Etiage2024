@@ -45,6 +45,9 @@ class Product
     )]
     private ?Categorie $classGroup = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $test = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -106,6 +109,18 @@ class Product
     public function setClassGroup(?Categorie $classGroup): static
     {
         $this->classGroup = $classGroup;
+
+        return $this;
+    }
+
+    public function getTest(): ?string
+    {
+        return $this->test;
+    }
+
+    public function setTest(?string $test): static
+    {
+        $this->test = $test;
 
         return $this;
     }

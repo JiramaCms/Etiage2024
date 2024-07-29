@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Util\Util;
 use App\Entity\Site;
+use App\Entity\Zone;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +22,7 @@ class SiteController extends AbstractController
     }
     
     #[Route('/site/insert', name: 'site_insert', methods: ['POST'])]
-    public function insertPV(Request $request, EntityManagerInterface $entityManager): Response
+    public function insertSite(Request $request, EntityManagerInterface $entityManager): Response
     {
         // Récupéreration des données du formulaire
         $libelle = $request->request->get('libelle');
@@ -38,7 +40,7 @@ class SiteController extends AbstractController
         $site->setAdresse($adresse);
         $site->setCoord(['latitude' => $latitude, 'longitude' => $longitude]);
 
-        $entityManager->getRepository(site::class)->insert($site);
+        $entityManager->getRepository(Site::class)->insert($site);
 
 
         // Rediriger vers
@@ -55,4 +57,76 @@ class SiteController extends AbstractController
             'sites' => $site,
         ]);
     }
+
+
+
+    ///ZONE Controller part
+    #[Route('/site/zone/new', name: 'new_zone')]
+    public function newZV(EntityManagerInterface $entityManager): Response
+    {
+        $rzone =  $entityManager->getRepository(Zone::class);
+        $zone = $rzone->findAll();
+        dump($zone);
+        return $this->render('site/new-zone.html.twig', [
+            'controller_name' => 'LocationController',
+            'zoneventes' => $zone,
+            'message' => null,
+        ]);
+    }
+
+    ///Venant da la form de newZone
+    #[Route('/site/zone/insert', name: 'insert_zv', methods: ['POST'])]
+    public function traitementbu(Request $request, EntityManagerInterface $em): Response
+    {
+        $libelle = $request->request->get('libelle');
+        $description = $request->request->get('description');
+        $coord = $request->request->get('coords');
+
+        //echo "efa tonga" . $coord ;
+
+        // Appeller l API ici avec comme zone $coords de format LatLng(-18.924224, 47.465464),LatLng(-18.921119, 47.465464),LatLng(-18.921119, 47.468769)
+
+       /* $ctrl_message = null;
+        if ($coords) {
+            $zoneVente = new Zone($libelle, $apropos, $coords);
+            echo($zoneVente->getCoordToWKT());
+
+            $intersect = $em->getRepository(Zone::class)->doesPolygonIntersect($zoneVente);
+
+             if($intersect) {
+                 $ctrl_message = "Zone intersectee";
+             } else {
+                 $em->getRepository(Zone::class)->insert($zoneVente);
+            }
+        }*/
+        $zone = new Zone($libelle, $description,$coord);
+        //dump($zone->getCoordStrWKT());die();
+
+        $em->getRepository(Zone::class)->insert($zone);
+
+        // return $this->redirectToRoute('nouveau_zv');
+        return $this->render('site/new-zone.html.twig', [
+            'controller_name' => 'LocationController',
+            'message' => "enregistrer",
+        ]);
+    }
+
+    #[Route('/site/zone', name: 'All_zone')]
+    public function listeZone(EntityManagerInterface $entityManager): Response
+    {
+        $rzone =  $entityManager->getRepository(Zone::class);
+        $rsite = $entityManager->getRepository(Site::class);
+        $site = $rsite->findAll();
+
+        $zones = $rzone->findAll();
+        $zone=(Util::toJson($zones));
+        //dump($zone,$site);die();
+        return $this->render('site/all-zone.html.twig', [
+            'zone' => $zone,
+            'zoneName' => $zones,
+            'sites' => $site,
+        ]);
+    }
+
+    
 }

@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\Point;
+use App\Entity\Pointer;
 use App\Entity\Polygon;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,7 +15,7 @@ class MapController extends AbstractController
     #[Route('/map', name: 'app_map')]
     public function index(ManagerRegistry $mr): Response
     {
-        $allPoints = $mr->getRepository(Point::class)->findAll();
+        $allPoints = $mr->getRepository(Pointer::class)->findAll();
         $polygons = $mr->getRepository(Polygon::class)->findAll();
 
 
@@ -49,7 +49,7 @@ class MapController extends AbstractController
         $nom = $request->request->get('nom');
 
         if ($latitude && $longitude && $nom) {
-            $points = new Point();
+            $points = new Pointer();
             $points->setLatitude((float) $latitude);
             $points->setLongitude((float) $longitude);
             $points->setNom($nom);
@@ -67,7 +67,7 @@ class MapController extends AbstractController
     #[Route('/editMap', name: 'app_map_edit')]
     public function editMap(ManagerRegistry $mr): Response
     {
-        $allPoints = $mr->getRepository(Point::class)->findAll();
+        $allPoints = $mr->getRepository(Pointer::class)->findAll();
         return $this->render('map/editMap.html.twig', [
             'allPoints' => $allPoints,
         ]);

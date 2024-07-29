@@ -1,0 +1,146 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une zone{% endblock %}
+
+{% block menuactive %}map-zone{% endblock %}
+
+{% block body %}
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.css" /> <!-- Leaflet-Geoman CSS -->
+    <style>
+        #map {
+            position: relative;
+            height: 500px; /* Assurez-vous que la carte a une hauteur définie */
+        }
+    </style>
+
+    <div class="content">
+        <div class="py-4 px-3 px-md-4">
+            <div class="card mb-3 mb-md-4">
+                <div class="card-body">
+                    <!-- Breadcrumb -->
+                    <nav class="d-none d-md-block" aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="/">Zone</a>
+                            </li>
+                            <li class="breadcrumb-item active" aria-current="page">Nouveau</li>
+                        </ol>
+                    </nav>
+                    <!-- End Breadcrumb -->
+
+                    <div class="mb3 mb-md-4 d-flex justify-content-between">
+                        <div class="h3 mb-0">Ajouter une zone</div>
+                    </div>
+
+                    <!-- Form -->
+                    <div>
+                        <div id="tabsContent2" class="card-body tab-content p-0">
+                            <div class="tab-pane fade show active" id="tabs2-tab1" role="tabpanel">
+                                <div>
+                                    <form method="post" action="{{path('insert_zv')}}">
+                                        <div class="form-row">
+                                            <div class="form-group col-12 col-md-6">
+                                                <label for="libelle">Libelle</label>
+                                                <input type="text" class="form-control" id="libelle" name="libelle" required>
+                                            </div>
+                                            <div class="form-group col-12 col-md-6">
+                                                <label for="description">Description</label>
+                                                <input type="text" class="form-control" id="description" name="description" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-12">
+                                                <label for="coords">Coordonnées (WKT)</label>
+                                                <input type="text" class="form-control" id="coords" name="coords" readonly>
+                                            </div>
+                                        </div>
+                                        <div id="map"></div>
+                                        <br><br>
+                                        <button type="submit" class="btn btn-primary float-right">Confirmer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Form -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    
+        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 16);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        map.zoomControl.setPosition('bottomright');
+
+        const options = {
+            position: "topleft",
+            drawMarker: false,
+            drawPolygon: true,
+            drawPolyline: false,
+            drawCircle: false,
+            drawCircleMarker: false,
+            editPolygon: true,
+            deleteLayer: true
+        };
+
+        map.pm.addControls(options);
+        {# map.pm.disableDraw('Polygon'); #}
+
+        var drawnPolygon;
+
+        function toWKT(coords) {
+            let wkt = 'POLYGON((';
+            coords[0].forEach((coord, index) => {
+                wkt += `${coord.lng} ${coord.lat}`;
+                if (index !== coords[0].length - 1) {
+                    wkt += ', ';
+                }
+            });
+            wkt += '))';
+            return wkt;
+        }
+
+        function updateCoordinates(layer) {
+            var coords = layer.getLatLngs();
+            document.getElementById('coords').value = coords;
+        }
+
+        map.on('pm:create', function(e) {
+            if (drawnPolygon) {
+                map.removeLayer(drawnPolygon);
+            }
+            drawnPolygon = e.layer;
+            updateCoordinates(e.layer);
+            console.log('Nouvelle couche créée');
+
+            // Écouter les modifications sur la nouvelle couche
+            e.layer.on('pm:edit', function(x) {
+                updateCoordinates(e.layer);
+                console.log('Couches éditée');
+            });
+        });
+
+        map.on('pm:remove', function(e) {
+            if (e.layer === drawnPolygon) {
+                document.getElementById('coords').value = '';
+                drawnPolygon = null;
+                console.log('Couche supprimée');
+            }
+            //console.log('Couche supprimée');
+        });
+
+        {% if message is not null %}
+                document.getElementById("error").innerHTML = "{{message}}";
+                document.getElementById("show-exception").click();
+                console.log('{{message}}');
+        {% endif %}
+</script>
+{% endblock %}
+

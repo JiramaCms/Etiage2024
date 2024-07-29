@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\PointRepository;
+use App\Repository\PointerRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: PointRepository::class)]
-class Point
+#[ORM\Entity(repositoryClass: PointerRepository::class)]
+class Pointer
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

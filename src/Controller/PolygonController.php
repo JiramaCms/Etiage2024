@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Polygon;
-use App\Form\PolygonType;
+use App\Form\PolygonForm;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -35,7 +35,7 @@ class PolygonController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $polygon = new Polygon();
-        $form = $this->createForm(PolygonType::class, $polygon);
+        $form = $this->createForm(PolygonForm::class, $polygon);
 
         $form->handleRequest($request);
 
