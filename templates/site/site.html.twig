@@ -40,7 +40,7 @@
             position: absolute;
             top: 0;
             right: 0;
-            width: 300px;
+            width: 350px;
             height: 100%;
             background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent */
             padding: 20px;
@@ -99,6 +99,23 @@
                         <!-- Div de la carte -->
                         <div class="sidebar-info hidden2" id="sidebar-info">
                             <button class="close-btn" onclick="closeSidebar()">×</button>
+                            <ul class="nav nav-tabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="tabOverview" data-bs-toggle="tab" onclick="showOverview()"  aria-selected="true">
+                                        Overview
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="tabIncident" data-bs-toggle="tab" onclick="showIncidents()"  aria-selected="false">
+                                        Incidents
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="tabStatistique" data-bs-toggle="tab" onclick="showStatistics()"  aria-selected="false">
+                                        Statistique
+                                    </button>
+                                </li>
+                            </ul>
                             <h3>Details</h3>
                             <p id="sidebar-info-content"></p>
                         </div>
@@ -108,8 +125,7 @@
                         <div><i style="background: blue;"></i> Site bleu</div>
                         <div><i style="background: green;"></i> Site vert</div>
                         <div><i style="background: orange;"></i> Site orange</div>
-                         <div class="toggle-zones" onclick="toggleZonesVisibility()">Zones</div>
-
+                        <div class="toggle-zones" onclick="toggleZonesVisibility()">Zones</div>
                     </div>
                 </div>
             </div>
@@ -126,9 +142,36 @@
 
         var zones = {{ zone|raw }};
         let sitesData =  {{sites|raw}};
-        console.log(sitesData);
+        //console.log(sitesData);
         var polygons = [];
         var zonesVisible = true;
+
+        function showOverview(){
+            var siteId = currentSelectedMarker;
+            fetchSiteDetails(siteId);
+        }
+
+        function showIncidents() {
+            var siteId = currentSelectedMarker;
+            var siteData = sitesData.find(site => site.id === siteId);
+
+            if (siteData && siteData.incidents.length >= 1) {
+                let incidentInfo = siteData.incidents.map(incident => `
+                    <div>Incident : ${incident.libelle}</div>
+                    <div>Description : ${incident.description}</div>
+                `).join('');
+                document.getElementById('sidebar-info-content').innerHTML = incidentInfo;
+            } else {
+                document.getElementById('sidebar-info-content').innerHTML = 'Aucun incident trouvé.';
+            }
+        }
+
+        function showStatistics() {
+            // Logique pour afficher les statistiques dans le sidebar
+            console.log('efa niova les statistiques');
+            // Exemple : Mettre à jour le contenu du sidebar
+            document.getElementById('sidebar-info-content').innerHTML = 'Contenu des statistiques dia mbola miampy';
+        }
 
         //GET
         function fetchZoneDetails(zoneId) {
@@ -154,6 +197,7 @@
                 var polygon = L.polygon(coordinates).addTo(map).bindPopup(zone.libelle);
                 polygon.on('click', function(e) {
                     fetchZoneDetails(zone.id);
+                    currentSelectedMarker = null;
                 });
 
                 polygons.push(polygon);
@@ -235,17 +279,11 @@
                 </div>
             `   );
 
-                let incidentInfo = siteData.incidents.map(incident => `
-                    <div>Incident : ${incident.libelle}</div>
-                    <div>Description : ${incident.description}</div>
-                `)
-
             sidebarContent.innerHTML = `
                 <strong>Nom : ${siteData.libelle}</strong><br>
                 Adresse : ${siteData.adresse}<br>
                 Latitude : ${siteData.coord.latitude}<br>
                 Longitude : ${siteData.coord.longitude}<br>
-                ${incidentInfo}
                 ${zonesInfo}
             `;
             sidebar.classList.remove('hidden2');
@@ -300,6 +338,7 @@
 
                 // Appliquez l'animation au marqueur cliqué
                 e.target.getElement().classList.add('marker-icon-jump');
+                currentSelectedMarker = site.id;
 
                 // Appelle la fonction pour récupérer les détails de la zone
                 fetchSiteDetails(site.id);
@@ -308,6 +347,5 @@
         
 
         map.zoomControl.setPosition('bottomright');
-
     </script>
 {% endblock %}

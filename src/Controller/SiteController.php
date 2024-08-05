@@ -22,6 +22,14 @@ class SiteController extends AbstractController
             'controller_name' => 'SiteController',
         ]);
     }
+
+    #[Route('/site/test', name: 'app_site_test')]
+    public function test(): Response
+    {
+        return $this->render('site/test.html.twig', [
+            'controller_name' => 'SiteController',
+        ]);
+    }
     
     #[Route('/site/insert', name: 'site_insert', methods: ['POST'])]
     public function insertSite(Request $request, EntityManagerInterface $entityManager): Response
