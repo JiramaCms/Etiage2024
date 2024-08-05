@@ -23,7 +23,7 @@ class Site
     private $coord = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $Etat = null;
+    private ?int $etat = null;
 
     public function getId(): ?int
     {
@@ -77,12 +77,12 @@ class Site
 
     public function getEtat(): ?int
     {
-        return $this->Etat;
+        return $this->etat;
     }
 
-    public function setEtat(?int $Etat): static
+    public function setEtat(?int $etat): static
     {
-        $this->Etat = $Etat;
+        $this->etat = $etat;
 
         return $this;
     }

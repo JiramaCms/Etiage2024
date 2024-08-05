@@ -5,10 +5,12 @@ namespace App\Controller;
 use App\Util\Util;
 use App\Entity\Site;
 use App\Entity\Zone;
+use App\Repository\ZoneRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class SiteController extends AbstractController
@@ -48,14 +50,45 @@ class SiteController extends AbstractController
     }
 
     #[Route('/site/liste', name: 'site_liste')]
-    public function site(EntityManagerInterface $entityManager): Response
+    public function site(Request $request,EntityManagerInterface $entityManager): Response
     {
         $rsite =  $entityManager->getRepository(Site::class);
-        $site = $rsite->findAll();
+        $rzone = $entityManager->getRepository(Zone::class);
+        $sites = $rsite->findAll();
+        $zones = $rzone->findAll();
+        $zone=(Util::toJson($zones));
+        $site = (Util::toJson($sites));
 
         return $this->render('site/site.html.twig', [
             'sites' => $site,
+            'zone' => $zone,
         ]);
+    }
+
+    //prendre les zones d'une site 
+    #[Route('site/liste/detailSite/{siteId}', name : 'site_liste_detail')]
+    public function siteDetail($siteId,EntityManagerInterface $entityManager): Response
+    {
+        $rsite = $entityManager->getRepository(Site::class);
+        //$siteByZone = $rzone->getSitesInZone($zoneId);
+        $zoneOfSite = $rsite->getZoneOfSite($siteId);
+        //dump($zoneOfSite);die();
+        $ato = Util::toJson($zoneOfSite);
+
+        return new JsonResponse($ato);
+    }
+
+    //prendre les sites d'une zone 
+    #[Route('site/liste/detailZone/{zoneId}', name : 'site_liste_zone_detail')]
+    public function zoneDetail($zoneId,EntityManagerInterface $entityManager): Response
+    {
+        $rzone = $entityManager->getRepository(Zone::class);
+        //$siteByZone = $rzone->getSitesInZone($zoneId);
+        $sitesInZone = $rzone->getSitesInZone($zoneId);
+        //dump($zoneOfSite);die();
+        $ato = Util::toJson($sitesInZone);
+
+        return new JsonResponse($ato);
     }
 
 

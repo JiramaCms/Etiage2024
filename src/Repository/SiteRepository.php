@@ -3,8 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Site;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Site>
@@ -37,6 +38,31 @@ class SiteRepository extends ServiceEntityRepository
             'latitude' => $pointVente->getLatitude(),
             'longitude' => $pointVente->getLongitude(),
         ]);
+    }
+
+    public function getZoneOfSite($siteId)
+    {
+        $entityManager = $this->getEntityManager();
+
+         // Créez un ResultSetMapping
+         $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+
+         // Ajoutez le mapping pour l'entité ZoneVente
+         $rsm->addRootEntityFromClassMetadata('App\Entity\Zone', 'z');
+
+        $nativeQuery = $entityManager->createNativeQuery('
+            SELECT z.*
+            FROM site s
+            JOIN zone z ON ST_Intersects(s.coord, z.coord)
+            WHERE s.id = :siteId
+        ',$rsm);
+        
+
+        $nativeQuery->setParameter('siteId', $siteId);
+        
+        $result = $nativeQuery->getResult();
+
+        return $result;
     }
 
 //    /**

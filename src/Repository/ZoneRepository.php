@@ -2,9 +2,12 @@
 
 namespace App\Repository;
 
+use App\Entity\Site;
 use App\Entity\Zone;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query\ResultSetMapping;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Zone>
@@ -35,6 +38,32 @@ class ZoneRepository extends ServiceEntityRepository
             'polygon' => $zone->getCoordToWKT(),
         ]);
     }
+
+    public function getSitesInZone($zoneId)
+    {
+        $entityManager = $this->getEntityManager();
+
+         // Créez un ResultSetMapping
+         $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+
+         // Ajoutez le mapping pour l'entité ZoneVente
+         $rsm->addRootEntityFromClassMetadata('App\Entity\Site', 's');
+
+        $nativeQuery = $entityManager->createNativeQuery('
+            SELECT s.*
+            FROM site s
+            JOIN zone z ON ST_Intersects(s.coord, z.coord)
+            WHERE z.id = :zoneId
+        ',$rsm);
+        
+
+        $nativeQuery->setParameter('zoneId', $zoneId);
+        
+        $result = $nativeQuery->getResult();
+
+        return $result;
+    }
+
 
 //    /**
 //     * @return Zone[] Returns an array of Zone objects

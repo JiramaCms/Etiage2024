@@ -11,6 +11,31 @@
             position: relative;
             height: 500px; 
         }
+        .legend {
+            background: white;
+            padding: 10px;
+            border: 1px solid white;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            position: absolute;
+            bottom: 18px;
+            left: 18px;
+            z-index: 1000;
+        }
+        .legend i {
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            margin-right: 8px;
+            border-radius: 50%;
+        }
+        .legend .toggle-zones {
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .legend .toggle-zones.strikethrough {
+            text-decoration: line-through;
+        }
         .sidebar-info {
             position: absolute;
             top: 0;
@@ -70,58 +95,22 @@
                     <div class="mb-3 mb-md-4 d-flex justify-content-between">
                         <div class="h3 mb-0">Descriptions</div>
                     </div>
-
-                    <!-- Form -->
-                <!--    <div>
-                        <div id="tabsContent2" class="card-body tab-content p-0">
-                            <div class="tab-pane fade show active" id="tabs2-tab1" role="tabpanel">
-                                <div>
-                                    <form method="post" action="#TraitementServlet">
-                                        <div class="form-row">
-                                            <div class="form-group col-12 col-md-6">
-                                                <label for="adresse">Adresse</label>
-                                                <input type="text" class="form-control" id="adresse" name="adresse" readonly>
-                                            </div>
-                                            <div class="form-group col-12 col-md-6">
-                                                <label for="type">Type Propriete</label>
-                                                <input type="text" class="form-control" id="type" name="type" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="form-row">
-                                            <div class="form-group col-12 col-md-6">
-                                                <label for="perimetre">Perimetre (m)</label>
-                                                <input type="text" class="form-control" id="perimetre" name="perimetre" readonly>
-                                            </div>
-                                            <div class="form-group col-12 col-md-6">
-                                                <label for="superficie">Superficie (m<sup>2</sup>)</label>
-                                                <input type="text" class="form-control" id="superficie" name="superficie" readonly>
-                                            </div>
-                                        </div>
-                                        <div class="form-row">
-                                            <div class="form-group col-12">
-                                                <label for="description">Description</label>
-                                                <textarea id="description" class="form-control" name="description" rows="2" cols="50" readonly></textarea>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="btn btnReset avatar-sm btn-primary p-0 ml-3" style="position: relative; z-index: 9999; margin-bottom: -8%;">
-                                            <i class="gd-pin-alt"></i>
-                                        </button> -->
-                                        <div id="map">
-                                            <!-- Div de la carte -->
-                                            <div class="sidebar-info hidden2" id="sidebar-info">
-                                                <button class="close-btn" onclick="closeSidebar()">×</button>
-                                                <h3>Details</h3>
-                                                <p id="sidebar-info-content"></p>
-                                            </div>
-                                        </div><!--
-                                        <br><br>
-                                        <button type="submit" class="btn btn-primary float-right">Modifier</button>
-                                    </form>
-                                </div>
-                            </div>
+                    <div id="map">
+                        <!-- Div de la carte -->
+                        <div class="sidebar-info hidden2" id="sidebar-info">
+                            <button class="close-btn" onclick="closeSidebar()">×</button>
+                            <h3>Details</h3>
+                            <p id="sidebar-info-content"></p>
                         </div>
-                    </div>-->
-                    <!-- End Form -->
+                    </div>
+                    <div id="legend" class="legend">
+                        <h4>Légende</h4>
+                        <div><i style="background: blue;"></i> Site bleu</div>
+                        <div><i style="background: green;"></i> Site vert</div>
+                        <div><i style="background: orange;"></i> Site orange</div>
+                         <div class="toggle-zones" onclick="toggleZonesVisibility()">Zones</div>
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,42 +124,169 @@
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
         }).addTo(map);
 
+        var zones = {{ zone|raw }};
+        let sitesData =  {{sites|raw}};
+        var polygons = [];
+        var zonesVisible = true;
+
+        //GET
+        function fetchZoneDetails(zoneId) {
+            fetch(`/site/liste/detailZone/${zoneId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let datas =JSON.parse(data);
+                    var zoneData = zones.find(zone => zone.id === zoneId);
+                    if (zoneData) {
+                        showZoneSidebar(zoneData, datas);
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        // Fonction pour ajouter les polygones à la carte
+        function addPolygons(zones) {
+            removePolygons();
+            zones.forEach(function(zone) {
+                var coordinates = zone.coord.map(function(coord) {
+                    return [coord.latitude, coord.longitude];
+                });
+                var polygon = L.polygon(coordinates).addTo(map).bindPopup(zone.libelle);
+                polygon.on('click', function(e) {
+                    fetchZoneDetails(zone.id);
+                });
+
+                polygons.push(polygon);
+            });
+        }
+
+        function showZoneSidebar(zone,siteData) {
+
+            let siteInfo = siteData.map(site => `
+                <div>
+                    <strong>nom : ${site.libelle}</strong><br>
+                    Adresse : ${site.adresse}<br>
+                    Etat : ${site.etat}
+                </div>
+            `   );
+
+            let zoneInfo = `
+                <div>
+                    <strong><p>Zone : ${zone.libelle}</p>Zone->Site :->incident :->Action->Objectif :Materiel</strong>
+                    Description : ${zone.description}
+                    <p>Coordonnées : ${zone.coord.map(coord => `(${coord.latitude}, ${coord.longitude})`).join(', ')}</p>
+                    Sites:
+                    ${siteInfo}
+                </div>
+            `;
+            sidebarContent.innerHTML = zoneInfo;
+            sidebar.classList.remove('hidden2');
+        }
+
+        function removePolygons() {
+            polygons.forEach(function(polygon) {
+                map.removeLayer(polygon);
+            });
+            polygons = [];
+        }
+
+        function toggleZonesVisibility() {
+            var toggleElement = document.querySelector('.toggle-zones');
+            zonesVisible = !zonesVisible;
+            if (zonesVisible) {
+                addPolygons(zones);
+                toggleElement.classList.remove('strikethrough');
+            } else {
+                removePolygons();
+                toggleElement.classList.add('strikethrough');
+            }
+        }
+
+        addPolygons(zones);
+
 
         var sidebar = document.getElementById('sidebar-info');
         var sidebarContent = document.getElementById('sidebar-info-content');
+        var markers = [];
         var currentSelectedMarker = null;
 
         function closeSidebar() {
             sidebar.classList.add('hidden2');
+            markers.forEach(function(m) {
+                m.getElement().classList.remove('marker-icon-jump');
+            });
         }
-
+                
+            
         var markers = [];
 
-        {% for pv in sites %}
+        // Fonction pour mettre à jour le contenu de la sidebar avec les données du site et de la zone
+        function updateSidebarContent(siteData, zoneData) {
 
-            {% set iconUrl = "" %}
-            {% if pv.etat == '1' %}
-                {% set iconUrl = "/images/marker-blue.svg" %}
-            {% elseif pv.etat == '2' %}
-                {% set iconUrl = "/images/marker-green.svg" %}
-            {% elseif pv.etat == '3' %}
-                {% set iconUrl = "/images/marker-orange.svg" %}
-            {% endif %}
+            if (!Array.isArray(zoneData)) {
+                console.error('Les données de zones ne sont pas un tableau:', zoneData);
+                return;
+            }
+
+                let zonesInfo = zoneData.map(zone => `
+                <div>
+                    <strong>Zone : ${zone.libelle}</strong><br>
+                    Description : ${zone.description}
+                </div>
+            `   );
+
+            sidebarContent.innerHTML = `
+                <strong>Nom : ${siteData.libelle}</strong><br>
+                Adresse : ${siteData.adresse}<br>
+                Latitude : ${siteData.coord.latitude}<br>
+                Longitude : ${siteData.coord.longitude}<br>
+                ${zonesInfo}
+            `;
+            sidebar.classList.remove('hidden2');
+        }
+
+        // Fonction pour récupérer les détails de la zone par rapport à l'ID du site
+        function fetchSiteDetails(siteId) {
+            // Remplacez cette URL par l'URL de votre endpoint pour obtenir les détails de la zone
+            fetch(`/site/liste/detailSite/${siteId}`)
+                .then(response => response.json())
+                .then(data => {
+                    let datas =JSON.parse(data);
+                    var siteData = sitesData.find(site => site.id === siteId);
+                    if (siteData) {
+                        updateSidebarContent(siteData, datas);
+                    }
+                })
+                .catch(error => console.error('Erreur:', error));
+        }
+
+        // Affichage des sites
+        sitesData.forEach(function(site) {
+            var iconUrl = "/images/marker-green.svg";
+            
+            if (site.etat == '1') {
+                iconUrl = "/images/marker-blue.svg";
+            } else if (site.etat == '2') {
+                iconUrl = "/images/marker-green.svg";
+            } else if (site.etat == '3') {
+                iconUrl = "/images/marker-orange.svg";
+            }
 
             var markerIcon = L.icon({
-                iconUrl: "{{ iconUrl}}",
+                iconUrl: iconUrl,
                 iconSize: [25, 41],
                 iconAnchor: [12, 41],
                 popupAnchor: [1, -34]
             });
-            var marker = L.marker([{{ pv.getLatitude() }}, {{ pv.getLongitude() }}], { icon: markerIcon }).addTo(map);
+
+            // Affichage sur la carte
+            var marker = L.marker([site.latitude, site.longitude], { icon: markerIcon }).addTo(map);
             markers.push(marker); // Ajoute le marqueur au tableau
 
-            //Sur clique d'un point
+            // Sur clic d'un point
             marker.on('click', function(e) {
                 map.setView(e.latlng, 12); // Centre la carte sur le marqueur
 
-               // Retirer l'animation de tous les autres marqueurs
+                // Retirer l'animation de tous les autres marqueurs
                 markers.forEach(function(m) {
                     m.getElement().classList.remove('marker-icon-jump');
                 });
@@ -178,11 +294,11 @@
                 // Appliquez l'animation au marqueur cliqué
                 e.target.getElement().classList.add('marker-icon-jump');
 
-
-                sidebarContent.innerHTML = '<strong>Nom : {{ pv.libelle }}</strong><br>Adresse : {{ pv.adresse }}<br> Latitude : {{pv.coord.latitude}} <br>  Longitude : {{pv.coord.longitude}}'; // Affiche les détails
-                sidebar.classList.remove('hidden2'); // Affiche la barre latérale
+                // Appelle la fonction pour récupérer les détails de la zone
+                fetchSiteDetails(site.id);
             });
-        {% endfor %}
+        });
+        
 
         map.zoomControl.setPosition('bottomright');
 
