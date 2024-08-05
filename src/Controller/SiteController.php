@@ -58,7 +58,7 @@ class SiteController extends AbstractController
         $zones = $rzone->findAll();
         $zone=(Util::toJson($zones));
         $site = (Util::toJson($sites));
-
+       // dump($site);die();
         return $this->render('site/site.html.twig', [
             'sites' => $site,
             'zone' => $zone,

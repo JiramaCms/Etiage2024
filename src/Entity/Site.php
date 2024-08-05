@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\SiteRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SiteRepository::class)]
@@ -24,6 +26,14 @@ class Site
 
     #[ORM\Column(nullable: true)]
     private ?int $etat = null;
+
+    #[ORM\OneToMany(targetEntity: Incident::class, mappedBy: 'Site')]
+    private Collection $incidents;
+
+    public function __construct()
+    {
+        $this->incidents = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -83,6 +93,36 @@ class Site
     public function setEtat(?int $etat): static
     {
         $this->etat = $etat;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Incident>
+     */
+    public function getIncidents(): Collection
+    {
+        return $this->incidents;
+    }
+
+    public function addIncident(Incident $incident): static
+    {
+        if (!$this->incidents->contains($incident)) {
+            $this->incidents->add($incident);
+            $incident->setSite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeIncident(Incident $incident): static
+    {
+        if ($this->incidents->removeElement($incident)) {
+            // set the owning side to null (unless already changed)
+            if ($incident->getSite() === $this) {
+                $incident->setSite(null);
+            }
+        }
 
         return $this;
     }

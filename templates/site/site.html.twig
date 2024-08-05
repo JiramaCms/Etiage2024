@@ -126,6 +126,7 @@
 
         var zones = {{ zone|raw }};
         let sitesData =  {{sites|raw}};
+        console.log(sitesData);
         var polygons = [];
         var zonesVisible = true;
 
@@ -234,11 +235,17 @@
                 </div>
             `   );
 
+                let incidentInfo = siteData.incidents.map(incident => `
+                    <div>Incident : ${incident.libelle}</div>
+                    <div>Description : ${incident.description}</div>
+                `)
+
             sidebarContent.innerHTML = `
                 <strong>Nom : ${siteData.libelle}</strong><br>
                 Adresse : ${siteData.adresse}<br>
                 Latitude : ${siteData.coord.latitude}<br>
                 Longitude : ${siteData.coord.longitude}<br>
+                ${incidentInfo}
                 ${zonesInfo}
             `;
             sidebar.classList.remove('hidden2');

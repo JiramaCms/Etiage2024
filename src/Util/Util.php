@@ -16,7 +16,11 @@ class Util
 
         $serializer = new Serializer($normalizers, $encoders);
 
-        $json = $serializer->serialize($data, 'json');
+        $json = $serializer->serialize($data, 'json', [
+            'circular_reference_handler' => function ($object) {
+                return $object->getId();
+            },
+        ]);
 
         return $json;
     }
