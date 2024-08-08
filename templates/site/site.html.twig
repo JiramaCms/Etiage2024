@@ -160,9 +160,17 @@
                     <div>Incident : ${incident.libelle}</div>
                     <div>Description : ${incident.description}</div>
                 `).join('');
-                document.getElementById('sidebar-info-content').innerHTML = incidentInfo;
+                document.getElementById('sidebar-info-content').innerHTML = `
+                    ${incidentInfo}
+                    <button onclick="showNewIncidentForm()">Ajouter un incident</button>
+
+                `;
             } else {
-                document.getElementById('sidebar-info-content').innerHTML = 'Aucun incident trouvé.';
+                document.getElementById('sidebar-info-content').innerHTML = `
+                    Aucun incident trouvé.
+                    <button onclick="showNewIncidentForm()">Ajouter un incident</button>
+                
+                `;
             }
         }
 
