@@ -30,9 +30,13 @@ class Site
     #[ORM\OneToMany(targetEntity: Incident::class, mappedBy: 'Site')]
     private Collection $incidents;
 
+    #[ORM\OneToMany(targetEntity: Objectif::class, mappedBy: 'site')]
+    private Collection $objectifs;
+
     public function __construct()
     {
         $this->incidents = new ArrayCollection();
+        $this->objectifs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -121,6 +125,36 @@ class Site
             // set the owning side to null (unless already changed)
             if ($incident->getSite() === $this) {
                 $incident->setSite(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Objectif>
+     */
+    public function getObjectifs(): Collection
+    {
+        return $this->objectifs;
+    }
+
+    public function addObjectif(Objectif $objectif): static
+    {
+        if (!$this->objectifs->contains($objectif)) {
+            $this->objectifs->add($objectif);
+            $objectif->setSite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeObjectif(Objectif $objectif): static
+    {
+        if ($this->objectifs->removeElement($objectif)) {
+            // set the owning side to null (unless already changed)
+            if ($objectif->getSite() === $this) {
+                $objectif->setSite(null);
             }
         }
 

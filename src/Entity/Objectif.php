@@ -40,6 +40,10 @@ class Objectif
     #[ORM\OneToMany(targetEntity: Action::class, mappedBy: 'objectif')]
     private Collection $actions;
 
+    #[ORM\ManyToOne(inversedBy: 'objectifs')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Site $site = null;
+
     public function __construct()
     {
         $this->actions = new ArrayCollection();
@@ -160,6 +164,18 @@ class Objectif
                 $action->setObjectif(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSite(): ?Site
+    {
+        return $this->site;
+    }
+
+    public function setSite(?Site $site): static
+    {
+        $this->site = $site;
 
         return $this;
     }

@@ -34,9 +34,13 @@ class Action
     #[ORM\ManyToOne(inversedBy: 'actions')]
     private ?Objectif $objectif = null;
 
+    #[ORM\OneToMany(targetEntity: Materiel::class, mappedBy: 'action')]
+    private Collection $materiels;
+
     public function __construct()
     {
         $this->observations = new ArrayCollection();
+        $this->materiels = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -130,6 +134,36 @@ class Action
     public function setObjectif(?Objectif $objectif): static
     {
         $this->objectif = $objectif;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Materiel>
+     */
+    public function getMateriels(): Collection
+    {
+        return $this->materiels;
+    }
+
+    public function addMateriel(Materiel $materiel): static
+    {
+        if (!$this->materiels->contains($materiel)) {
+            $this->materiels->add($materiel);
+            $materiel->setAction($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMateriel(Materiel $materiel): static
+    {
+        if ($this->materiels->removeElement($materiel)) {
+            // set the owning side to null (unless already changed)
+            if ($materiel->getAction() === $this) {
+                $materiel->setAction(null);
+            }
+        }
 
         return $this;
     }

@@ -25,6 +25,9 @@ class Materiel
     #[ORM\Column]
     private ?bool $disposition = null;
 
+    #[ORM\ManyToOne(inversedBy: 'materiels')]
+    private ?Action $action = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -74,6 +77,18 @@ class Materiel
     public function setDisposition(bool $disposition): static
     {
         $this->disposition = $disposition;
+
+        return $this;
+    }
+
+    public function getAction(): ?Action
+    {
+        return $this->action;
+    }
+
+    public function setAction(?Action $action): static
+    {
+        $this->action = $action;
 
         return $this;
     }

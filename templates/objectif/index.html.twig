@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Objectif test{% endblock %}
+
+{% block body %}
+
+
+<div class="example-wrapper">
+    <ul>
+        {% for objectif in objectifs %}
+            <li>{{objectif.libelle}}</li>
+            <li>{{objectif.description}}</li>
+            <li>{{objectif.budget}}</li>
+            <li>{{objectif.deadline|date('d/m/Y')}}</li>
+            <li>{{objectif.estimationCible}} m3</li>
+            <li>{{objectif.statut}}</li>
+            {% for action in objectif.actions %}
+                <li>{{action.libelle}}</li>
+                <li>{{action.observations[0].libelle}}</li>
+            {% endfor %}
+            
+            {% if is_granted('ROLE_USER') %}
+                <a href={{path('app_delete_product',{'id':objectif.id})}}><input type="button" value="deleted objectif"  class"btn btn-primary"> </a>
+            {% endif %}
+            
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

@@ -38,6 +38,8 @@ class PolygonController extends AbstractController
         $form = $this->createForm(PolygonForm::class, $polygon);
 
         $form->handleRequest($request);
+        dump($form);
+            
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($polygon);
