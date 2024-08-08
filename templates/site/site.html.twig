@@ -74,7 +74,6 @@
                 opacity: 0.3;
             }
         }
-        
     </style>
 
     <div class="content">
@@ -101,23 +100,29 @@
                             <button class="close-btn" onclick="closeSidebar()">×</button>
                             <ul class="nav nav-tabs" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="tabOverview" data-bs-toggle="tab" onclick="showOverview()"  aria-selected="true">
-                                        Overview
-                                    </button>
+                                    <a class="nav-link active" id="tabOverview" data-bs-toggle="tab" href="#overview" role="tab" aria-selected="true">Overview</a>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="tabIncident" data-bs-toggle="tab" onclick="showIncidents()"  aria-selected="false">
-                                        Incidents
-                                    </button>
+                                    <a class="nav-link" id="tabIncident" data-bs-toggle="tab" href="#incidents" role="tab" aria-selected="false">Incidents</a>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="tabStatistique" data-bs-toggle="tab" onclick="showStatistics()"  aria-selected="false">
-                                        Statistique
-                                    </button>
+                                    <a class="nav-link" id="tabStatistique" data-bs-toggle="tab" href="#statistique" role="tab" aria-selected="false">Statistique</a>
                                 </li>
                             </ul>
-                            <h3>Details</h3>
-                            <p id="sidebar-info-content"></p>
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                    <h3>Overview</h3>
+                                    <p id="overview-content"></p>
+                                </div>
+                                <div class="tab-pane fade" id="incidents" role="tabpanel">
+                                    <h3>Incidents</h3>
+                                    <p id="incidents-content"></p>
+                                </div>
+                                <div class="tab-pane fade" id="statistique" role="tabpanel">
+                                    <h3>Statistique</h3>
+                                    <p id="statistique-content"></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div id="legend" class="legend">
@@ -141,12 +146,11 @@
         }).addTo(map);
 
         var zones = {{ zone|raw }};
-        let sitesData =  {{sites|raw}};
-        //console.log(sitesData);
+        let sitesData =  {{ sites|raw }};
         var polygons = [];
         var zonesVisible = true;
 
-        function showOverview(){
+        function showOverview() {
             var siteId = currentSelectedMarker;
             fetchSiteDetails(siteId);
         }
@@ -160,33 +164,28 @@
                     <div>Incident : ${incident.libelle}</div>
                     <div>Description : ${incident.description}</div>
                 `).join('');
-                document.getElementById('sidebar-info-content').innerHTML = `
+                document.getElementById('incidents-content').innerHTML = `
                     ${incidentInfo}
                     <button onclick="showNewIncidentForm()">Ajouter un incident</button>
-
                 `;
             } else {
-                document.getElementById('sidebar-info-content').innerHTML = `
+                document.getElementById('incidents-content').innerHTML = `
                     Aucun incident trouvé.
                     <button onclick="showNewIncidentForm()">Ajouter un incident</button>
-                
                 `;
             }
         }
 
         function showStatistics() {
             // Logique pour afficher les statistiques dans le sidebar
-            console.log('efa niova les statistiques');
-            // Exemple : Mettre à jour le contenu du sidebar
-            document.getElementById('sidebar-info-content').innerHTML = 'Contenu des statistiques dia mbola miampy';
+            document.getElementById('statistique-content').innerHTML = 'Contenu des statistiques dia mbola miampy';
         }
 
-        //GET
         function fetchZoneDetails(zoneId) {
             fetch(`/site/liste/detailZone/${zoneId}`)
                 .then(response => response.json())
                 .then(data => {
-                    let datas =JSON.parse(data);
+                    let datas = JSON.parse(data);
                     var zoneData = zones.find(zone => zone.id === zoneId);
                     if (zoneData) {
                         showZoneSidebar(zoneData, datas);
@@ -195,7 +194,6 @@
                 .catch(error => console.error('Erreur:', error));
         }
 
-        // Fonction pour ajouter les polygones à la carte
         function addPolygons(zones) {
             removePolygons();
             zones.forEach(function(zone) {
@@ -212,15 +210,14 @@
             });
         }
 
-        function showZoneSidebar(zone,siteData) {
-
+        function showZoneSidebar(zone, siteData) {
             let siteInfo = siteData.map(site => `
                 <div>
                     <strong>nom : ${site.libelle}</strong><br>
                     Adresse : ${site.adresse}<br>
                     Etat : ${site.etat}
                 </div>
-            `   );
+            `);
 
             let zoneInfo = `
                 <div>
@@ -231,8 +228,11 @@
                     ${siteInfo}
                 </div>
             `;
-            sidebarContent.innerHTML = zoneInfo;
+            document.getElementById('overview-content').innerHTML = zoneInfo;
+            document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
             sidebar.classList.remove('hidden2');
+            showIncidents();
+            showStatistics();
         }
 
         function removePolygons() {
@@ -256,9 +256,7 @@
 
         addPolygons(zones);
 
-
         var sidebar = document.getElementById('sidebar-info');
-        var sidebarContent = document.getElementById('sidebar-info-content');
         var markers = [];
         var currentSelectedMarker = null;
 
@@ -268,42 +266,38 @@
                 m.getElement().classList.remove('marker-icon-jump');
             });
         }
-                
-            
-        var markers = [];
 
-        // Fonction pour mettre à jour le contenu de la sidebar avec les données du site et de la zone
         function updateSidebarContent(siteData, zoneData) {
-
             if (!Array.isArray(zoneData)) {
                 console.error('Les données de zones ne sont pas un tableau:', zoneData);
                 return;
             }
 
-                let zonesInfo = zoneData.map(zone => `
+            let zonesInfo = zoneData.map(zone => `
                 <div>
                     <strong>Zone : ${zone.libelle}</strong><br>
                     Description : ${zone.description}
                 </div>
-            `   );
+            `);
 
-            sidebarContent.innerHTML = `
+            document.getElementById('overview-content').innerHTML = `
                 <strong>Nom : ${siteData.libelle}</strong><br>
                 Adresse : ${siteData.adresse}<br>
                 Latitude : ${siteData.coord.latitude}<br>
                 Longitude : ${siteData.coord.longitude}<br>
                 ${zonesInfo}
             `;
+            document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
             sidebar.classList.remove('hidden2');
+            showIncidents();
+            showStatistics();
         }
 
-        // Fonction pour récupérer les détails de la zone par rapport à l'ID du site
         function fetchSiteDetails(siteId) {
-            // Remplacez cette URL par l'URL de votre endpoint pour obtenir les détails de la zone
             fetch(`/site/liste/detailSite/${siteId}`)
                 .then(response => response.json())
                 .then(data => {
-                    let datas =JSON.parse(data);
+                    let datas = JSON.parse(data);
                     var siteData = sitesData.find(site => site.id === siteId);
                     if (siteData) {
                         updateSidebarContent(siteData, datas);
@@ -312,7 +306,6 @@
                 .catch(error => console.error('Erreur:', error));
         }
 
-        // Affichage des sites
         sitesData.forEach(function(site) {
             var iconUrl = "/images/marker-green.svg";
             
@@ -331,28 +324,22 @@
                 popupAnchor: [1, -34]
             });
 
-            // Affichage sur la carte
             var marker = L.marker([site.latitude, site.longitude], { icon: markerIcon }).addTo(map);
-            markers.push(marker); // Ajoute le marqueur au tableau
+            markers.push(marker);
 
-            // Sur clic d'un point
             marker.on('click', function(e) {
-                map.setView(e.latlng, 12); // Centre la carte sur le marqueur
+                map.setView(e.latlng, 12);
 
-                // Retirer l'animation de tous les autres marqueurs
                 markers.forEach(function(m) {
                     m.getElement().classList.remove('marker-icon-jump');
                 });
 
-                // Appliquez l'animation au marqueur cliqué
                 e.target.getElement().classList.add('marker-icon-jump');
                 currentSelectedMarker = site.id;
 
-                // Appelle la fonction pour récupérer les détails de la zone
                 fetchSiteDetails(site.id);
             });
         });
-        
 
         map.zoomControl.setPosition('bottomright');
     </script>
