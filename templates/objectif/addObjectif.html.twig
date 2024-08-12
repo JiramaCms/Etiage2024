@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container">
+        <div class="row row-cols-2">
+            <div class="col-md-4">
+                {{form_start(form, { attr: { novalidate: 'novalidate'}})}}
+                <div class='form-control'>
+                    {{form_label(form.libelle,"Libelle")}}
+                    {{form_widget(form.libelle, {"attr" : {"placeholder": "mettez le Libelle ici"}})}}
+
+                    <small> {{form_help(form.libelle)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.libelle)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.description,"Description")}}
+                    {{form_widget(form.description, {"attr" : {"placeholder": "Description du produit"}})}}
+
+                    <small> {{form_help(form.description)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.description)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.budget,"Montant du budget")}}
+                    {{form_widget(form.budget, {"attr" : {"placeholder": "Budget pour atteindre l'objectif"}})}}
+
+                    <small> {{form_help(form.budget)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.budget)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.deadline,"Deadline de l'objectif")}}
+                    {{form_widget(form.deadline)}}
+
+                    <small> {{form_help(form.deadline)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.deadline)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.estimationCible,"Quantité en m3")}}
+                    {{form_widget(form.estimationCible, {"attr" : {"placeholder": "Quantité"}})}}
+
+                    <small> {{form_help(form.estimationCible)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.estimationCible)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.statut,"Statut")}}
+                    {{form_widget(form.statut, {"attr" : {"placeholder": "Statut de l'objectif"}})}}
+
+                    <small> {{form_help(form.statut)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.statut)}}
+                    </div>
+                </div>
+                <div class='form-control'>
+                    {{form_label(form.site,"Site")}}
+                    {{form_widget(form.site)}}
+
+                    <small> {{form_help(form.site)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.site)}}
+                    </div>
+                </div>
+                <div class="form-control" >
+                    <input type="submit" value="Add incident" class="btn btn-primary">
+                </div>
+                {{form_end(form)}}
+            </div>
+        </div>
+    </div>
+{% endblock %}

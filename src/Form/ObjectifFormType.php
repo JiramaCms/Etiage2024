@@ -3,25 +3,38 @@
 namespace App\Form;
 
 use App\Entity\Site;
-use App\Entity\Incident;
+use App\Entity\Objectif;
 use Doctrine\ORM\EntityRepository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 
-class IncidentFormType extends AbstractType
+class ObjectifFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('libelle')
-            ->add('date', DateTimeType::class,[
-                'input' => 'datetime_immutable',
-                'widget' => 'single_text'
-            ])
             ->add('description')
+            ->add('budget')
+            ->add('deadline',DateType::class,[
+                'widget' => 'single_text',
+                'format' => 'yyyy-MM-dd'
+            ])
+            ->add('estimationCible')
+            //->add('resultat')
+            ->add('statut', ChoiceType::class, [
+                'choices' => [
+                    'Pas commencé' => 'inactif',
+                    'En cours' => 'actif',
+                    'Fini' => 'done',
+                    'Abandonné' => 'abandonner'
+                ],
+                'placeholder' => 'Sélectionnez un statut',
+            ])
             ->add('site',EntityType::class,[
                 'placeholder' => 'Choisissez votre site',
                 'class' => Site::class,
@@ -37,7 +50,7 @@ class IncidentFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Incident::class,
+            'data_class' => Objectif::class,
         ]);
     }
 }

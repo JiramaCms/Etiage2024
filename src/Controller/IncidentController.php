@@ -2,43 +2,43 @@
 
 namespace App\Controller;
 
-use App\Entity\Objectif;
-use App\Form\ObjectifFormType;
+use App\Entity\Incident;
+use App\Form\IncidentFormType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-class ObjectifController extends AbstractController
+class IncidentController extends AbstractController
 {
-    #[Route('/objectif', name: 'app_liste_objectif')]
+    #[Route('/incident', name: 'app_liste_incident')]
     public function index(ManagerRegistry $mr): Response
     {
-        $allObjectif= $mr->getRepository(Objectif::class)->findAll();
+        $allIncident= $mr->getRepository(Incident::class)->findAll();
         //$Product = $mr->getRepository(Objectif::class)->findOneBy(['libelle' => 'objectif 2']);
-        return $this->render('objectif/index.html.twig', [
-            'objectifs' => $allObjectif,
+        return $this->render('incident/index.html.twig', [
+            'incidents' => $allIncident,
         ]);
     }
 
-    #[Route('/addObjectif',name: 'app_add_objectif')]
+    #[Route('/addIncident',name: 'app_add_incident')]
     public function addIncident(Request $req,ManagerRegistry $mr): Response
     {
 
-        $objectif = new Objectif();
-        $form = $this->createForm(ObjectifFormType::class,$objectif);
+        $incident = new Incident();
+        $form = $this->createForm(IncidentFormType::class,$incident);
         $form->handleRequest($req);
         if($form->isSubmitted() && $form->isValid()){
-            $objectif = $form->getData();
+            $incident = $form->getData();
             $em = $mr->getManager();
 
-            $em->persist($objectif);
+            $em->persist($incident);
             $em->flush();
             return $this->redirectToRoute('app_liste_objectif');
         }
 
-        return $this->render('objectif/addObjectif.html.twig', [
+        return $this->render('incident/addIncident.html.twig', [
             'form'=>$form->createView()
         ]);
     }
