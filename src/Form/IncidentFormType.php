@@ -10,6 +10,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class IncidentFormType extends AbstractType
 {
@@ -21,23 +22,27 @@ class IncidentFormType extends AbstractType
                 'input' => 'datetime_immutable',
                 'widget' => 'single_text'
             ])
-            ->add('description')
-            ->add('site',EntityType::class,[
-                'placeholder' => 'Choisissez votre site',
+            ->add('description',TextareaType::class)
+        ;
+
+        if(!$options['getID']){
+            $builder->add('site',EntityType::class,[
+                'placeholder' => 'Choisissez le site',
                 'class' => Site::class,
                 'query_builder' => function(EntityRepository $er){
                     return $er->createQueryBuilder('p')
                         ->orderBy('p.libelle','ASC');
                 },
                 'choice_label' => 'libelle',
-            ])
-        ;
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Incident::class,
+            'getID' => false,
         ]);
     }
 }
