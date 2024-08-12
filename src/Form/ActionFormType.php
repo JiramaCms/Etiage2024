@@ -34,6 +34,7 @@ class ActionFormType extends AbstractType
                         ->orderBy('p.id','DESC');
                 },
                 'choice_label' => 'libelle',
+                'disabled' => $options['include_date_fin'],
             ])
         ;
 

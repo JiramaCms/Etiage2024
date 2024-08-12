@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste d'actions{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Objectif title</th>
+                    <th>Travail à faire</th>
+                    <th>Date de Début</th>
+                    <th>Date de Fin</th>
+                    <th>Avancement</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for action in actions %}
+                    <tr>
+
+                        <td>{{ action.objectif.libelle }}</td>
+                        <td>{{ action.libelle }}</td>
+                        <td>{{ action.dateDebut|date('d/m/Y') }}</td>
+                        <td>{{ action.dateFin|date('d/m/Y') }}</td>
+                        <td>{{ action.avancement }}</td>
+                        <td>
+                            <a href="{{ path('app_update_action', {'id': action.id}) }}" class="btn btn-primary">Modifier</a>
+                        </td>
+                        <td>
+                            <a href="{{ path('app_add_observationByAction', {'id': action.id}) }}" class="btn btn-primary">Add Observation</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

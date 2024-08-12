@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Action;
 use App\Entity\Incident;
 use App\Entity\Observation;
 use App\Form\IncidentFormType;
@@ -38,6 +39,36 @@ class ObservationController extends AbstractController
             $em->persist($observation);
             $em->flush();
             return $this->redirectToRoute('app_liste_observation');
+        }
+
+        return $this->render('observation/addObservation.html.twig', [
+            'form'=>$form->createView()
+        ]);
+    }
+
+    #[Route('/addObservation/{id}',name: 'app_add_observationByAction')]
+    public function addObservationID($id,Request $req,ManagerRegistry $mr): Response
+    {
+        $em = $mr->getManager();
+        // Récupérer l'entité Action en fonction de l'id
+        $action = $em->getRepository(Action::class)->find($id);
+        if (!$action) {
+            throw $this->createNotFoundException('No action found for id ' . $id);
+        }
+        // Créer une nouvelle observation et lier l'action
+        $observation = new Observation();
+        $observation->setAction($action); // Associer l'action à l'observation
+        $form = $this->createForm(ObservationFormType::class,$observation,[
+            'getIdByUrl' => true,
+        ]);
+        $form->handleRequest($req);
+        if($form->isSubmitted() && $form->isValid()){
+            $observation = $form->getData();
+            $em = $mr->getManager();
+
+            $em->persist($observation);
+            $em->flush();
+            return $this->redirectToRoute('app_liste_action');
         }
 
         return $this->render('observation/addObservation.html.twig', [

@@ -6,6 +6,15 @@
             <div class="col-md-4">
                 {{form_start(form, { attr: { novalidate: 'novalidate'}})}}
                 <div class='form-control'>
+                    {{form_label(form.objectif,"Objectif title")}}
+                    {{form_widget(form.objectif)}}
+
+                    <small> {{form_help(form.objectif)}}</small>
+                    <div class="form_error">
+                        {{form_errors(form.objectif)}}
+                    </div>
+                </div>
+                <div class='form-control'>
                     {{form_label(form.libelle,"Libelle")}}
                     {{form_widget(form.libelle, {"attr" : {"placeholder": "mettez le Libelle ici"}})}}
 
@@ -41,17 +50,8 @@
                         {{form_errors(form.avancement)}}
                     </div>
                 </div>
-                <div class='form-control'>
-                    {{form_label(form.objectif,"Site")}}
-                    {{form_widget(form.objectif)}}
-
-                    <small> {{form_help(form.objectif)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.objectif)}}
-                    </div>
-                </div>
                 <div class="form-control" >
-                    <input type="submit" value="Ajouter )l'objectif" class="btn btn-primary">
+                    <input type="submit" value="Modifier l'action" class="btn btn-primary">
                 </div>
                 {{form_end(form)}}
             </div>

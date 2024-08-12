@@ -5,6 +5,16 @@
         <div class="row row-cols-2">
             <div class="col-md-4">
                 {{form_start(form, { attr: { novalidate: 'novalidate'}})}}
+                {% if form.action is defined %}
+                    <div class='form-control'>
+                        {{ form_label(form.action, "Action") }}
+                        {{ form_widget(form.action) }}
+                        <small>{{ form_help(form.action) }}</small>
+                        <div class="form_error">
+                            {{ form_errors(form.action) }}
+                        </div>
+                    </div>
+                {% endif %}
                 <div class='form-control'>
                     {{form_label(form.libelle,"Libelle")}}
                     {{form_widget(form.libelle, {"attr" : {"placeholder": "mettez le Libelle ici"}})}}
@@ -23,15 +33,7 @@
                         {{form_errors(form.dateHeure)}}
                     </div>
                 </div>
-                <div class='form-control'>
-                    {{form_label(form.action,"Action")}}
-                    {{form_widget(form.action)}}
-
-                    <small> {{form_help(form.action)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.action)}}
-                    </div>
-                </div>
+                
                 <div class="form-control" >
                     <input type="submit" value="Ajouter l'observation" class="btn btn-primary">
                 </div>
