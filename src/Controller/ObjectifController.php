@@ -2,8 +2,11 @@
 
 namespace App\Controller;
 
-use App\Entity\Objectif;
+use App\Entity\Incident;
+use App\Entity\Site;
 use App\Entity\Product;
+use App\Entity\Objectif;
+use App\Form\IncidentFormType;
 use App\Form\ProductType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +23,19 @@ class ObjectifController extends AbstractController
         //$Product = $mr->getRepository(Objectif::class)->findOneBy(['libelle' => 'objectif 2']);
         return $this->render('objectif/index.html.twig', [
             'objectifs' => $allObjectif,
+        ]);
+    }
+
+    #[Route('/addIncident',name: 'app_add_incident')]
+    public function addIncident(Request $req,ManagerRegistry $mr): Reponse
+    {
+        $allSite= $mr->getRepository(Site::class)->findAll();
+
+        $incident = new Incident();
+        $form = $this->createForm(IncidentFormType::class,$incident);
+
+        return $this->render('product/addProduct.html.twig', [
+            'form'=>$form->createView()
         ]);
     }
 
