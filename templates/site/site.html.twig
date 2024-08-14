@@ -160,9 +160,10 @@
             var siteData = sitesData.find(site => site.id === siteId);
 
             if (siteData && siteData.incidents.length >= 1) {
-                let incidentInfo = siteData.incidents.map(incident => `
+                let incidentInfo = siteData.incidents.map(incident => console.log(incident.date.timestamp)
+                `
                     <div>Incident : ${incident.libelle}</div>
-                    <div>Description : ${incident.description}</div>
+                    <div>Description : ${incident.description}  ${incident}</div>
                 `).join('');
                 var addObservationUrlWithId = addObservationUrl.replace('siteId', siteData.id);
                 document.getElementById('incidents-content').innerHTML = `
