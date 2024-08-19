@@ -11,19 +11,24 @@
                     <th>Objectif title</th>
                     <th>Travail à faire</th>
                     <th>Date de Début</th>
-                    <th>Date de Fin</th>
+                    <th>Date Fin</th>
                     <th>Avancement</th>
                 </tr>
             </thead>
             <tbody>
                 {% for action in actions %}
                     <tr>
-
                         <td>{{ action.objectif.libelle }}</td>
                         <td>{{ action.libelle }}</td>
                         <td>{{ action.dateDebut|date('d/m/Y') }}</td>
-                        <td>{{ action.dateFin|date('d/m/Y') }}</td>
-                        <td>{{ action.avancement }}</td>
+                        <td>
+                            {% if action.dateFin is not null %}
+                                {{ action.dateFin|date('d/m/Y') }}
+                            {% else %}
+                                Non défini
+                            {% endif %}
+                        </td>
+                        <td>{{ action.avancement }}%</td>
                         <td>
                             <a href="{{ path('app_update_action', {'id': action.id}) }}" class="btn btn-primary">Modifier</a>
                         </td>

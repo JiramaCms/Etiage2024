@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                {{ form_start(form, { attr: { novalidate: 'novalidate' } }) }}
+                
+                <div class="mb-3">
+                    {{ form_label(form.libelle, "Libelle du matériel", { 'label_attr': { 'class': 'form-label' } }) }}
+                    {{ form_widget(form.libelle, { 'attr': { 'class': 'form-control', 'placeholder': 'Mettez le libelle ici' } }) }}
+                    <div class="form-text">{{ form_help(form.libelle) }}</div>
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.libelle) }}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_label(form.code, "Nom de code du matériel", { 'label_attr': { 'class': 'form-label' } }) }}
+                    {{ form_widget(form.code, { 'attr': { 'class': 'form-control' } }) }}
+                    <div class="form-text">{{ form_help(form.code) }}</div>
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.code) }}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    {{ form_label(form.capacite, "Capacité", { 'label_attr': { 'class': 'form-label' } }) }}
+                    {{ form_widget(form.capacite, { 'attr': { 'class': 'form-control' } }) }}
+                    <div class="form-text">{{ form_help(form.capacite) }}</div>
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.capacite) }}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <input type="submit" value="Ajouter le matériel" class="btn btn-primary">
+                </div>
+                
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

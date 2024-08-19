@@ -121,6 +121,10 @@
                                 <div class="tab-pane fade" id="statistique" role="tabpanel">
                                     <h3>Statistique</h3>
                                     <p id="statistique-content"></p>
+                                    <!-- Ajoutez le canvas pour Chart.js -->
+                                    <div>
+                                        <canvas id="myChart" width="450" height="450"></canvas>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -148,6 +152,7 @@
         var zones = {{ zone|raw }};
         let sitesData =  {{ sites|raw }};
         var polygons = [];
+        var myChart;
         var zonesVisible = true;
         var addObservationUrl = "{{ path('app_add_incidentById', {'id': 'siteId'}) }}";
         function showOverview() {
@@ -160,11 +165,20 @@
             var siteData = sitesData.find(site => site.id === siteId);
 
             if (siteData && siteData.incidents.length >= 1) {
-                let incidentInfo = siteData.incidents.map(incident => console.log(incident.date.timestamp)
-                `
+                let incidentInfo = siteData.incidents.map(incident =>{
+                // Convertion dua timestamp en millisecondes
+                let timestampInMilliseconds = incident.daty.timestamp * 1000;
+                let date = new Date(timestampInMilliseconds);
+                // Formatage de la date et de l'heure en UTC
+                let formattedDate = date.toISOString().slice(0, 10); // 'YYYY-MM-DD'
+                let formattedTime = date.toISOString().slice(11, 19); // 'HH:MM:SS'
+
+                return `
                     <div>Incident : ${incident.libelle}</div>
-                    <div>Description : ${incident.description}  ${incident}</div>
-                `).join('');
+                    <div>Description : ${incident.description}</div>
+                    <div>Date et heure : ${formattedDate} ${formattedTime}</div>
+                `;
+            }).join('');
                 var addObservationUrlWithId = addObservationUrl.replace('siteId', siteData.id);
                 document.getElementById('incidents-content').innerHTML = `
                     ${incidentInfo}
@@ -181,9 +195,52 @@
         }
 
         function showStatistics() {
-            // Logique pour afficher les statistiques dans le sidebar
-            document.getElementById('statistique-content').innerHTML = 'Contenu des statistiques dia mbola miampy';
-        }
+            var siteId = currentSelectedMarker;
+            var siteData = sitesData.find(site => site.id === siteId);
+            var lastTenProductions = siteData.productions.slice(-10);
+
+            // Vérifie que siteData et siteData.productions existent
+            if (siteData.productions.length>1) {
+                // Extraire les dates et les quantités
+                var labels = lastTenProductions.map(production => {
+                    var date = new Date(production.daty.timestamp * 1000); // Multiplier par 1000 pour convertir en millisecondes
+                    return date.toLocaleDateString();
+                });
+                var data = siteData.productions.map(production => production.quantite);
+
+                var ctx = document.getElementById('myChart').getContext('2d');
+                if (myChart) {
+                    myChart.destroy();
+                }
+                myChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels, // Les dates pour l'axe x
+                        datasets: [{
+                            label: 'Quantité de production',
+                            data: data, // Les quantités pour l'axe y
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+
+                document.getElementById('statistique-content').innerHTML = 'Voici le graphique des statistiques.';
+            } else {
+                if (myChart) {
+                    myChart.destroy();
+                }
+                document.getElementById('statistique-content').innerHTML = 'Aucune donnée de production disponible pour ce site.';
+            }
+            }
 
         function fetchZoneDetails(zoneId) {
             fetch(`/site/liste/detailZone/${zoneId}`)

@@ -1,0 +1,31 @@
+{# templates/site/detail.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du site - {{ site.libelle }}{% endblock %}
+
+{% block body %}
+    <h1>Détails du site - {{ site.libelle }}</h1>
+
+    <div>
+        <h2>Informations générales</h2>
+        <p><strong>Nom:</strong> {{ site.libelle }}</p>
+        <p><strong>Localisation:</strong> {{ site.adresse }}</p>
+        <p><strong>Coordonnées:</strong> {{ site.coord.latitude }} {{ site.coord.longitude }}</p>
+    </div>
+
+    <div>
+        <h2>Statistiques de Production</h2>
+        <canvas id="myChart"></canvas>
+    </div>
+
+    <script>
+        // Convertir le JSON en objet JavaScript
+        var site = {{sitej|raw}}
+
+        // Vérifier que les données sont correctement affichées dans la console
+        console.log('Site Object:', site);
+        console.log('Site ID:', site.id);
+        console.log('Site Libelle:', site.libelle);
+    </script>
+{% endblock %}

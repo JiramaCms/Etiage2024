@@ -33,10 +33,14 @@ class Site
     #[ORM\OneToMany(targetEntity: Objectif::class, mappedBy: 'site')]
     private Collection $objectifs;
 
+    #[ORM\OneToMany(targetEntity: Production::class, mappedBy: 'site')]
+    private Collection $productions;
+
     public function __construct()
     {
         $this->incidents = new ArrayCollection();
         $this->objectifs = new ArrayCollection();
+        $this->productions = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -155,6 +159,36 @@ class Site
             // set the owning side to null (unless already changed)
             if ($objectif->getSite() === $this) {
                 $objectif->setSite(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Production>
+     */
+    public function getProductions(): Collection
+    {
+        return $this->productions;
+    }
+
+    public function addProduction(Production $production): static
+    {
+        if (!$this->productions->contains($production)) {
+            $this->productions->add($production);
+            $production->setSite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduction(Production $production): static
+    {
+        if ($this->productions->removeElement($production)) {
+            // set the owning side to null (unless already changed)
+            if ($production->getSite() === $this) {
+                $production->setSite(null);
             }
         }
 

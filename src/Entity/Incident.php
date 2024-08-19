@@ -19,7 +19,7 @@ class Incident
     private ?string $libelle = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $date = null;
+    private ?\DateTimeImmutable $daty = null;
 
     #[ORM\Column(length: 255)]
     private ?string $description = null;
@@ -45,14 +45,14 @@ class Incident
         return $this;
     }
 
-    public function getDate(): ?\DateTimeImmutable
+    public function getDaty(): ?\DateTimeImmutable
     {
-        return $this->date;
+        return $this->daty;
     }
 
-    public function setDate(\DateTimeImmutable $date): static
+    public function setDaty(\DateTimeImmutable $daty): static
     {
-        $this->date = $date;
+        $this->daty = $daty;
 
         return $this;
     }

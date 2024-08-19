@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste d'actions{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Observation</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for observation in observations %}
+                    <tr>
+
+                        <td>{{ observation.libelle }}</td>
+                        <td>{{ observation.dateHeure|date('d/m/Y H:i') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

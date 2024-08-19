@@ -16,6 +16,7 @@ class ActionController extends AbstractController
     public function index(ManagerRegistry $mr): Response
     {
         $allAction= $mr->getRepository(Action::class)->findAll();
+        //dump($allAction);die();
         return $this->render('action/index.html.twig', [
             'actions' => $allAction,
         ]);

@@ -1,29 +1,47 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Objectif test{% endblock %}
+{% block title %}Objectif Test{% endblock %}
 
 {% block body %}
-
-
-<div class="example-wrapper">
-    <ul>
-        {% for objectif in objectifs %}
-            <li>{{objectif.libelle}}</li>
-            <li>{{objectif.description}}</li>
-            <li>{{objectif.budget}}</li>
-            <li>{{objectif.deadline|date('d/m/Y')}}</li>
-            <li>{{objectif.estimationCible}} m3</li>
-            <li>{{objectif.statut}}</li>
-            {% for action in objectif.actions %}
-                <li>{{action.libelle}}</li>
-                <li>{{action.observations[0].libelle}}</li>
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            Liste des Objectifs
+        </div>
+        <div class="card-body">
+            {% for objectif in objectifs %}
+                <div class="mb-4">
+                    <h5 class="card-title">{{ objectif.libelle }}</h5>
+                    <p class="card-text">
+                        <strong>Description:</strong> {{ objectif.description }}<br>
+                        <strong>Budget:</strong> {{ objectif.budget | number_format(2, ',', ' ') }} Ar<br>
+                        <strong>Deadline:</strong> {{ objectif.deadline|date('d/m/Y') }}<br>
+                        <strong>Estimation cible:</strong> {{ objectif.estimationCible }} m³<br>
+                        <strong>Statut:</strong> {{ objectif.statut }}
+                    </p>
+                    <h6>Actions associées :</h6>
+                    <ul class="list-group mb-3">
+                        {% for action in objectif.actions %}
+                            <li class="list-group-item">
+                                <strong>Action:</strong> {{ action.libelle }}<br>
+                                {% if action.observations is not empty %}
+                                    <strong>Observation:</strong> {{ action.observations|last.libelle }}
+                                {% else %}
+                                    <strong>Observation:</strong> Aucune observation
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    
+                    {% if is_granted('ROLE_USER') %}
+                        <a href="{{ path('app_delete_product', {'id': objectif.id}) }}" class="btn btn-danger">
+                            Supprimer l'objectif
+                        </a>
+                    {% endif %}
+                </div>
+                <hr>
             {% endfor %}
-            
-            {% if is_granted('ROLE_USER') %}
-                <a href={{path('app_delete_product',{'id':objectif.id})}}><input type="button" value="deleted objectif"  class"btn btn-primary"> </a>
-            {% endif %}
-            
-        {% endfor %}
-    </ul>
+        </div>
+    </div>
 </div>
 {% endblock %}

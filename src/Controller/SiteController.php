@@ -7,6 +7,7 @@ use App\Entity\Site;
 use App\Entity\Zone;
 use App\Repository\ZoneRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,11 +16,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class SiteController extends AbstractController
 {
-    #[Route('/site', name: 'app_site')]
+    #[Route('/site', name: 'app_insert_site')]
     public function index(): Response
     {
         return $this->render('site/index.html.twig', [
-            'controller_name' => 'SiteController',
         ]);
     }
 
@@ -28,6 +28,18 @@ class SiteController extends AbstractController
     {
         return $this->render('site/test.html.twig', [
             'controller_name' => 'SiteController',
+        ]);
+    }
+    #[Route('/site/{id}', name: 'app_detail_site')]
+    public function detailSite($id,ManagerRegistry $mr): Response
+    {
+        $em = $mr->getManager();
+        $site = $em->getRepository(Site::class)->find($id);
+        $siteJ = (Util::toJson($site));
+        //dump($site);die();
+        return $this->render('site/detailSite.html.twig', [
+            'site' => $site,
+            'sitejs' => $siteJ,
         ]);
     }
     

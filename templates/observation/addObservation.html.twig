@@ -16,8 +16,8 @@
                     </div>
                 {% endif %}
                 <div class='form-control'>
-                    {{form_label(form.libelle,"Libelle")}}
-                    {{form_widget(form.libelle, {"attr" : {"placeholder": "mettez le Libelle ici"}})}}
+                    {{form_label(form.libelle,"Commentaire")}}
+                    {{form_widget(form.libelle, {"attr" : {"placeholder": "Ecrivez votre observation ici"}})}}
 
                     <small> {{form_help(form.libelle)}}</small>
                     <div class="form_error">
@@ -25,7 +25,7 @@
                     </div>
                 </div>
                 <div class='form-control'>
-                    {{form_label(form.dateHeure,"date du commentaire")}}
+                    {{form_label(form.dateHeure,"date de l'observation")}}
                     {{form_widget(form.dateHeure)}}
 
                     <small> {{form_help(form.dateHeure)}}</small>

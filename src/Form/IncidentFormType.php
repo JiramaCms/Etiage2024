@@ -18,7 +18,7 @@ class IncidentFormType extends AbstractType
     {
         $builder
             ->add('libelle')
-            ->add('date', DateTimeType::class,[
+            ->add('daty', DateTimeType::class,[
                 'input' => 'datetime_immutable',
                 'widget' => 'single_text'
             ])
