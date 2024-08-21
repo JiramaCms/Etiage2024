@@ -6,6 +6,7 @@ use App\Util\Util;
 use App\Entity\Site;
 use App\Entity\Zone;
 use App\Repository\ZoneRepository;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -30,18 +31,7 @@ class SiteController extends AbstractController
             'controller_name' => 'SiteController',
         ]);
     }
-    #[Route('/site/{id}', name: 'app_detail_site')]
-    public function detailSite($id,ManagerRegistry $mr): Response
-    {
-        $em = $mr->getManager();
-        $site = $em->getRepository(Site::class)->find($id);
-        $siteJ = (Util::toJson($site));
-        //dump($site);die();
-        return $this->render('site/detailSite.html.twig', [
-            'site' => $site,
-            'sitejs' => $siteJ,
-        ]);
-    }
+    
     
     #[Route('/site/insert', name: 'site_insert', methods: ['POST'])]
     public function insertSite(Request $request, EntityManagerInterface $entityManager): Response
@@ -69,6 +59,8 @@ class SiteController extends AbstractController
         return $this->redirectToRoute('app_site');
     }
 
+    
+
     #[Route('/site/liste', name: 'site_liste')]
     public function site(Request $request,EntityManagerInterface $entityManager): Response
     {
@@ -82,6 +74,17 @@ class SiteController extends AbstractController
         return $this->render('site/site.html.twig', [
             'sites' => $site,
             'zone' => $zone,
+        ]);
+    }
+    #[Route('/site/{id}', name: 'detail_site')]
+    public function detailSite($id,EntityManagerInterface $entityManager): Response
+    {
+        $rsite = $entityManager->getRepository(Site::class);
+        $site = $rsite->find($id);
+        $siteJ = (Util::toJson($site));
+        return $this->render('site/detailSite.html.twig', [
+            'site' => $site,
+            'sitej' => $siteJ,
         ]);
     }
 
