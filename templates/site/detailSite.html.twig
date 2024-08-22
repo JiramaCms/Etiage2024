@@ -6,35 +6,66 @@
 
 {% block body %}
 <div class="content">
-
-        <div class="py-4 px-3 px-md-4">
-            <div class="card mb-3 mb-md-4">
-    <div class="card-body">
-    <h1>Détails du site - {{ site.libelle }}</h1>
-
-    <div>
-        <h2>Informations générales</h2>
-        <p><strong>Nom:</strong> {{ site.libelle }}</p>
-        <p><strong>Localisation:</strong> {{ site.adresse }}</p>
-        <p><strong>Coordonnées:</strong> {{ site.coord.latitude }} {{ site.coord.longitude }}</p>
+    <div class="py-4 px-3 px-md-4">
+        <div class="card mb-3 mb-md-4">
+            <div class="card-body">
+                <h1>Détails du site - {{ site.libelle }}</h1>
+                <div>
+                    <h2>Informations générales</h2>
+                    <p><strong>Nom:</strong> {{ site.libelle }}</p>
+                    <p><strong>Localisation:</strong> {{ site.adresse }}</p>
+                    <p><strong>Coordonnées:</strong> {{ site.coord.latitude }} {{ site.coord.longitude }}</p>
+                </div>
+                <div>
+                    <h2>Statistiques de Production</h2>
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div>
-        <h2>Statistiques de Production</h2>
-        <canvas id="myChart"></canvas>
-    </div>
-</div>
-</div>
-</div>
-</div>
-
+</div> 
     <script>
-        // Convertir le JSON en objet JavaScript
-        var site = {{sitej|raw}}
+    
+        let site = {{sitej|raw}};
+        console.log(site);
+        document.addEventListener('DOMContentLoaded', function () {
+            showStatistics(site.id,site.productions);
+        });
 
-        // Vérifier que les données sont correctement affichées dans la console
-        console.log('Site Object:', site);
-        console.log('Site ID:', site.id);
-        console.log('Site Libelle:', site.libelle);
+        function showStatistics(siteId, productions) {
+            var lastTenProductions = productions.slice(-10);
+
+            var labels = lastTenProductions.map(function(production) {
+                var date = new Date(production.daty.timestamp * 1000);
+                return date.toLocaleDateString();
+            });
+            var data = lastTenProductions.map(function(production) {
+                return production.quantite;
+            });
+
+            var ctx = document.getElementById('myChart').getContext('2d');
+
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Quantité de production',
+                        data: data,
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
     </script>
+
 {% endblock %}

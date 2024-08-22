@@ -82,6 +82,8 @@ class SiteController extends AbstractController
         $rsite = $entityManager->getRepository(Site::class);
         $site = $rsite->find($id);
         $siteJ = (Util::toJson($site));
+        //dump($site->getIncidents()[0]->getLibelle());die();
+        //dump($site,$siteJ);die();
         return $this->render('site/detailSite.html.twig', [
             'site' => $site,
             'sitej' => $siteJ,
