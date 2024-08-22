@@ -11,3 +11,5 @@ import './styles/app.css';
 // start the Stimulus application
 import './bootstrap';
 import Chart from 'chart.js/auto';
+import './styles/style.css';
+

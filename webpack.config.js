@@ -14,6 +14,7 @@ Encore
         '@symfony/stimulus-bridge/controllers.json': path.resolve(__dirname, 'assets/controllers.json'),
     })
     .addStyleEntry('now_ui_kit', './assets/styles/now-ui-kit.css')
+    .addStyleEntry('style', './assets/styles/style.css')
     /*
      * ENTRY CONFIG
      *
@@ -24,6 +25,11 @@ Encore
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
     .addEntry('app', './assets/app.js')
+
+    .copyFiles({
+        from: './assets/vendor',
+        to: 'vendor/[path][name].[ext]'
+    })
     
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
