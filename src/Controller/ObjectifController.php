@@ -21,6 +21,15 @@ class ObjectifController extends AbstractController
             'objectifs' => $allObjectif,
         ]);
     }
+    #[Route('/objectif/{id}' ,name: 'app_detail_observation')]
+    public function observationById($id,ManagerRegistry $mr): Response
+    {
+        $objectif = $mr->getRepository(Objectif::class)->find($id);
+
+        return $this->render('objectif/objectif.html.twig', [
+            'objectif' => $objectif,
+        ]);
+    }
 
     #[Route('/addObjectif',name: 'app_add_objectif')]
     public function addIncident(Request $req,ManagerRegistry $mr): Response

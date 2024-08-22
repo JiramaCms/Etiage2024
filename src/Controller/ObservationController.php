@@ -25,6 +25,8 @@ class ObservationController extends AbstractController
         ]);
     }
 
+    
+
     #[Route('/addObservation',name: 'app_add_observation')]
     public function addObservation(Request $req,ManagerRegistry $mr): Response
     {
