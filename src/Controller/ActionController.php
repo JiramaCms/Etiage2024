@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Action;
+use App\Entity\Objectif;
 use App\Form\ActionFormType;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -44,6 +45,36 @@ class ActionController extends AbstractController
             'form'=>$form->createView()
         ]);
     }
+
+    #[Route('/addAction/{id}',name: 'app_add_actionByObjectif')]
+    public function addActionID($id,Request $req,ManagerRegistry $mr): Response
+    {
+        $em = $mr->getManager();
+        // Récupérer l'entité Action en fonction de l'id
+        $objectif = $em->getRepository(Objectif::class)->find($id);
+        if (!$objectif) {
+            throw $this->createNotFoundException('Pas d\'objectif trouvé pour l\'id ' . $id);
+        }
+        // Créer une nouvelle observation et lier l'action
+        $action = new action();
+        $action->setObjectif($objectif); // Associer le site à l'objectif
+        $form = $this->createForm(ActionFormType::class,$action,[
+            'getIdByUrl' => true,
+        ]);
+        $form->handleRequest($req);
+        if($form->isSubmitted() && $form->isValid()){
+            $action = $form->getData();
+            $em = $mr->getManager();
+
+            $em->persist($action);
+            $em->flush();
+            return $this->redirectToRoute('app_liste_objectif');
+        }
+        return $this->render('objectif/addAction.html.twig', [
+            'form'=>$form->createView()
+        ]);
+    }
+
     #[Route('updateAction/{id}', name:'app_update_action')]
     public function updateAction(Action $action,Request $req,ManagerRegistry $mr): Response
     {

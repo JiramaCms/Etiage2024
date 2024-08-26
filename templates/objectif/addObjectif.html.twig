@@ -1,77 +1,102 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <div class="container">
-        <div class="row row-cols-2">
-            <div class="col-md-4">
-                {{form_start(form, { attr: { novalidate: 'novalidate'}})}}
-                <div class='form-control'>
-                    {{form_label(form.libelle,"Libelle")}}
-                    {{form_widget(form.libelle, {"attr" : {"placeholder": "mettez le Libelle ici"}})}}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Formulaire d'Objectif</h5>
 
-                    <small> {{form_help(form.libelle)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.libelle)}}
+                        {{ form_start(form, { attr: { novalidate: 'novalidate', class: 'row g-3' } }) }}
+                        
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                {{ form_widget(form.libelle, { 'attr': {'id': 'floatingLibelle', 'class': 'form-control', 'placeholder': 'Libelle'} }) }}
+                                {{ form_label(form.libelle, "Libelle", { 'label_attr': {'for': 'floatingLibelle'} }) }}
+                                <small>{{ form_help(form.libelle) }}</small>
+                                <div class="form_error">
+                                    {{ form_errors(form.libelle) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                {{ form_widget(form.description, { 'attr': {'id': 'floatingDescription', 'class': 'form-control', 'placeholder': 'Description du produit'} }) }}
+                                {{ form_label(form.description, "Description", { 'label_attr': {'for': 'floatingDescription'} }) }}
+                                <small>{{ form_help(form.description) }}</small>
+                                <div class="form_error">
+                                    {{ form_errors(form.description) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                {{ form_widget(form.budget, { 'attr': {'id': 'floatingBudget', 'class': 'form-control', 'placeholder': 'Budget'} }) }}
+                                {{ form_label(form.budget, "Montant du budget", { 'label_attr': {'for': 'floatingBudget'} }) }}
+                                <small>{{ form_help(form.budget) }}</small>
+                                <div class="form_error">
+                                    {{ form_errors(form.budget) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                {{ form_widget(form.deadline, { 'attr': {'id': 'floatingDeadline', 'class': 'form-control', 'placeholder': 'Deadline'} }) }}
+                                {{ form_label(form.deadline, "Deadline de l'objectif", { 'label_attr': {'for': 'floatingDeadline'} }) }}
+                                <small>{{ form_help(form.deadline) }}</small>
+                                <div class="form_error">
+                                    {{ form_errors(form.deadline) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="form-floating mb-3">
+                                {{ form_widget(form.estimationCible, { 'attr': {'id': 'floatingEstimationCible', 'class': 'form-control', 'placeholder': 'Quantité en m3'} }) }}
+                                {{ form_label(form.estimationCible, "Quantité en m3", { 'label_attr': {'for': 'floatingEstimationCible'} }) }}
+                                <small>{{ form_help(form.estimationCible) }}</small>
+                                <div class="form_error">
+                                    {{ form_errors(form.estimationCible) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                {{ form_widget(form.statut, { 'attr': {'id': 'floatingStatut', 'class': 'form-control', 'placeholder': 'Statut'} }) }}
+                                {{ form_label(form.statut, "Statut", { 'label_attr': {'for': 'floatingStatut'} }) }}
+                                <small>{{ form_help(form.statut) }}</small>
+                                <div class="form_error">
+                                    {{ form_errors(form.statut) }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if form.site is defined %}
+                            <div class="col-md-12">
+                            <div class="form-floating mb-3">
+                                {{ form_widget(form.site, { 'attr': {'id': 'floatingSite', 'class': 'form-select'} }) }}
+                                {{ form_label(form.site, "Site", { 'label_attr': {'for': 'floatingSite'} }) }}
+                                <small>{{ form_help(form.site) }}</small>
+                                <div class="form_error">
+                                    {{ form_errors(form.site) }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Ajouter</button>
+                            <button type="reset" class="btn btn-secondary">Réinitialiser</button>
+                        </div>
+
+                        {{ form_end(form) }}
                     </div>
                 </div>
-                <div class='form-control'>
-                    {{form_label(form.description,"Description")}}
-                    {{form_widget(form.description, {"attr" : {"placeholder": "Description du produit"}})}}
-
-                    <small> {{form_help(form.description)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.description)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(form.budget,"Montant du budget")}}
-                    {{form_widget(form.budget, {"attr" : {"placeholder": "Budget pour atteindre l'objectif"}})}}
-
-                    <small> {{form_help(form.budget)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.budget)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(form.deadline,"Deadline de l'objectif")}}
-                    {{form_widget(form.deadline)}}
-
-                    <small> {{form_help(form.deadline)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.deadline)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(form.estimationCible,"Quantité en m3")}}
-                    {{form_widget(form.estimationCible, {"attr" : {"placeholder": "Quantité"}})}}
-
-                    <small> {{form_help(form.estimationCible)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.estimationCible)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(form.statut,"Statut")}}
-                    {{form_widget(form.statut, {"attr" : {"placeholder": "Statut de l'objectif"}})}}
-
-                    <small> {{form_help(form.statut)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.statut)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(form.site,"Site")}}
-                    {{form_widget(form.site)}}
-
-                    <small> {{form_help(form.site)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.site)}}
-                    </div>
-                </div>
-                <div class="form-control" >
-                    <input type="submit" value="Add incident" class="btn btn-primary">
-                </div>
-                {{form_end(form)}}
             </div>
         </div>
     </div>

@@ -8,9 +8,8 @@
       <h1>Data Tables</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-          <li class="breadcrumb-item">Tables</li>
-          <li class="breadcrumb-item active">Data</li>
+          <li class="breadcrumb-item"><a href="index.html">Site</a></li>
+          <li class="breadcrumb-item active">Objectif(s)</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
@@ -21,66 +20,42 @@
 
           <div class="card">
             <div class="card-body">
-              <h5 class="card-title">Datatables</h5>
-              <p>Add lightweight datatables to your project with using the <a href="https://github.com/fiduswriter/Simple-DataTables" target="_blank">Simple DataTables</a> library. Just add <code>.datatable</code> class name to any table you wish to conver to a datatable. Check for <a href="https://fiduswriter.github.io/simple-datatables/demos/" target="_blank">more examples</a>.</p>
-
+              <div class="d-flex justify-content-between mb-3">
+                <h5 class="card-title">Objectif : {{objectif.libelle}}</h5>
+                <a href="{{ path('app_add_actionByObjectif', {'id': objectif.id}) }}"><button type='button' class="btn btn-secondary mr-10">Nouvelle action</button></a>
+              </div>
+              <p><b>Description</b> : {{objectif.description}}</p>
+              <p class="text-primary"><b>Budget</b> : {{objectif.budget | number_format(0, ',', ' ') }}Ar </p>
+              {% if objectif.estimationCible %}
+                <p><b>Quantité cible</b> : {{objectif.estimationCible}}  m³</p>
+              {% endif %}
+              {% if objectif.resultat %}
+                <p><b>Quantité obtenue</b> : {{objectif.resultat}}  m³</p>
+              {% endif %}
+              
+              <p><b>Statut</b> :  
+              {% if objectif.statut == 'inactif' %}
+                Pas encore commencé
+              {% endif %}</p>
               <!-- Table with stripped rows -->
               <table class="table datatable">
                 <thead>
                   <tr>
                     <th>
-                      <b>N</b>ame
+                      <b>N</b>om
                     </th>
-                    <th>Ext.</th>
-                    <th>City</th>
-                    <th data-type="date" data-format="YYYY/DD/MM">Start Date</th>
-                    <th>Completion</th>
+                    <th data-type="date" data-format="DD/MM/YYYY">Date de début</th>
+                    <th data-type="date" data-format="DD/MM/YYYY">Date de fin</th>
                   </tr>
                 </thead>
                 <tbody>
+                {% for action in objectif.actions %}
                   <tr>
-                    <td>Unity Pugh</td>
-                    <td>9958</td>
-                    <td>Curicó</td>
-                    <td>2005/02/11</td>
-                    <td>37%</td>
+                    <td>{{action.libelle}}</td>
+                    <td>{{action.dateDebut|date('d/m/Y')}}</td>
+                    <td>{{action.dateFin|date('d/m/Y')}}</td>
                   </tr>
-                  <tr>
-                    <td>Theodore Duran</td>
-                    <td>8971</td>
-                    <td>Dhanbad</td>
-                    <td>1999/04/07</td>
-                    <td>97%</td>
-                  </tr>
-                  <tr>
-                    <td>Kylie Bishop</td>
-                    <td>3147</td>
-                    <td>Norman</td>
-                    <td>2005/09/08</td>
-                    <td>63%</td>
-                  </tr>
-                 
-                    <td>Riley Nunez</td>
-                    <td>5533</td>
-                    <td>Sart-Eustache</td>
-                    <td>2003/26/02</td>
-                    <td>30%</td>
-                  </tr>
-                  
-                  <tr>
-                    <td>Alisa Horn</td>
-                    <td>9853</td>
-                    <td>Ucluelet</td>
-                    <td>2007/01/11</td>
-                    <td>39%</td>
-                  </tr>
-                  <tr>
-                    <td>Zelenia Roman</td>
-                    <td>7516</td>
-                    <td>Redwater</td>
-                    <td>2012/03/03</td>
-                    <td>31%</td>
-                  </tr>
+                {% endfor %}
                 </tbody>
               </table>
               <!-- End Table with stripped rows -->

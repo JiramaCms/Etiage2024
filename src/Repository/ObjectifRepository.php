@@ -36,6 +36,22 @@ class ObjectifRepository extends ServiceEntityRepository
 //        ;
 //    }
 
+/**
+     * Find objectives by site ID
+     *
+     * @param int $siteId
+     * @return Objectif[] Returns an array of Objectif objects
+     */
+    public function findBySiteId(int $siteId): array
+    {
+        return $this->createQueryBuilder('o')
+            ->andWhere('o.site = :siteId')
+            ->setParameter('siteId', $siteId)
+            ->getQuery()
+            ->getResult();
+    }
+    
+
 //    public function findOneBySomeField($value): ?Objectif
 //    {
 //        return $this->createQueryBuilder('o')

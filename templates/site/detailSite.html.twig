@@ -186,10 +186,10 @@
                   <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
+                      <h6>Menu</h6>
                     </li>
 
-                    <li><a class="dropdown-item" href="#">Today</a></li>
+                    <li><a class="dropdown-item" href="{{ path('app_add_objectifBySite', {'id': site.id}) }}">Nouveau objectif</a></li>
                     <li><a class="dropdown-item" href="#">This Month</a></li>
                   </ul>
                 </div>
@@ -210,7 +210,7 @@
                     </thead>
                     <tbody>
                     {% for objectif in site.objectifs|reverse %}
-                      <tr>app_detail_observation
+                      <tr>
                         <th scope="row"><a href="{{ path('app_detail_observation', {'id': objectif.id}) }}">#{{objectif.id}}</th>
                         <th scope="row"><a href="{{ path('app_detail_observation', {'id': objectif.id}) }}">#{{objectif.libelle}}</a></th>
                         <td>

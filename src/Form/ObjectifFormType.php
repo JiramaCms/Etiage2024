@@ -30,12 +30,14 @@ class ObjectifFormType extends AbstractType
                 'choices' => [
                     'Pas commencé' => 'inactif',
                     'En cours' => 'actif',
-                    'Fini' => 'done',
-                    'Abandonné' => 'abandonner'
+                    'Fini' => 'Fini',
+                    'Abandonné' => 'Abandonné'
                 ],
                 'placeholder' => 'Sélectionnez un statut',
             ])
-            ->add('site',EntityType::class,[
+        ;
+        if (!$options['getIdByUrl']) {
+            $builder->add('site',EntityType::class,[
                 'placeholder' => 'Choisissez votre site',
                 'class' => Site::class,
                 'query_builder' => function(EntityRepository $er){
@@ -43,14 +45,15 @@ class ObjectifFormType extends AbstractType
                         ->orderBy('p.libelle','ASC');
                 },
                 'choice_label' => 'libelle',
-            ])
-        ;
+                ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Objectif::class,
+            'getIdByUrl' => false,
         ]);
     }
 }
