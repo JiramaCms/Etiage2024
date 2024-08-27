@@ -113,7 +113,6 @@
                   <script>
 
                     let site = {{sitej|raw}};
-                    console.log(site.objectifs);
                     var lastTenProductions = site.productions.slice(-10);
 
                     var labels = lastTenProductions.map(function(production) {
@@ -298,6 +297,45 @@
 
             </div>
           </div><!-- End Recent Activity -->
+
+          <div class="card">
+            <div class="filter">
+              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <li class="dropdown-header text-start">
+                  <h6>Filter</h6>
+                </li>
+
+                <li><a class="dropdown-item" href="#">Today</a></li>
+                <li><a class="dropdown-item" href="#">This Month</a></li>
+                <li><a class="dropdown-item" href="#">This Year</a></li>
+              </ul>
+            </div>
+
+            <div class="card-body pb-0">
+              <h5 class="card-title">Incidents</h5>
+
+              <div class="news">
+                {% for incident in site.incidents %}
+                  <div class="post-item mb-4">
+                <div class="d-flex align-items-start">
+                    <!-- Colonne pour la date -->
+                    <div class="me-3">
+                        <h5 class="incident-date">{{ incident.daty|date('d/m/Y') }}</h5>
+                    </div>
+                    <!-- Colonne pour le libelle -->
+                    <div>
+                        <h4 class="incident-libelle"><a href="#">{{ incident.libelle }}</a></h4>
+                    </div>
+                </div>
+                <!-- Description en dessous -->
+                <p>{{ incident.description }}</p>
+            </div>
+                {% endfor %}
+              </div>
+
+            </div>
+          </div><!-- End sidebar Incidents list-->
       </div>
     </section>
 

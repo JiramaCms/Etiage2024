@@ -1680,7 +1680,7 @@ fieldset[disabled] .navbar .navbar-nav>a.btn.active {
 }
 
 .btn-primary {
-  background-color: #4032f9;
+  background-color: #fa7a50;
   color: #FFFFFF;
 }
 
@@ -1695,7 +1695,7 @@ fieldset[disabled] .navbar .navbar-nav>a.btn.active {
 .show>.btn-primary.dropdown-toggle,
 .show>.btn-primary.dropdown-toggle:focus,
 .show>.btn-primary.dropdown-toggle:hover {
-  background-color: #fa7a50;
+  background-color: #1234c8;
   color: #FFFFFF;
   box-shadow: none;
 }
@@ -2671,7 +2671,7 @@ fieldset[disabled] .btn-link.active {
 }
 
 .form-control:focus {
-  border: 1px solid #f96332;
+  border: 1px solid #0d6efd;
   -webkit-box-shadow: none;
   box-shadow: none;
   outline: 0 !important;

@@ -26,7 +26,10 @@ class ActionFormType extends AbstractType
             //     'format' => 'yyyy-MM-dd'
             // ])
             ->add('avancement')
-            ->add('objectif',EntityType::class,[
+        ;
+
+        if (!$options['getIdByUrl']) {
+           $builder->add('objectif',EntityType::class,[
                 'placeholder' => 'Choisissez l\'objectif en question',
                 'class' => Objectif::class,
                 'query_builder' => function(EntityRepository $er){
@@ -35,8 +38,8 @@ class ActionFormType extends AbstractType
                 },
                 'choice_label' => 'libelle',
                 'disabled' => $options['include_date_fin'],
-            ])
-        ;
+            ]);
+        }
 
         // Ajout conditionnel du champ 'dateFin'
         if ($options['include_date_fin']) {
@@ -52,6 +55,7 @@ class ActionFormType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Action::class,
             'include_date_fin' => false, // Par défaut, 'dateFin' n'est pas inclus
+            'getIdByUrl' => false,
         ]);
     }
 }

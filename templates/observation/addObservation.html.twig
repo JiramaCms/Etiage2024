@@ -1,43 +1,52 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <div class="container">
-        <div class="row row-cols-2">
-            <div class="col-md-4">
-                {{form_start(form, { attr: { novalidate: 'novalidate'}})}}
-                {% if form.action is defined %}
-                    <div class='form-control'>
-                        {{ form_label(form.action, "Action") }}
-                        {{ form_widget(form.action) }}
-                        <small>{{ form_help(form.action) }}</small>
-                        <div class="form_error">
-                            {{ form_errors(form.action) }}
+    <div class="container ">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card mt-4 ">
+                    <div class="card-body ">
+                        <h5 class="card-title">Observation ou commentaire</h5>
+                        
+                        {{ form_start(form, { attr: { novalidate: 'novalidate', class: 'row g-3' }}) }}
+                        
+                        {% if form.action is defined %}
+                            <div class="col-12">
+                                <label for="{{ form.action.vars.id }}" class="form-label">{{ form_label(form.action) }}</label>
+                                {{ form_widget(form.action, { attr: { class: 'form-control' } }) }}
+                                <small>{{ form_help(form.action) }}</small>
+                                <div class="form_error">
+                                    {{ form_errors(form.action) }}
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="col-12">
+                            <label for="{{ form.libelle.vars.id }}" class="form-label">{{ form_label(form.libelle, "Commentaire") }}</label>
+                            {{ form_widget(form.libelle, { attr: { class: 'form-control', placeholder: "Ecrivez votre observation ici" , class: "input-blue-background" } }) }}
+                            <small>{{ form_help(form.libelle) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.libelle) }}
+                            </div>
                         </div>
-                    </div>
-                {% endif %}
-                <div class='form-control'>
-                    {{form_label(form.libelle,"Commentaire")}}
-                    {{form_widget(form.libelle, {"attr" : {"placeholder": "Ecrivez votre observation ici"}})}}
-
-                    <small> {{form_help(form.libelle)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.libelle)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(form.dateHeure,"date de l'observation")}}
-                    {{form_widget(form.dateHeure)}}
-
-                    <small> {{form_help(form.dateHeure)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.dateHeure)}}
+                        
+                        <div class="col-6">
+                            <label for="{{ form.dateHeure.vars.id }}" class="form-label">{{ form_label(form.dateHeure, "Date de l'observation") }}</label>
+                            {{ form_widget(form.dateHeure, { attr: { class: 'form-control' } }) }}
+                            <small>{{ form_help(form.dateHeure) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.dateHeure) }}
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Ajouter l'observation</button>
+                            <button type="reset" class="btn btn-secondary">Reset</button>
+                        </div>
+                        
+                        {{ form_end(form) }}
                     </div>
                 </div>
-                
-                <div class="form-control" >
-                    <input type="submit" value="Ajouter l'observation" class="btn btn-primary">
-                </div>
-                {{form_end(form)}}
             </div>
         </div>
     </div>

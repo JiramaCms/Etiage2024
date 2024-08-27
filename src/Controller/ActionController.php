@@ -64,13 +64,16 @@ class ActionController extends AbstractController
         $form->handleRequest($req);
         if($form->isSubmitted() && $form->isValid()){
             $action = $form->getData();
+            if ($action->getAvancement() === null) {
+                $action->setAvancement(0);
+            }
             $em = $mr->getManager();
 
             $em->persist($action);
             $em->flush();
             return $this->redirectToRoute('app_liste_objectif');
         }
-        return $this->render('objectif/addAction.html.twig', [
+        return $this->render('action/addAction.html.twig', [
             'form'=>$form->createView()
         ]);
     }

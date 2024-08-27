@@ -892,10 +892,39 @@ h6 {
   float: left;
   border-radius: 5px;
 }
+/* eto modifier selfmade*/
+.dashboard .news h5{
+  float:left;
+}
+.post-item {
+  /* Optionnel : ajoutez un fond léger ou une bordure pour mieux voir les éléments */
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 10px;
+}
+
+.d-flex {
+  display: flex;
+  align-items: center; /* Aligne les éléments verticalement au centre */
+}
+
+.incident-date {
+  margin-bottom: 0; /* Enlève la marge en bas pour un meilleur alignement */
+  font-size: 1rem; /* Ajustez la taille de la police si nécessaire */
+}
+
+.incident-libelle {
+  margin-bottom: 0; /* Enlève la marge en bas pour un meilleur alignement */
+  font-size: 1.25rem; /* Ajustez la taille de la police si nécessaire */
+}
+
+.me-3 {
+  margin-right: 1rem; /* Ajoute un espacement à droite de la date */
+}
+/* katreto modifier selfmade */
 
 .dashboard .news h4 {
   font-size: 15px;
-  margin-left: 95px;
+ /* margin-left: 95px;*/
   font-weight: bold;
   margin-bottom: 5px;
 }
@@ -1230,4 +1259,7 @@ h6 {
   text-align: center;
   font-size: 13px;
   color: #012970;
+}
+.input-blue-background {
+  background-color: #d5dfe1; /* Couleur bleu clair */
 }

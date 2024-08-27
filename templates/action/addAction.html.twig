@@ -1,50 +1,63 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-    <div class="container">
-        <div class="row row-cols-2">
-            <div class="col-md-4">
-                {{form_start(form, { attr: { novalidate: 'novalidate'}})}}
-                <div class='form-control'>
-                    {{form_label(form.libelle,"Libelle")}}
-                    {{form_widget(form.libelle, {"attr" : {"placeholder": "mettez le Libelle ici"}})}}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Formulaire de nouvelle action</h5>
 
-                    <small> {{form_help(form.libelle)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.libelle)}}
+                        {{ form_start(form, { attr: { novalidate: 'novalidate', class: 'row g-3' } }) }}
+
+                        <div class="col-12">
+                            {{ form_label(form.libelle, "Libelle", { 'label_attr': { 'class': 'form-label' } }) }}
+                            {{ form_widget(form.libelle, { 'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Mettez le Libelle ici' } }) }}
+                            <small>{{ form_help(form.libelle) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.libelle) }}
+                            </div>
+                        </div>
+                        {% if form.objectif is defined %}
+                            <div class="col-12">
+                            {{ form_label(form.objectif, "Objectif", { 'label_attr': { 'class': 'form-label' } }) }}
+                            {{ form_widget(form.objectif, { 'attr': { 'class': 'form-control form-control-lg' } }) }}
+                            <small>{{ form_help(form.objectif) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.objectif) }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+
+                        <div class="col-12">
+                            {{ form_label(form.dateDebut, "Début du projet", { 'label_attr': { 'class': 'form-label' } }) }}
+                            {{ form_widget(form.dateDebut, { 'attr': { 'class': 'form-control form-control-lg' } }) }}
+                            <small>{{ form_help(form.dateDebut) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.dateDebut) }}
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            {{ form_label(form.avancement, "Avancement du travail", { 'label_attr': { 'class': 'form-label' } }) }}
+                            {{ form_widget(form.avancement, { 'attr': { 'class': 'form-control form-control-lg' } }) }}
+                            <small>{{ form_help(form.avancement) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.avancement) }}
+                            </div>
+                        </div>
+
+                        
+
+                        <div class="text-center mt-4">
+                            <button type="reset" class="btn btn-danger">Réinitialiser</button>
+                            <button type="submit" class="btn btn-secondary">Ajouter l'action</button>
+                        </div>
+
+                        {{ form_end(form) }}
                     </div>
                 </div>
-                <div class='form-control'>
-                    {{form_label(form.dateDebut,"Début du projet")}}
-                    {{form_widget(form.dateDebut)}}
-
-                    <small> {{form_help(form.dateDebut)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.dateDebut)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(form.avancement,"Avancement du travail")}}
-                    {{form_widget(form.avancement)}}
-
-                    <small> {{form_help(form.avancement)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.avancement)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(form.objectif,"Site")}}
-                    {{form_widget(form.objectif)}}
-
-                    <small> {{form_help(form.objectif)}}</small>
-                    <div class="form_error">
-                        {{form_errors(form.objectif)}}
-                    </div>
-                </div>
-                <div class="form-control" >
-                    <input type="submit" value="Ajouter )l'objectif" class="btn btn-primary">
-                </div>
-                {{form_end(form)}}
             </div>
         </div>
     </div>
