@@ -7,6 +7,7 @@
             <div class="card col-md-8 mt-4"> <!-- Ajout de mt-4 pour le margin-top -->
                 <div class="card-body">
                     <h3 class="card-title fw-bold">Ajouter un incident</h3>
+                    <h4><b> Nom du Site</b> : {{site.libelle}} à {{site.adresse}}</h4>
                     
                     <!-- Début du formulaire -->
                     {{ form_start(form, { attr: { novalidate: 'novalidate', class: 'row g-3' } }) }}

@@ -155,6 +155,7 @@
         var myChart;
         var zonesVisible = true;
         var addObservationUrl = "{{ path('app_add_incidentById', {'id': 'siteId'}) }}";
+        var siteDetailUrl = "{{ path('detail_site',{'id' : 'siteId'})}}";
         function showOverview() {
             var siteId = currentSelectedMarker;
             fetchSiteDetails(siteId);
@@ -192,6 +193,34 @@
 
                 `;
             }
+        }
+        function updateSidebarContent(siteData, zoneData) {
+            var addSiteUrlWithId = siteDetailUrl.replace('siteId', siteData.id);
+            console.log(addSiteUrlWithId);
+            if (!Array.isArray(zoneData)) {
+                console.error('Les données de zones ne sont pas un tableau:', zoneData);
+                return;
+            }
+
+            let zonesInfo = zoneData.map(zone => `
+                <div>
+                    <strong>Zone : ${zone.libelle}</strong><br>
+                    Description : ${zone.description}
+                </div>
+            `);
+
+            document.getElementById('overview-content').innerHTML = `
+                <strong>Nom : ${siteData.libelle}</strong><br>
+                Adresse : ${siteData.adresse}<br>
+                Latitude : ${siteData.coord.latitude}<br>
+                Longitude : ${siteData.coord.longitude}<br>
+                ${zonesInfo}
+            <button onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button>
+            `;
+            document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
+            sidebar.classList.remove('hidden2');
+            showIncidents();
+            showStatistics();
         }
 
         function showStatistics() {
@@ -240,7 +269,7 @@
                 }
                 document.getElementById('statistique-content').innerHTML = 'Aucune donnée de production disponible pour ce site.';
             }
-            }
+        }
 
         function fetchZoneDetails(zoneId) {
             fetch(`/site/liste/detailZone/${zoneId}`)
@@ -328,31 +357,7 @@
             });
         }
 
-        function updateSidebarContent(siteData, zoneData) {
-            if (!Array.isArray(zoneData)) {
-                console.error('Les données de zones ne sont pas un tableau:', zoneData);
-                return;
-            }
-
-            let zonesInfo = zoneData.map(zone => `
-                <div>
-                    <strong>Zone : ${zone.libelle}</strong><br>
-                    Description : ${zone.description}
-                </div>
-            `);
-
-            document.getElementById('overview-content').innerHTML = `
-                <strong>Nom : ${siteData.libelle}</strong><br>
-                Adresse : ${siteData.adresse}<br>
-                Latitude : ${siteData.coord.latitude}<br>
-                Longitude : ${siteData.coord.longitude}<br>
-                ${zonesInfo}
-            `;
-            document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
-            sidebar.classList.remove('hidden2');
-            showIncidents();
-            showStatistics();
-        }
+        
 
         function fetchSiteDetails(siteId) {
             fetch(`/site/liste/detailSite/${siteId}`)

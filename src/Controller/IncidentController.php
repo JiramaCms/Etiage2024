@@ -69,7 +69,8 @@ class IncidentController extends AbstractController
         }
 
         return $this->render('incident/addIncident.html.twig', [
-            'form'=>$form->createView()
+            'form'=>$form->createView(),
+            'site' => $site,
         ]);
     }
 }
