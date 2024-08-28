@@ -18,7 +18,7 @@ class MaterielController extends AbstractController
         $allMateriel= $mr->getRepository(Materiel::class)->findAll();
         //dump($allAction);die();
         return $this->render('materiel/index.html.twig', [
-            'materiel' => $allMateriel,
+            'materiaux' => $allMateriel,
         ]);
     }
 
