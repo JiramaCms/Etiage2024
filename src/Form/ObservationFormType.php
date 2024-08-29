@@ -19,7 +19,8 @@ class ObservationFormType extends AbstractType
 
         
         $builder
-            ->add('libelle',TextareaType::class)
+            ->add('libelle')
+            ->add('detail',TextareaType::class)
             ->add('dateHeure',DateTimeType::class,[
                 'input' => 'datetime_immutable',
                 'widget' =>'single_text'

@@ -13,26 +13,35 @@
                         {% if form.action is defined %}
                             <div class="col-12">
                                 <label for="{{ form.action.vars.id }}" class="form-label">{{ form_label(form.action) }}</label>
-                                {{ form_widget(form.action, { attr: { class: 'form-control' } }) }}
+                                {{ form_widget(form.action, { attr: { class: 'form-control form-control-lg' } }) }}
                                 <small>{{ form_help(form.action) }}</small>
                                 <div class="form_error">
                                     {{ form_errors(form.action) }}
                                 </div>
                             </div>
                         {% endif %}
-                        
+
                         <div class="col-12">
-                            <label for="{{ form.libelle.vars.id }}" class="form-label">{{ form_label(form.libelle, "Commentaire") }}</label>
-                            {{ form_widget(form.libelle, { attr: { class: 'form-control', placeholder: "Ecrivez votre observation ici" , class: "input-blue-background" } }) }}
+                            {{ form_label(form.libelle, "Libelle", {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.libelle, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'mettez le Libelle ici'}}) }}
                             <small>{{ form_help(form.libelle) }}</small>
                             <div class="form_error">
                                 {{ form_errors(form.libelle) }}
                             </div>
                         </div>
                         
+                        <div class="col-12">
+                            <label for="{{ form.detail.vars.id }}" class="form-label form-label-lg">{{ form_label(form.detail, "Détail") }}</label>
+                            {{ form_widget(form.detail, { attr: { class: 'form-control', placeholder: "Description detaillée ..." , class: "input-white-background" } }) }}
+                            <small>{{ form_help(form.detail) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.detail) }}
+                            </div>
+                        </div>
+                        
                         <div class="col-6">
                             <label for="{{ form.dateHeure.vars.id }}" class="form-label">{{ form_label(form.dateHeure, "Date de l'observation") }}</label>
-                            {{ form_widget(form.dateHeure, { attr: { class: 'form-control' } }) }}
+                            {{ form_widget(form.dateHeure, { attr: { class: 'form-control form-control-lg' } }) }}
                             <small>{{ form_help(form.dateHeure) }}</small>
                             <div class="form_error">
                                 {{ form_errors(form.dateHeure) }}

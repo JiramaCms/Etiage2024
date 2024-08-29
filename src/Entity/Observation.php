@@ -23,6 +23,9 @@ class Observation
     #[ORM\JoinColumn(nullable: false)]
     private ?Action $action = null;
 
+    #[ORM\Column(length: 900, nullable: true)]
+    private ?string $Detail = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -60,6 +63,18 @@ class Observation
     public function setAction(?Action $action): static
     {
         $this->action = $action;
+
+        return $this;
+    }
+
+    public function getDetail(): ?string
+    {
+        return $this->Detail;
+    }
+
+    public function setDetail(?string $Detail): static
+    {
+        $this->Detail = $Detail;
 
         return $this;
     }
