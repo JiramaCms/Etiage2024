@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Detail action{% endblock %}
+
+{% block body %}
+
+    {{action.libelle}}
+    {{ action.dateDebut|date('d/m/Y') }}
+    {{ action.dateFin|date('d/m/Y') }}
+    {{action.avancement}}
+
+{% endblock %}

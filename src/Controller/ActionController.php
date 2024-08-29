@@ -23,6 +23,16 @@ class ActionController extends AbstractController
         ]);
     }
 
+    #[Route('/action/{id}' ,name: 'app_detail_action')]
+    public function actionById($id,ManagerRegistry $mr): Response
+    {
+        $action = $mr->getRepository(Action::class)->find($id);
+
+        return $this->render('action/actionDetail.html.twig', [
+            'action' => $action,
+        ]);
+    }
+
     #[Route('/addAction',name: 'app_add_action')]
     public function addAction(Request $req,ManagerRegistry $mr): Response
     {

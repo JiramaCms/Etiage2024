@@ -27,6 +27,8 @@ class ObjectifController extends AbstractController
     public function objectifById($id,ManagerRegistry $mr): Response
     {
         $objectif = $mr->getRepository(Objectif::class)->find($id);
+        //$t= $objectif->getActions();
+        //dump($t->get(0));die();
 
         return $this->render('objectif/objectif.html.twig', [
             'objectif' => $objectif,

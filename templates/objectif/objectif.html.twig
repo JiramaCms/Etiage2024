@@ -25,7 +25,7 @@
                 <a href="{{ path('app_add_actionByObjectif', {'id': objectif.id}) }}"><button type='button' class="btn btn-secondary mr-10">Nouvelle action</button></a>
               </div>
               <p><b>Description</b> : {{objectif.description}}</p>
-              <p class="text-primary"><b>Budget</b> : {{objectif.budget | number_format(0, ',', ' ') }}Ar </p>
+              <p><b>Budget</b> : {{objectif.budget | number_format(0, ',', ' ') }}Ar </p>
               {% if objectif.estimationCible %}
                 <p><b>Quantité cible</b> : {{objectif.estimationCible}}  m³</p>
               {% endif %}
@@ -53,9 +53,15 @@
                 <tbody>
                 {% for action in objectif.actions %}
                   <tr>
-                    <td>{{action.libelle}}</td>
+                    <th scope="row"><a href="{{ path('app_detail_action', {'id': action.id}) }}">{{action.libelle}}</a></th>
                     <td>{{action.dateDebut|date('d/m/Y')}}</td>
-                    <td>{{action.dateFin|date('d/m/Y')}}</td>
+                    <td>
+                      {% if action.dateFin is not null %}
+                          {{ action.dateFin|date('d/m/Y') }}
+                      {% else %}
+                          Non défini
+                      {% endif %}
+                    </td>
                   </tr>
                 {% endfor %}
                 </tbody>
