@@ -25,6 +25,7 @@ class MaterielFormType extends AbstractType
                     'rows' => 5, // Vous pouvez ajuster le nombre de lignes par défaut
                 ],
             ])
+            ->add('cout')
             ->add('capacite')
             ->add('action', HiddenType::class, [
                 'label' => 'Action',

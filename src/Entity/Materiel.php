@@ -31,6 +31,9 @@ class Materiel
     #[ORM\Column(length: 900, nullable: true)]
     private ?string $utilite = null;
 
+    #[ORM\Column(nullable: true)]
+    private ?int $cout = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -104,6 +107,18 @@ class Materiel
     public function setUtilite(?string $utilite): static
     {
         $this->utilite = $utilite;
+
+        return $this;
+    }
+
+    public function getCout(): ?int
+    {
+        return $this->cout;
+    }
+
+    public function setCout(?int $cout): static
+    {
+        $this->cout = $cout;
 
         return $this;
     }

@@ -17,12 +17,14 @@
     <section class="section">
       <div class="row">
         <div class="col-lg-12">
-
           <div class="card">
             <div class="card-body">
-              <div class="d-flex justify-content-between mb-3">
+              <div class="d-flex justify-content-between align-items mb-3">
                 <h5 class="card-title">Objectif : {{objectif.libelle}}</h5>
-                <a href="{{ path('app_add_actionByObjectif', {'id': objectif.id}) }}"><button type='button' class="btn btn-secondary mr-10">Nouvelle action</button></a>
+                <div>
+                  <a href="{{ path('app_update_objectif', {'id': objectif.id}) }}"><button type='button' class="btn btn-secondary mr-10">Modifier l'objectif</button></a>
+                  <a href="{{ path('app_add_actionByObjectif', {'id': objectif.id}) }}"><button type='button' class="btn btn-dark mr-10">Nouvelle action</button></a>
+                </div>
               </div>
               <p><b>Description</b> : {{objectif.description}}</p>
               <p><b>Budget</b> : {{objectif.budget | number_format(0, ',', ' ') }}Ar </p>
@@ -36,7 +38,9 @@
               <p><b>Statut</b> :  
               {% if objectif.statut == 'inactif' %}
                 Pas encore commencé
-                {% else %}
+              {% elseif objectif.statut == 'actif' %}
+                En cours
+              {% else %}
                 {{objectif.statut}}
               {% endif %}</p>
               <!-- Table with stripped rows -->
@@ -44,10 +48,10 @@
                 <thead>
                   <tr>
                     <th>
-                      <b>N</b>om
+                      <b>A</b>ctions prises
                     </th>
                     <th data-type="date" data-format="DD/MM/YYYY">Date de début</th>
-                    <th data-type="date" data-format="DD/MM/YYYY">Date de fin</th>
+                    <th data-type="number" >Avancement</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -55,13 +59,7 @@
                   <tr>
                     <th scope="row"><a href="{{ path('app_detail_action', {'id': action.id}) }}">{{action.libelle}}</a></th>
                     <td>{{action.dateDebut|date('d/m/Y')}}</td>
-                    <td>
-                      {% if action.dateFin is not null %}
-                          {{ action.dateFin|date('d/m/Y') }}
-                      {% else %}
-                          Non défini
-                      {% endif %}
-                    </td>
+                    <td>{{action.avancement}}%</td>
                   </tr>
                 {% endfor %}
                 </tbody>

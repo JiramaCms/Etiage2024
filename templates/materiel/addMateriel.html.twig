@@ -40,9 +40,18 @@
                     </div>
 
                     <!-- Champ Capacité -->
-                    <div class="col-12">
+                    <div class="col-6">
+                        {{ form_label(form.cout, "Cout de l'usage", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_widget(form.cout, { 'attr': { 'class': 'form-control form-control-lg','placeholder': 'Coût d\'usage en Ariary' } }) }}
+                        <div class="form-text">{{ form_help(form.cout) }}</div>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.cout) }}
+                        </div>
+                    </div>
+                    <!-- Champ Cout -->
+                    <div class="col-6">
                         {{ form_label(form.capacite, "Capacité", { 'label_attr': { 'class': 'form-label' } }) }}
-                        {{ form_widget(form.capacite, { 'attr': { 'class': 'form-control form-control-lg' } }) }}
+                        {{ form_widget(form.capacite, { 'attr': { 'class': 'form-control form-control-lg','placeholder':'Capacité d\'apport en eau en m³ ' } }) }}
                         <div class="form-text">{{ form_help(form.capacite) }}</div>
                         <div class="invalid-feedback">
                             {{ form_errors(form.capacite) }}

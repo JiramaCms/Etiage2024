@@ -96,4 +96,23 @@ class ObjectifController extends AbstractController
         ]);
     }
 
+    #[Route('/updateObjectif/{id}', name:'app_update_objectif')]
+    public function updateObjectif(Objectif $objectif,Request $req,ManagerRegistry $mr): Response
+    {
+        $form = $this->createForm(ObjectifFormType::class,$objectif);
+        $form->handleRequest($req);
+        if($form->isSubmitted() && $form->isValid()){
+            $objectif = $form->getData();
+            $em = $mr->getManager();
+
+            $em->persist($objectif);
+            $em->flush();
+
+            return $this->redirectToRoute('app_liste_objectif');
+        }
+        return $this->render('objectif/updateMateriel.html.twig',[
+            'form'=>$form->createView()
+        ]);
+    }
+
 }
