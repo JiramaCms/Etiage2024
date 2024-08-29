@@ -29,6 +29,16 @@
                         </div>
                     </div>
 
+                    <!-- Champ Utilité -->
+                    <div class="col-12">
+                        {{ form_label(form.utilite, "Usage du matériel", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_widget(form.utilite, { 'attr': { 'class': 'form-control form-control-lg', 'style': 'padding: 15px; border-bottom: 2px solid #ced4da; border-radius: 5px; background-color: #f8f9fa;' } }) }}
+                        <div class="form-text">{{ form_help(form.utilite) }}</div>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.utilite) }}
+                        </div>
+                    </div>
+
                     <!-- Champ Capacité -->
                     <div class="col-12">
                         {{ form_label(form.capacite, "Capacité", { 'label_attr': { 'class': 'form-label' } }) }}

@@ -28,6 +28,9 @@ class Materiel
     #[ORM\ManyToOne(inversedBy: 'materiels')]
     private ?Action $action = null;
 
+    #[ORM\Column(length: 900, nullable: true)]
+    private ?string $utilite = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -89,6 +92,18 @@ class Materiel
     public function setAction(?Action $action): static
     {
         $this->action = $action;
+
+        return $this;
+    }
+
+    public function getUtilite(): ?string
+    {
+        return $this->utilite;
+    }
+
+    public function setUtilite(?string $utilite): static
+    {
+        $this->utilite = $utilite;
 
         return $this;
     }

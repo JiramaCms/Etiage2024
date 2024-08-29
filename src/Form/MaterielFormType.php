@@ -17,24 +17,35 @@ class MaterielFormType extends AbstractType
         $builder
             ->add('libelle')
             ->add('code')
-            ->add('capacite')
-            ->add('disposition', HiddenType::class, [
-                'label' => 'Disposition',
-                'required' => false,
-                'data' => true, // Valeur par défaut
+            ->add('utilite', TextareaType::class, [
+                'label' => 'Utilité',
+                'required' => false, // Si vous voulez que ce champ soit facultatif
+                'attr' => [
+                    'placeholder' => 'Décrivez l\'utilité du matériel...',
+                    'rows' => 5, // Vous pouvez ajuster le nombre de lignes par défaut
+                ],
             ])
+            ->add('capacite')
             ->add('action', HiddenType::class, [
                 'label' => 'Action',
                 'required' => false,
                 'empty_data' => null, // Valeur par défaut
             ]);
         ;
+
+        if($options['is_edit']){
+            $builder->add('disposition',CheckboxType::class,[
+                'required' => false,
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Materiel::class,
+            'is_edit' => false,
         ]);
     }
 }
+

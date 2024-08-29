@@ -36,6 +36,8 @@
               <p><b>Statut</b> :  
               {% if objectif.statut == 'inactif' %}
                 Pas encore commencé
+                {% else %}
+                {{objectif.statut}}
               {% endif %}</p>
               <!-- Table with stripped rows -->
               <table class="table datatable">

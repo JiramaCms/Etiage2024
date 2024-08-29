@@ -3103,9 +3103,9 @@ textarea.form-control:active {
 
 .form-check input[type="checkbox"],
 .radio input[type="radio"] {
-  opacity: 0;
+  opacity: 3;
   position: absolute;
-  visibility: hidden;
+ /* visibility: hidden;*/
 }
 
 .form-check input[type="checkbox"]:checked+.form-check-sign::after {

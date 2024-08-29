@@ -31,6 +31,7 @@ class MaterielController extends AbstractController
         $form->handleRequest($req);
         if($form->isSubmitted() && $form->isValid()){
             $materiel = $form->getData();
+            $materiel->setDisposition(true);
             $em = $mr->getManager();
 
             $em->persist($materiel);
@@ -47,7 +48,9 @@ class MaterielController extends AbstractController
     #[Route('/updateMateriel/{id}', name:'app_update_materiel')]
     public function updateMateriel(Materiel $materiel,Request $req,ManagerRegistry $mr): Response
     {
-        $form = $this->createForm(MaterielFormType::class,$materiel);
+        $form = $this->createForm(MaterielFormType::class,$materiel,[
+            'is_edit' => true,
+        ]);
         $form->handleRequest($req);
         if($form->isSubmitted() && $form->isValid()){
             $materiel = $form->getData();

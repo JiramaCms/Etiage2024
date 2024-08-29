@@ -7,7 +7,7 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h1>Liste des Matériaux</h1>
-            <a href="{{path('app_liste_objectif')}}" class="btn btn-secondary">Nouveau matériel</a>
+            <a href="{{path('app_add_materiel')}}" class="btn btn-secondary">Nouveau matériel</a>
         </div>
         <nav>
             <ol class="breadcrumb">
@@ -47,6 +47,9 @@
                                             {% else %}
                                                 Indisponible
                                             {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ path('app_update_materiel', {'id': materiel.id}) }}" class="btn btn-secondary">Modifier Matériel</a>
                                         </td>
                                     </tr>
                                 {% endfor %}

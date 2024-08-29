@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="card col-md-8"> <!-- Utilisation de la classe Bootstrap 'card' -->
+                <div class="card-body">
+                    <h5 class="card-title">Ajouter un matériel</h5> <!-- Titre de la carte -->
+
+                    {{ form_start(form, { attr: { novalidate: 'novalidate', class: 'row g-3' } }) }}
+
+                    <!-- Champ Libelle -->
+                    <div class="col-12">
+                        {{ form_label(form.libelle, "Libelle du matériel", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_widget(form.libelle, { 'attr': { 'class': 'form-control form-control-lg', 'placeholder': 'Mettez le libelle ici' } }) }}
+                        <div class="form-text">{{ form_help(form.libelle) }}</div>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.libelle) }}
+                        </div>
+                    </div>
+
+                    <!-- Champ Code -->
+                    <div class="col-12">
+                        {{ form_label(form.code, "Nom de code du matériel", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_widget(form.code, { 'attr': { 'class': 'form-control form-control-lg', 'placeholder' : '#JRMCAM32' } }) }}
+                        <div class="form-text">{{ form_help(form.code) }}</div>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.code) }}
+                        </div>
+                    </div>
+
+                    <!-- Champ Utilité -->
+                    <div class="col-12">
+                        {{ form_label(form.utilite, "Usage du matériel", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_widget(form.utilite) }}
+                        <div class="form-text">{{ form_help(form.utilite) }}</div>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.utilite) }}
+                        </div>
+                    </div>
+
+                    <!-- Champ Capacité -->
+                    <div class="col-12">
+                        {{ form_label(form.capacite, "Capacité", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_widget(form.capacite, { 'attr': { 'class': 'form-control form-control-lg' } }) }}
+                        <div class="form-text">{{ form_help(form.capacite) }}</div>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.capacite) }}
+                        </div>
+                    </div>
+
+                    <!-- Champ disposition (Checkbox) -->
+                    {% if form.disposition is defined %}
+                        <div class="col-12">
+                            {{ form_label(form.disposition, "Disponible", { 'label_attr': { 'class': 'form-label form-label-lg' } }) }}
+                            {{ form_widget(form.disposition, { 'attr': { 'class': 'form-check-input' } }) }}
+                            <div class="form-text">{{ form_help(form.disposition) }}</div>
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.disposition) }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Bouton de soumission -->
+                    <div class="text-center mt-3">
+                        <input type="submit" value="Modifier le matériel" class="btn btn-secondary">
+                    </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
