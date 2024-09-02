@@ -15,7 +15,7 @@
         </div>
         
         <p class="card-text">Date de début: {{ action.dateDebut|date('d/m/Y') }}</p>
-        {% if action.dateFin is defined %}
+        {% if action.dateFin is not null %}
             <p class="card-text">Date de fin: {{ action.dateFin|date('d/m/Y') }}</p>
         {% else %}
             <p class="card-text">Date de fin: Non défini</p>

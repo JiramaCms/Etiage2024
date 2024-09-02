@@ -30,10 +30,10 @@
                         </td>
                         <td>{{ action.avancement }}%</td>
                         <td>
-                            <a href="{{ path('app_update_action', {'id': action.id}) }}" class="btn btn-primary">Modifier</a>
+                            <a href="{{ path('app_update_action', {'id': action.id}) }}" class="btn btn-info">Modifier</a>
                         </td>
                         <td>
-                            <a href="{{ path('app_add_observationByAction', {'id': action.id}) }}" class="btn btn-primary">Add Observation</a>
+                            <a href="{{ path('app_add_observationByAction', {'id': action.id}) }}" class="btn btn-secondary">Add Observation</a>
                         </td>
                     </tr>
                 {% endfor %}
