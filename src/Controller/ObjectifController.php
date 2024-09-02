@@ -126,7 +126,7 @@ class ObjectifController extends AbstractController
     #[Route('/objectif/solution/{id}', name: 'app_objectif_solution')]
     public function getSolutionsMinimales(Objectif $objectif,ManagerRegistry $mr): Response
     {
-        $types = $this->actionService->bestActionToTake($objectif);
+        $types = $this->actionService->bestActionToTake($objectif->getBudget(),$objectif->getEstimationCible());
 
         //dump($objectif,$types);die();
         return $this->render('objectif/solution.html.twig', [
