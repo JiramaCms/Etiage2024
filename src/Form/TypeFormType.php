@@ -2,15 +2,16 @@
 
 namespace App\Form;
 
-use App\Entity\Materiel;
+use App\Entity\Type;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
-class MaterielFormType extends AbstractType
+class TypeFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
@@ -27,6 +28,14 @@ class MaterielFormType extends AbstractType
             ])
             ->add('cout')
             ->add('capacite')
+            ->add('type', ChoiceType::class, [
+                'choices' => [
+                    'Matériel' => 'Matériel',
+                    'Infrastructure' => 'Infrastructure',
+                    'Entité' => 'Entité'
+                ],
+                'placeholder' => 'Sélectionnez le type d\'action',
+            ])
             ->add('action', HiddenType::class, [
                 'label' => 'Action',
                 'required' => false,
@@ -44,7 +53,7 @@ class MaterielFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => Materiel::class,
+            'data_class' => Type::class,
             'is_edit' => false,
         ]);
     }

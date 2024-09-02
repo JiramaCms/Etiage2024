@@ -34,13 +34,13 @@ class Action
     #[ORM\ManyToOne(inversedBy: 'actions')]
     private ?Objectif $objectif = null;
 
-    #[ORM\OneToMany(targetEntity: Materiel::class, mappedBy: 'action')]
-    private Collection $materiels;
+    #[ORM\OneToMany(targetEntity: Type::class, mappedBy: 'action')]
+    private Collection $types;
 
     public function __construct()
     {
         $this->observations = new ArrayCollection();
-        $this->materiels = new ArrayCollection();
+        $this->types = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -139,29 +139,29 @@ class Action
     }
 
     /**
-     * @return Collection<int, Materiel>
+     * @return Collection<int, Type>
      */
-    public function getMateriels(): Collection
+    public function getTypes(): Collection
     {
-        return $this->materiels;
+        return $this->types;
     }
 
-    public function addMateriel(Materiel $materiel): static
+    public function addType(Type $type): static
     {
-        if (!$this->materiels->contains($materiel)) {
-            $this->materiels->add($materiel);
-            $materiel->setAction($this);
+        if (!$this->types->contains($type)) {
+            $this->types->add($type);
+            $type->setAction($this);
         }
 
         return $this;
     }
 
-    public function removeMateriel(Materiel $materiel): static
+    public function removeMateriel(Type $type): static
     {
-        if ($this->materiels->removeElement($materiel)) {
+        if ($this->types->removeElement($type)) {
             // set the owning side to null (unless already changed)
-            if ($materiel->getAction() === $this) {
-                $materiel->setAction(null);
+            if ($type->getAction() === $this) {
+                $type->setAction(null);
             }
         }
 

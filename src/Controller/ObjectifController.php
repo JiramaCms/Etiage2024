@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Site;
 use App\Entity\Objectif;
 use App\Form\ObjectifFormType;
+use App\Service\ActionService;
 use App\Repository\ObjectifRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,6 +15,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ObjectifController extends AbstractController
 {
+    private $actionService;
+
+    public function __construct(ActionService $actionService)
+    {
+        $this->actionService = $actionService;
+    }
+    
     #[Route('/objectif', name: 'app_liste_objectif')]
     public function index(ManagerRegistry $mr): Response
     {
@@ -112,6 +120,16 @@ class ObjectifController extends AbstractController
         }
         return $this->render('objectif/updateMateriel.html.twig',[
             'form'=>$form->createView()
+        ]);
+    }
+
+    #[Route('/objectif/solution/{id}', name: 'app_liste_objectif')]
+    public function getSolutionsMinimales(Objectif $objectif,ManagerRegistry $mr): Response
+    {
+        $types = $this->actionService->bestActionToTake($objectif);
+        dump($types);die();
+        return $this->render('objectif/index.html.twig', [
+            
         ]);
     }
 

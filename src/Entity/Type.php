@@ -2,11 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\MaterielRepository;
+use App\Repository\TypeRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: MaterielRepository::class)]
-class Materiel
+#[ORM\Entity(repositoryClass: TypeRepository::class)]
+class Type
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -25,7 +25,7 @@ class Materiel
     #[ORM\Column]
     private ?bool $disposition = null;
 
-    #[ORM\ManyToOne(inversedBy: 'materiels')]
+    #[ORM\ManyToOne(inversedBy: 'types')]
     private ?Action $action = null;
 
     #[ORM\Column(length: 900, nullable: true)]
@@ -33,6 +33,9 @@ class Materiel
 
     #[ORM\Column(nullable: true)]
     private ?int $cout = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $type = null;
 
     public function getId(): ?int
     {
@@ -119,6 +122,18 @@ class Materiel
     public function setCout(?int $cout): static
     {
         $this->cout = $cout;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }

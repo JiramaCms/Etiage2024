@@ -31,16 +31,24 @@
 
                     <!-- Champ Utilité -->
                     <div class="col-12">
-                        {{ form_label(form.utilite, "Usage du matériel", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_label(form.utilite, "Description", { 'label_attr': { 'class': 'form-label' } }) }}
                         {{ form_widget(form.utilite, { 'attr': { 'class': 'form-control form-control-lg', 'style': 'padding: 15px; border-bottom: 2px solid #ced4da; border-radius: 5px; background-color: #f8f9fa;' } }) }}
                         <div class="form-text">{{ form_help(form.utilite) }}</div>
                         <div class="invalid-feedback">
                             {{ form_errors(form.utilite) }}
                         </div>
                     </div>
-
+                    
+                    <div class="col-4">
+                        {{ form_label(form.type, "Type", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_widget(form.type, { 'attr': { 'class': 'form-control form-control-lg' } }) }}
+                        <div class="form-text">{{ form_help(form.type) }}</div>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.cout) }}
+                        </div>
+                    </div>
                     <!-- Champ Capacité -->
-                    <div class="col-6">
+                    <div class="col-4">
                         {{ form_label(form.cout, "Cout de l'usage", { 'label_attr': { 'class': 'form-label' } }) }}
                         {{ form_widget(form.cout, { 'attr': { 'class': 'form-control form-control-lg','placeholder': 'Coût d\'usage en Ariary' } }) }}
                         <div class="form-text">{{ form_help(form.cout) }}</div>
@@ -49,7 +57,7 @@
                         </div>
                     </div>
                     <!-- Champ Cout -->
-                    <div class="col-6">
+                    <div class="col-4">
                         {{ form_label(form.capacite, "Capacité", { 'label_attr': { 'class': 'form-label' } }) }}
                         {{ form_widget(form.capacite, { 'attr': { 'class': 'form-control form-control-lg','placeholder':'Capacité d\'apport en eau en m³ ' } }) }}
                         <div class="form-text">{{ form_help(form.capacite) }}</div>
