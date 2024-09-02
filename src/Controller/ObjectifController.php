@@ -123,13 +123,15 @@ class ObjectifController extends AbstractController
         ]);
     }
 
-    #[Route('/objectif/solution/{id}', name: 'app_liste_objectif')]
+    #[Route('/objectif/solution/{id}', name: 'app_objectif_solution')]
     public function getSolutionsMinimales(Objectif $objectif,ManagerRegistry $mr): Response
     {
         $types = $this->actionService->bestActionToTake($objectif);
-        dump($types);die();
-        return $this->render('objectif/index.html.twig', [
-            
+
+        //dump($objectif,$types);die();
+        return $this->render('objectif/solution.html.twig', [
+            'allMateriel' => $types,
+            'objectif' => $objectif, 
         ]);
     }
 

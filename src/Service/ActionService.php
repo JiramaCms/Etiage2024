@@ -15,33 +15,84 @@ class ActionService
     }
 
     /**
-     * Cette méthode retourne une liste de types à prendre en action pour satisfaire un objectif donné avec un budget.
+     * Cette méthode retourne une liste de types à prendre en action pour satisfaire un objectif donné.
      */
     public function bestActionToTake(Objectif $objectif): array
     {
-        // Appelle la méthode du repository pour récupérer les types qui satisfont les critères.
+        // Appelle la méthode du repository pour récupérer les types disponible.
         $allMateriel = $this->typeRepository->findAll();
-        $types = []; // Initialise un tableau vide pour stocker les types sélectionnés
-
+        $budget = $objectif->getBudget();
+        $capaciteCible = $objectif->getEstimationCible();
+        $capacite = 0;
+        $cout = 0;
+        $tempCapacite = 0;
+        $tempCout = 0;
+        $types = [];
+    
         if (count($allMateriel) > 0) {
-            // Initialise le coût minimum avec un coût élevé pour le comparer avec les coûts réels
-            $minCout = PHP_INT_MAX; 
-
-            // Parcours de tous les matériels pour trouver le coût minimum
+            // Trier les matériels par coût croissant
+            usort($allMateriel, function($a, $b) {
+                return $b->getCapacite() <=> $a->getCapacite();
+            });
+    
             foreach ($allMateriel as $materiel) {
-                if ($materiel->getCout() !== null && $materiel->getCout() < $minCout) {
-                    $minCout = $materiel->getCout();
-                }
+                $tempTypes[] = $materiel;
+                $tempCapacite = $tempCapacite + $materiel->getCapacite(); 
+                $tempCout = $tempCout + $materiel->getCout();
+                $repTemp =[
+                    'types' => $tempTypes,
+                    'capacite' => $tempCapacite,
+                    'cout' => $tempCout
+                ];
+
+                if($tempCapacite > $capaciteCible && $tempCout <= $budget ) return $repTemp;
+
+                if($tempCapacite == $capaciteCible && $tempCout <= $budget) return $repTemp;
+
             }
 
-            // Deuxième boucle pour ajouter tous les matériels avec le coût minimum au tableau $types
+            $tempTypes = [];
+            $tempCapacite = 0;
+            $tempCout = 0;
+
+
+            usort($allMateriel, function($a, $b) {
+                return $a->getCout() <=> $b->getCout();
+            });
+    
             foreach ($allMateriel as $materiel) {
-                if ($materiel->getCout() !== null && $materiel->getCout() == $minCout) {
-                    $types[] = $materiel;
-                }
+
+                $tempTypes[] = $materiel;
+                $tempCapacite = $tempCapacite + $materiel->getCapacite(); 
+                $tempCout = $tempCout + $materiel->getCout();
+                $repTemp =[
+                    'types' => $tempTypes,
+                    'capacite' => $tempCapacite,
+                    'cout' => $tempCout
+                ];
+                //dump($tempCout);die();
+
+                if($tempCout > $budget) break ; //return $types;
+
+                if($tempCapacite > $capaciteCible) return $repTemp;
+
+                if($tempCout == $budget) return $repTemp;
+
+                if($tempCapacite == $capaciteCible) return $repTemp;
+
+                $types [] = $materiel;
+                $capacite = $capacite + $materiel->getCapacite(); 
+                $cout = $cout + $materiel->getCout();
+
             }
-        return $allMateriel;
         }
+    
+        return [
+            'types' => $types,
+            'capacite' => $capacite,
+            'cout' => $cout
+        ];
     }
+    
 
 }
