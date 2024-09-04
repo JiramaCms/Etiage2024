@@ -14,60 +14,53 @@
         }
     </style>
 
-    <div class="content">
-        <div class="py-4 px-3 px-md-4">
-            <div class="card mb-3 mb-md-4">
-                <div class="card-body">
-                    <!-- Breadcrumb -->
-                    <nav class="d-none d-md-block" aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item">
-                                <a href="/">Zone</a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page">Nouveau</li>
-                        </ol>
-                    </nav>
-                    <!-- End Breadcrumb -->
-
-                    <div class="mb3 mb-md-4 d-flex justify-content-between">
-                        <div class="h3 mb-0">Ajouter une zone</div>
-                    </div>
-
-                    <!-- Form -->
-                    <div>
-                        <div id="tabsContent2" class="card-body tab-content p-0">
-                            <div class="tab-pane fade show active" id="tabs2-tab1" role="tabpanel">
-                                <div>
-                                    <form method="post" action="{{path('insert_zv')}}">
-                                        <div class="form-row">
-                                            <div class="form-group col-12 col-md-6">
-                                                <label for="libelle">Libelle</label>
-                                                <input type="text" class="form-control" id="libelle" name="libelle" required>
-                                            </div>
-                                            <div class="form-group col-12 col-md-6">
-                                                <label for="description">Description</label>
-                                                <input type="text" class="form-control" id="description" name="description" required>
-                                            </div>
-                                        </div>
-                                        <div class="form-row">
-                                            <div class="form-group col-12">
-                                                <label for="coords">Coordonnées (WKT)</label>
-                                                <input type="text" class="form-control" id="coords" name="coords" readonly>
-                                            </div>
-                                        </div>
-                                        <div id="map"></div>
-                                        <br><br>
-                                        <button type="submit" class="btn btn-primary float-right">Confirmer</button>
-                                    </form>
+<main id="main" class="main">
+    <div class="pagetitle">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Formulaire Zone</h1>
+        </div>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Zone</a></li>
+                <li class="breadcrumb-item active">Nouveau</li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Ajouter une zone </h5>
+                        <!-- Table with stripped rows -->
+                        <form method="post" action="{{path('insert_zv')}}">
+                            <div class="form-row">
+                                <div class="form-group col-12 col-md-6">
+                                    <label for="libelle">Libelle</label>
+                                    <input type="text" class="form-control" id="libelle" name="libelle" required>
+                                </div>
+                                <div class="form-group col-12 col-md-6">
+                                    <label for="description">Description</label>
+                                    <input type="text" class="form-control" id="description" name="description" required>
                                 </div>
                             </div>
-                        </div>
+                            <div class="form-row">
+                                <div class="form-group col-12">
+                                    <label for="coords">Coordonnées (WKT)</label>
+                                    <input type="text" class="form-control" id="coords" name="coords" readonly>
+                                </div>
+                            </div>
+                            <div id="map"></div>
+                            <br><br>
+                            <button type="submit" class="btn btn-secondary float-right">Confirmer</button>
+                        </form>
+                        <!-- End Table with stripped rows -->
                     </div>
-                    <!-- End Form -->
                 </div>
             </div>
         </div>
-    </div>
+    </section>
+</main>
 
 <script>
     
