@@ -36,6 +36,17 @@ class SiteController extends AbstractController
             'productions' => $production,
         ]);
     }
+    #[Route('site/production/month/{siteId}', name : 'site_production_month')]
+    public function siteProductionMonth($siteId,EntityManagerInterface $entityManager): Response
+    {
+        $rproduction = $entityManager->getRepository(ProductionMonth::class);
+        $production = $rproduction->findBy(['idSite' => $siteId]);
+        //dump($production);die();
+        $rep = Util::toJson($production);
+
+
+        return new JsonResponse($rep);
+    }
     
     
     #[Route('/site/insert', name: 'site_insert', methods: ['POST'])]
