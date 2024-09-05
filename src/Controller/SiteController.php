@@ -5,10 +5,12 @@ namespace App\Controller;
 use App\Util\Util;
 use App\Entity\Site;
 use App\Entity\Zone;
-use App\Repository\ZoneRepository;
+use App\Entity\ProductionMonth;
 use Doctrine\ORM\EntityManager;
+use App\Repository\ZoneRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Repository\ProductionMonthRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -25,10 +27,13 @@ class SiteController extends AbstractController
     }
 
     #[Route('/site/test', name: 'app_site_test')]
-    public function test(): Response
+    public function test(EntityManagerInterface $entityManager): Response
     {
+        $rproduction = $entityManager->getRepository(ProductionMonth::class);
+        $production = $rproduction->findAll();
+       // dump($production);die();
         return $this->render('site/test.html.twig', [
-            'controller_name' => 'SiteController',
+            'productions' => $production,
         ]);
     }
     

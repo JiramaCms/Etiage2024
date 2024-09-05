@@ -27,36 +27,10 @@
         </li>
     </ul>
 
-    <div class="tab-content">
-        <div class="tab-pane fade show active" id="tabContentOverview" role="tabpanel" aria-labelledby="tabOverview">
-            <!-- Contenu pour l'onglet Overview -->
-            <div class="content">
-                <h3>Overview Content</h3>
-                <p>Content specific to Overview tab.</p>
-            </div>
-        </div>
-        <div class="tab-pane fade" id="tabContentPrices" role="tabpanel" aria-labelledby="tabPrices">
-            <!-- Contenu pour l'onglet Prices -->
-            <div class="content">
-                <h3>Prices Content</h3>
-                <p>Content specific to Prices tab.</p>
-            </div>
-        </div>
-        <div class="tab-pane fade" id="tabContentReviews" role="tabpanel" aria-labelledby="tabReviews">
-            <!-- Contenu pour l'onglet Reviews -->
-            <div class="content">
-                <h3>Reviews Content</h3>
-                <p>Content specific to Reviews tab.</p>
-            </div>
-        </div>
-        <div class="tab-pane fade" id="tabContentAbout" role="tabpanel" aria-labelledby="tabAbout">
-            <!-- Contenu pour l'onglet About -->
-            <div class="content">
-                <h3>About Content</h3>
-                <p>Content specific to About tab.</p>
-            </div>
-        </div>
-    </div>
+    {% for production in productions %}
+        <p> {{production.quantite}}</p>
+        <p>{{production.mois|date('m/Y') }}<p>
+    {% endfor %}
 </div>
 
 {% endblock %}

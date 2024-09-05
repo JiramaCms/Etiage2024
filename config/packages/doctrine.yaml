@@ -12,6 +12,7 @@ doctrine:
             polygon: App\Types\PolygonType
             points: CrEOF\Spatial\DBAL\Types\Geometry\PointType
             polygons: CrEOF\Spatial\DBAL\Types\Geometry\PolygonType
+            year_month: App\Doctrine\Type\YearMonthType
             
             
 
