@@ -1,22 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Form Site!{% endblock %}
+{% block title %}Map of Madagascar Sites{% endblock %}
 
 {% block menuactive %}map{% endblock %}
 
 {% block body %}
     <style>
-        /* Styles for the sidebar */
+        /* Custom styles for the map */
         #map {
-            position: relative;
             height: 500px; 
+            position: relative;
         }
         .legend {
             background: white;
             padding: 10px;
-            border: 1px solid white;
-            border-radius: 3px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
             position: absolute;
             bottom: 18px;
             left: 18px;
@@ -33,23 +33,33 @@
             cursor: pointer;
             text-decoration: none;
         }
-        .legend .toggle-zones.strikethrough {
+        .legend .zone-polygon {
+            background: blue; /* Couleur de remplissage du polygone */
+            clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%); /* Pentagone */
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            margin-right: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .strikethrough {
+            opacity: 0.3;
             text-decoration: line-through;
         }
         .sidebar-info {
             position: absolute;
             top: 0;
             right: 0;
-            width: 350px;
+            width: 380px;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent */
+            background-color: rgba(255, 255, 255, 0.9);
             padding: 20px;
             box-shadow: -2px 0 5px rgba(0,0,0,0.5);
             overflow-y: auto;
             z-index: 1000;
             margin: 2px;
             border-radius: 15px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
         }
         .hidden2 {
             display: none;
@@ -64,7 +74,7 @@
             cursor: pointer;
         }
         .marker-icon-jump {
-        animation: jumpMarker 0.8s infinite alternate;
+            animation: jumpMarker 0.8s infinite alternate;
         }
         @keyframes jumpMarker {
             from {
@@ -76,69 +86,81 @@
         }
     </style>
 
-    <div class="content">
-        <div class="py-4 px-3 px-md-4">
-            <div class="card mb-3 mb-md-4">
-                <div class="card-body">
-                    <!-- Breadcrumb -->
-                    <nav class="d-none d-md-block" aria-label="breadcrumb">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item active">
-                                <a href="#">Map</a>
-                            </li>
-                        </ol>
-                    </nav>
-                    <!-- End Breadcrumb -->
+    <main id="main" class="main">
 
-                    <div class="mb-3 mb-md-4 d-flex justify-content-between">
-                        <div class="h3 mb-0">Sites Madagascar</div>
-                    </div>
-                    <div id="map">
-                        <!-- Div de la carte -->
-                        <div class="sidebar-info hidden2" id="sidebar-info">
-                            <button class="close-btn" onclick="closeSidebar()">×</button>
-                            <ul class="nav nav-tabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link active" id="tabOverview" data-bs-toggle="tab" href="#overview" role="tab" aria-selected="true">Overview</a>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link" id="tabIncident" data-bs-toggle="tab" href="#incidents" role="tab" aria-selected="false">Incidents</a>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <a class="nav-link" id="tabStatistique" data-bs-toggle="tab" href="#statistique" role="tab" aria-selected="false">Statistique</a>
-                                </li>
-                            </ul>
-                            <div class="tab-content">
-                                <div class="tab-pane fade show active" id="overview" role="tabpanel">
-                                    <h3>Overview</h3>
-                                    <p id="overview-content"></p>
-                                </div>
-                                <div class="tab-pane fade" id="incidents" role="tabpanel">
-                                    <h3>Incidents</h3>
-                                    <p id="incidents-content"></p>
-                                </div>
-                                <div class="tab-pane fade" id="statistique" role="tabpanel">
-                                    <h3>Statistique</h3>
-                                    <p id="statistique-content"></p>
-                                    <!-- Ajoutez le canvas pour Chart.js -->
-                                    <div>
-                                        <canvas id="myChart" width="450" height="450"></canvas>
+    <div class="pagetitle">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Map Madagascar</h1>
+        </div>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
+            </ol>
+        </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section">
+        <div class="row">
+            <div class="col-lg-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Sites Madagascar</h5>
+
+                        <div id="map">
+                            <div class="sidebar-info hidden2" id="sidebar-info">
+                                <button class="close-btn" onclick="closeSidebar()">×</button>
+                                <ul class="nav nav-tabs" role="tablist">
+                                    <li class="nav-item" role="presentation">
+                                        <a class="nav-link active" id="tabOverview" data-bs-toggle="tab" href="#overview" role="tab" aria-selected="true">Overview</a>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <a class="nav-link" id="tabIncident" data-bs-toggle="tab" href="#incidents" role="tab" aria-selected="false">Incidents</a>
+                                    </li>
+                                    <li class="nav-item" role="presentation">
+                                        <a class="nav-link" id="tabStatistique" data-bs-toggle="tab" href="#statistique" role="tab" aria-selected="false">Statistique</a>
+                                    </li>
+                                </ul>
+                                <div class="tab-content">
+                                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                                        <h4>Overview</h4>
+                                        <p id="overview-content"></p>
+                                    </div>
+                                    <div class="tab-pane fade" id="incidents" role="tabpanel">
+                                        <h4>Incidents</h4>
+                                        <p id="incidents-content"></p>
+                                    </div>
+                                    <div class="tab-pane fade" id="statistique" role="tabpanel">
+                                        <h4>Statistique</h4>
+                                        <p id="statistique-content"></p>
+                                        <!-- Canvas for Chart.js -->
+                                        <div>
+                                            <canvas id="myChart" width="450" height="450"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div id="legend" class="legend">
-                        <h4>Légende</h4>
-                        <div><i style="background: blue;"></i> Site bleu</div>
-                        <div><i style="background: green;"></i> Site vert</div>
-                        <div><i style="background: orange;"></i> Site orange</div>
-                        <div class="toggle-zones" onclick="toggleZonesVisibility()">Zones</div>
+                        <div id="legend" class="legend">
+                            <h5>Légende</h5>
+                            <div><i style="background: blue;"></i> Site bleu</div>
+                            <div><i style="background: green;"></i> Site vert</div>
+                            <div><i style="background: orange;"></i> Site orange</div>
+                            <i class="zone-polygon" id="legend-text" onclick="toggleZonesVisibility()"></i> 
+                            <span id="zone-label" class="">Zone</span>
+                        </div>
+                        <!-- End Table with stripped rows -->
+
                     </div>
                 </div>
+
             </div>
         </div>
-    </div>
+    </section>
+
+</main><!-- End #main -->
+
     <link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
     <script src="https://unpkg.com/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
     <script>
@@ -182,13 +204,13 @@
                 var addObservationUrlWithId = addObservationUrl.replace('siteId', siteData.id);
                 document.getElementById('incidents-content').innerHTML = `
                     ${incidentInfo}
-                    <button onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
+                    <button  class="btn btn-secondary" onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
 
                 `;
             } else {
                 document.getElementById('incidents-content').innerHTML = `
                     Aucun incident trouvé.
-                    <button onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
 
                 `;
             }
@@ -214,7 +236,7 @@
                 Latitude : ${siteData.coord.latitude}<br>
                 Longitude : ${siteData.coord.longitude}<br>
                 ${zonesInfo}
-            <button onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button>
+            <center><button class="btn btn-info" onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button></center>
             `;
             document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
             sidebar.classList.remove('hidden2');
@@ -261,7 +283,7 @@
                     }
                 });
 
-                document.getElementById('statistique-content').innerHTML = 'Voici le graphique des statistiques.';
+                document.getElementById('statistique-content').innerHTML = 'Voici le statistique de production.';
             } else {
                 if (myChart) {
                     myChart.destroy();
@@ -332,14 +354,17 @@
         }
 
         function toggleZonesVisibility() {
-            var toggleElement = document.querySelector('.toggle-zones');
+            var toggleElement = document.querySelector('.zone-polygon');
+            var zoneLabel = document.getElementById('zone-label');
             zonesVisible = !zonesVisible;
             if (zonesVisible) {
                 addPolygons(zones);
                 toggleElement.classList.remove('strikethrough');
+                zoneLabel.classList.remove('strikethrough');
             } else {
                 removePolygons();
                 toggleElement.classList.add('strikethrough');
+                zoneLabel.classList.add('strikethrough');
             }
         }
 
@@ -348,6 +373,20 @@
         var sidebar = document.getElementById('sidebar-info');
         var markers = [];
         var currentSelectedMarker = null;
+
+        //desactive l'interaction avec la map lorsque le curseur est sur mon sidebar
+        sidebar.addEventListener('mouseenter', function() {
+            map.dragging.disable();
+            map.scrollWheelZoom.disable();
+            map.doubleClickZoom.disable();
+        });
+
+        // Réactiver l'interaction avec la map lorsque le curseur quitte le sidebar
+        sidebar.addEventListener('mouseleave', function() {
+            map.dragging.enable();
+            map.scrollWheelZoom.enable();
+            map.doubleClickZoom.enable();
+        });
 
         function closeSidebar() {
             sidebar.classList.add('hidden2');

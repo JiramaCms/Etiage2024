@@ -4438,7 +4438,8 @@ Created using IcoMoon - icomoon.io
 
 .nav-tabs {
   border: 0;
-  padding: 15px 0.7rem;
+  padding: 9px 0.7rem;
+  flex-wrap: nowrap;
 }
 
 .nav-tabs:not(.nav-tabs-neutral)>.nav-item>.nav-link.active {
