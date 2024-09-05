@@ -87,7 +87,7 @@
 
             </div><!-- End Customers Card -->
 
-            <!-- Reports -->
+            <!-- Statst -->
             <div class="col-12">
               <div class="card">
 
@@ -95,12 +95,10 @@
                   <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                   <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                     <li class="dropdown-header text-start">
-                      <h6>Filter</h6>
+                      <h6 id="filter-title">Filter par</h6>
                     </li>
-
-                    <li><a class="dropdown-item" href="#">Aujourd'hui</a></li>
-                    <li><a class="dropdown-item" href="#">Ce Mois-ci</a></li>
-                    <li><a class="dropdown-item" href="#">Cette Année</a></li>
+                    <li><a class="dropdown-item" href="#filter-title"  id="filter-today">Par jour</a></li>
+                    <li><a class="dropdown-item" href="#filter-title"  id="filter-month">Par mois</a></li>
                   </ul>
                 </div>
 
@@ -108,76 +106,126 @@
                   <h5 class="card-title">Reports <span>/Today</span></h5>
 
                   <!-- Line Chart -->
+                  <div class="d-flex justify-content-center">
+                    <div id="loading" class="spinner-border" role="status" style="display: none;">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
                   <div id="reportsChart"></div>
 
                   <script>
-
                     let site = {{sitej|raw}};
-                    var lastTenProductions = site.productions.slice(-10);
 
-                    var labels = lastTenProductions.map(function(production) {
-                        var date = new Date(production.daty.timestamp * 1000);
-                        return date.toLocaleDateString();
-                    });
-                    var data = lastTenProductions.map(function(production) {
-                        return production.quantite;
-                    });
                     document.addEventListener("DOMContentLoaded", () => {
-                      new ApexCharts(document.querySelector("#reportsChart"), {
-                        series: [{
-                          name: 'Production m³',
-                          data: data,
-                        }, {
-                          name: 'Prévison m³',
-                          data: [2911, 3200, 3045, 3200, 3400, 3352, 3200,3200,3300,3298]
-                        }],
-                        chart: {
-                          height: 350,
-                          type: 'area',
-                          toolbar: {
-                            show: false
-                          },
-                        },
-                        markers: {
-                          size: 4
-                        },
-                        colors: ['#4154f1', '#2eca6a'],
-                        fill: {
-                          type: "gradient",
-                          gradient: {
-                            shadeIntensity: 1,
-                            opacityFrom: 0.3,
-                            opacityTo: 0.4,
-                            stops: [0, 90, 100]
-                          }
-                        },
-                        dataLabels: {
-                          enabled: false
-                        },
-                        stroke: {
-                          curve: 'smooth',
-                          width: 2
-                        },
-                        xaxis: {
-                          type: 'datetime',
-                          categories: labels
-                        },
-                        tooltip: {
-                          x: {
-                            format: 'dd/MM/yy HH:mm'
-                          },
-                        }
-                      }).render();
+                    // Initialiser avec les données du jour
+                    getDataByDay().then(dayData => {
+                      const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
+                      const data = dayData.map(production => production.quantite);
+                      updateChartWithData(labels, data, 'jour');
                     });
+
+                    document.querySelector('#filter-today').addEventListener('click', function () {
+                      showLoadingIndicator(true);
+                      getDataByDay().then(dayData => {
+                        const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
+                        const data = dayData.map(production => production.quantite);
+                        updateChartWithData(labels, data, 'jour');
+                        showLoadingIndicator(false);
+
+                      });
+                    });
+
+                    document.querySelector('#filter-month').addEventListener('click', function () {
+                      showLoadingIndicator(true);
+                      getDataByMonth().then(monthlyData => {
+                        console.log(monthlyData);
+                        const labels = monthlyData.map(production =>new Date (production.mois.timestamp * 1000).toLocaleDateString('default', { year: 'numeric', month: 'short' }));
+                        const data = monthlyData.map(production => production.quantite);
+                        updateChartWithData(labels, data, 'mois');
+                        showLoadingIndicator(false);
+
+                      });
+                    });
+                  });
+
+                  function showLoadingIndicator(show) {
+                    const loadingElement = document.querySelector('#loading');
+                    if (loadingElement) {
+                        loadingElement.style.display = show ? 'block' : 'none';
+                        if (!show) {
+                            setTimeout(() => {
+                                loadingElement.style.display = 'none';
+                            }, 500); // délai de 500 ms avant de masquer le spinner
+                        }
+                    }
+                }
+
+                  function getDataByDay() {
+                    return fetch(`/site/production/day/${site.id}`)
+                      .then(response => response.json())
+                      .then(data => {
+                        let datas = JSON.parse(data);
+                        console.log(datas[0].daty.timestamp);// assuming the data structure is correct
+                        return datas; 
+                      })
+                      .catch(error => {
+                        console.error('Error fetching daily production data:', error);
+                        return [];
+                      });
+                  }
+
+                  function getDataByMonth() {
+                    return fetch(`/site/production/month/${site.id}`)
+                      .then(response => response.json())
+                      .then(data => {
+                        let datas = JSON.parse(data);
+                        return datas;
+                      })
+                      .catch(error => {
+                        console.error('Error fetching monthly production data:', error);
+                        return [];
+                      });
+                  }
+
+                  let chart; // Déclaration d'une instance globale pour le graphique
+
+                  function updateChartWithData(labels, data, filterType) {
+                      if (chart) {
+                          chart.updateSeries([{
+                              name: 'Production m³',
+                              data: data,
+                          }]);
+                          chart.updateOptions({
+                              xaxis: { categories: labels },
+                          });
+                      } else {
+                          chart = new ApexCharts(document.querySelector("#reportsChart"), {
+                              series: [{
+                                  name: 'Production m³',
+                                  data: data,
+                              }],
+                              chart: {
+                                  height: 350,
+                                  type: 'area',
+                                  toolbar: { show: false },
+                              },
+                              xaxis: { categories: labels },
+                          });
+                          chart.render();
+                      }
+
+                      document.querySelector('#filter-title').innerText = `Par ${filterType}`;
+                  }
+                    
                   </script>
                   <!-- End Line Chart -->
 
                 </div>
 
               </div>
-            </div><!-- End Reports -->
+            </div><!-- End stats -->
 
-            <!-- Recent Sales -->
+            <!-- Liste d'Objectif  -->
             <div class="col-12">
               <div class="card recent-sales overflow-auto">
 
@@ -231,7 +279,7 @@
                 </div>
 
               </div>
-            </div><!-- End Recent Sales -->
+            </div><!-- End liste objectif -->
 
 
           </div>
@@ -267,6 +315,7 @@
             </div>
           </div><!-- End Recent Action -->
 
+          <!-- Incidents cards -->
           <div class="card">
             <div class="filter">
               <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>

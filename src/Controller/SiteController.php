@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Production;
 use App\Util\Util;
 use App\Entity\Site;
 use App\Entity\Zone;
@@ -40,11 +41,25 @@ class SiteController extends AbstractController
     public function siteProductionMonth($siteId,EntityManagerInterface $entityManager): Response
     {
         $rproduction = $entityManager->getRepository(ProductionMonth::class);
-        $production = $rproduction->findBy(['idSite' => $siteId]);
+        $production = $rproduction->findBy(['idSite' => $siteId],['mois' => 'ASC']);
         //dump($production);die();
         $rep = Util::toJson($production);
+        return new JsonResponse($rep);
+    }
+    #[Route('/site/production/day/{siteId}', name :'site_production_day')]
+    public function getProductionByDay($siteId, EntityManagerInterface $entityManager): Response
+    {
+        $rsite = $entityManager->getRepository(Production::class);
+        $site = $rsite->findBy(
+            ['site' => $siteId], // Filtrer par idSite
+            ['daty' => 'DESC'],      // Trier par id en ordre décroissant
+            10                     // Limiter à 10 résultats
+        );
+        $taille = count($site);
 
-
+        //dump($taille); // Voir la taille des résultats
+        //die();
+        $rep = (Util::toJson($site));
         return new JsonResponse($rep);
     }
     
