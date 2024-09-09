@@ -24,4 +24,18 @@ class Util
 
         return $json;
     }
+
+    public static function toJsonData($data)
+    {
+        // Si $data est un tableau d'entités, on le convertit en tableau avant de le sérialiser
+        if (is_array($data)) {
+            return json_encode(array_map(function($entity) {
+                // Assurez-vous d'utiliser une méthode pour obtenir les données de l'entité
+                return $entity->toArray(); // Vous devez implémenter toArray() dans vos entités
+            }, $data));
+        }
+        
+        // Si c'est une seule entité
+        return json_encode($data->toArray());
+    }
 }

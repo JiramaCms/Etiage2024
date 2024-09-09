@@ -14,7 +14,7 @@
       <h1>Site : {{site.libelle}}</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="index.html">Map</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Map</a></li>
           <li class="breadcrumb-item active">Dashboard</li>
         </ol>
       </nav>
@@ -29,21 +29,35 @@
 
             <!-- Site Card -->
             <div class="col-xxl-12 col-md-6">
-              <div class="card info-card sales-card">
+            <div class="card info-card sales-card">
                 <div class="card-body">
-                  <h5 class="card-title">Site <span>| Zone</span></h5>
+                    <h5 class="card-title">Site <span>| Zone</span></h5>
 
-                  <div class="d-flex align-items-center">
-                    <div class="ps-3">
-                      <p class="mb-0 bold">Nom du site : {{site.libelle}}</p>
-                      <p class="mb-0">Adresse : {{site.adresse}}</p>
-                      <p class="mb-0">Latitude : {{site.coord.latitude}}</p>
-                      <p class="mb-0">Longitude : {{site.coord.longitude}}</p>
+                    <div class="d-flex">
+                        <!-- Données du site à gauche -->
+                        <div class="site-data col-6">
+                            <p class="mb-0 bold">Nom du site : {{site.libelle}}</p>
+                            <p class="mb-0">Adresse : {{site.adresse}}</p>
+                            <p class="mb-0">Latitude : {{site.coord.latitude}}</p>
+                            <p class="mb-0">Longitude : {{site.coord.longitude}}</p>
+                        </div>
+
+                        <!-- Ligne de séparation -->
+                        <div class="separator" style="border-left: 1px solid red; height: 100%;"></div>
+
+                        <!-- Données de la zone à droite -->
+                        <div class="zone-data col-6 ps-3">
+                        {% if zonej is not null %}
+                          {% for zone in zonej %}
+                                <p class="mb-0 bold">Nom de la zone : {{zone.libelle}}</p>
+                                <p class="mb-0">Description : {{zone.description}}</p>
+                          {% endfor %}
+                        {% endif %}  
+                        </div>
                     </div>
-                  </div>
                 </div>
-              </div>
-            </div><!-- End SIte Card -->
+            </div>
+        </div><!-- End SIte Card -->
 
             <!-- Productions Card -->
             <div class="col-xxl-6 col-md-6">

@@ -112,12 +112,19 @@ class SiteController extends AbstractController
     {
         $rsite = $entityManager->getRepository(Site::class);
         $site = $rsite->find($id);
+        $rzone = $entityManager->getRepository(Zone::class);
         $siteJ = (Util::toJson($site));
         //dump($site->getIncidents()[0]->getLibelle());die();
         //dump($site,$siteJ);die();
+        $zoneOfSite = $rzone->getZoneOfSite($id);
+        //dump($zoneOfSite);die();
+        //$zone = (Util::toJson($zoneOfSite));
+
+        //dump($zoneOfSite,$site);die();
         return $this->render('site/detailSite.html.twig', [
             'site' => $site,
             'sitej' => $siteJ,
+            'zonej' => $zoneOfSite,
         ]);
     }
 

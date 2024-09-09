@@ -63,6 +63,24 @@ class ZoneRepository extends ServiceEntityRepository
 
         return $result;
     }
+    public function getZoneOfSite($siteId)
+    {
+        $entityManager = $this->getEntityManager();
+
+        $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+        $rsm->addRootEntityFromClassMetadata('App\Entity\Zone', 'z');
+
+        $nativeQuery = $entityManager->createNativeQuery('
+            select z.* from zone z 
+            join site s on st_Intersects(s.coord, z.coord) 
+            where s.id = :siteId
+        ',$rsm);
+
+        $nativeQuery->setParameter('siteId', $siteId);
+
+        $result = $nativeQuery->getResult();
+        return $result;
+    }
 
 
 //    /**

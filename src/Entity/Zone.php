@@ -83,6 +83,15 @@ class Zone
     {
         $this->coord_str_wkt = $coord_str_wkt;
     }
+    public function toArray()
+    {
+        return [
+            'id' => $this->getId(),
+            'libelle' => $this->getLibelle(),
+            'description' => $this->getDescription(),
+            'coord' => $this->getCoord(),
+        ];
+    }
     
 
 
