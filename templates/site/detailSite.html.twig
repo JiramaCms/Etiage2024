@@ -3,6 +3,11 @@
 {% block title %}Detail Site{% endblock %}
 
 {% block body %}
+<style>
+  .info-card .card-body .bold {
+      font-weight: 700;
+}
+</style>
   <main id="main" class="main">
 
     <div class="pagetitle">
@@ -22,8 +27,26 @@
         <div class="col-lg-8">
           <div class="row">
 
-            <!-- Sales Card -->
-            <div class="col-xxl-4 col-md-6">
+            <!-- Site Card -->
+            <div class="col-xxl-12 col-md-6">
+              <div class="card info-card sales-card">
+                <div class="card-body">
+                  <h5 class="card-title">Site <span>| Zone</span></h5>
+
+                  <div class="d-flex align-items-center">
+                    <div class="ps-3">
+                      <p class="mb-0 bold">Nom du site : {{site.libelle}}</p>
+                      <p class="mb-0">Adresse : {{site.adresse}}</p>
+                      <p class="mb-0">Latitude : {{site.coord.latitude}}</p>
+                      <p class="mb-0">Longitude : {{site.coord.longitude}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div><!-- End SIte Card -->
+
+            <!-- Productions Card -->
+            <div class="col-xxl-6 col-md-6">
               <div class="card info-card sales-card">
                 <div class="card-body">
                   <h5 class="card-title">Productions <span>| Aujourd'hui</span></h5>
@@ -41,31 +64,10 @@
                 </div>
 
               </div>
-            </div><!-- End Sales Card -->
+            </div><!-- End Production Card -->
 
-            <!-- Revenue Card -->
-            <div class="col-xxl-4 col-md-6">
-              <div class="card info-card revenue-card">
-                <div class="card-body">
-                  <h5 class="card-title">Précipitations <span>|  Aujourd'hui</span></h5>
-
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <i class="bi bi-cloud-rain-fill"></i>
-                    </div>
-                    <div class="ps-3">
-                      <h6>3,264</h6>
-                      <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">augmentation</span>
-
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div><!-- End Revenue Card -->
-
-            <!-- Customers Card -->
-            <div class="col-xxl-4 col-xl-12">
+            <!-- Gap Card -->
+            <div class="col-xxl-6 col-xl-12">
 
               <div class="card info-card customers-card">
                 <div class="card-body">
@@ -85,7 +87,7 @@
                 </div>
               </div>
 
-            </div><!-- End Customers Card -->
+            </div><!-- End Gap Card -->
 
             <!-- Statst -->
             <div class="col-12">
@@ -115,6 +117,7 @@
 
                   <script>
                     let site = {{sitej|raw}};
+                    console.log(site);
 
                     document.addEventListener("DOMContentLoaded", () => {
                     // Initialiser avec les données du jour
@@ -165,6 +168,7 @@
                       .then(response => response.json())
                       .then(data => {
                         let datas = JSON.parse(data);
+                        datas.reverse();
                         console.log(datas[0].daty.timestamp);// assuming the data structure is correct
                         return datas; 
                       })
@@ -209,6 +213,26 @@
                                   type: 'area',
                                   toolbar: { show: false },
                               },
+                              markers: {
+                          size: 4
+                        },
+                        colors: ['#4154f1'],
+                        fill: {
+                          type: "gradient",
+                          gradient: {
+                            shadeIntensity: 1,
+                            opacityFrom: 0.3,
+                            opacityTo: 0.4,
+                            stops: [0, 90, 100]
+                          }
+                        },
+                        dataLabels: {
+                          enabled: false
+                        },
+                        stroke: {
+                          curve: 'smooth',
+                          width: 2
+                        },
                               xaxis: { categories: labels },
                           });
                           chart.render();
@@ -242,7 +266,7 @@
                 </div>
 
                 <div class="card-body">
-                  <h5 class="card-title">Objectif en cours</h5>
+                  <h5 class="card-title">Objectifs</h5>
 
                   <table class="table table-borderless datatable">
                     <thead>
