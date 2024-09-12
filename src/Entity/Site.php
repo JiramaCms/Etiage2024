@@ -36,11 +36,15 @@ class Site
     #[ORM\OneToMany(targetEntity: Production::class, mappedBy: 'site')]
     private Collection $productions;
 
+    #[ORM\ManyToMany(targetEntity: Source::class, inversedBy: 'sites')]
+    private Collection $Source;
+
     public function __construct()
     {
         $this->incidents = new ArrayCollection();
         $this->objectifs = new ArrayCollection();
         $this->productions = new ArrayCollection();
+        $this->Source = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -191,6 +195,30 @@ class Site
                 $production->setSite(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Source>
+     */
+    public function getSource(): Collection
+    {
+        return $this->Source;
+    }
+
+    public function addSource(Source $source): static
+    {
+        if (!$this->Source->contains($source)) {
+            $this->Source->add($source);
+        }
+
+        return $this;
+    }
+
+    public function removeSource(Source $source): static
+    {
+        $this->Source->removeElement($source);
 
         return $this;
     }

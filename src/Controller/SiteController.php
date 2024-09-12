@@ -90,6 +90,25 @@ class SiteController extends AbstractController
         return $this->redirectToRoute('app_site');
     }
 
+    #[Route('/updateSite/{id}', name:'app_update_site')]
+    public function updateObjectif(Site $site,Request $req,ManagerRegistry $mr): Response
+    {
+        $form = $this->createForm(SiteFormType::class,$site);
+        $form->handleRequest($req);
+        if($form->isSubmitted() && $form->isValid()){
+            $objectif = $form->getData();
+            $em = $mr->getManager();
+
+            $em->persist($objectif);
+            $em->flush();
+
+            return $this->redirectToRoute('app_liste_objectif');
+        }
+        return $this->render('objectif/updateSite.html.twig',[
+            'form'=>$form->createView()
+        ]);
+    }
+
     
 
     #[Route('/site/liste', name: 'site_liste')]
@@ -222,7 +241,5 @@ class SiteController extends AbstractController
             'zoneName' => $zones,
             'sites' => $site,
         ]);
-    }
-
-    
+    }    
 }

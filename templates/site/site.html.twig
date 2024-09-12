@@ -147,7 +147,6 @@
                             <div><i style="background: blue;"></i> Site bleu</div>
                             <div><i style="background: green;"></i> Site vert</div>
                             <div><i style="background: orange;"></i> Site orange</div>
-                             <div><i style="background: orange;"></i> Site orange</div>
                             <i class="zone-polygon" id="legend-text" onclick="toggleZonesVisibility()"></i> 
                             <span id="zone-label" class="">Zone</span>
                         </div>
@@ -419,7 +418,7 @@
             } else if (site.etat == '2') {
                 iconUrl = "/images/marker-green.svg";
             } else if (site.etat == '3') {
-                iconUrl = "/images/marker-orange.svg";
+                iconUrl = "/images/waterfall.svg";
             }
 
             var markerIcon = L.icon({
