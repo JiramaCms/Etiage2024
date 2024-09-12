@@ -76,6 +76,27 @@
         .marker-icon-jump {
             animation: jumpMarker 0.8s infinite alternate;
         }
+        .source-card {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .card-pointer {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
         @keyframes jumpMarker {
             from {
                 opacity: 1;
@@ -109,6 +130,7 @@
                         <h5 class="card-title">Sites Madagascar</h5>
 
                         <div id="map">
+                            <div id="card-container"></div>
                             <div class="sidebar-info hidden2" id="sidebar-info">
                                 <button class="close-btn" onclick="closeSidebar()">×</button>
                                 <ul class="nav nav-tabs" role="tablist">
@@ -125,6 +147,7 @@
                                 <div class="tab-content">
                                     <div class="tab-pane fade show active" id="overview" role="tabpanel">
                                         <h4>Overview</h4>
+                                        <div id="source-icons"></div> <!-- Placeholder for source icons -->
                                         <p id="overview-content"></p>
                                     </div>
                                     <div class="tab-pane fade" id="incidents" role="tabpanel">
@@ -215,6 +238,34 @@
                 `;
             }
         }
+    
+        function showSourceIcon(siteData) {
+            const cardContainer = document.getElementById('card-container');
+            cardContainer.innerHTML = ''; // Clear any existing content
+
+            siteData.sources.forEach(source => {
+                const iconUrl = `/images/${source.nom.toLowerCase()}.svg`;
+                const card = document.createElement('div');
+                card.classList.add('source-card');
+
+                card.innerHTML = `
+                    <div class="card-content">
+                        <img src="${iconUrl}" alt="${source.nom}" style="width: 50px; height: 50px;">
+                        <div>${source.nom}</div>
+                    </div>
+                    <div class="card-pointer"></div>
+                `;
+
+                card.style.position = 'absolute';
+                card.style.top = `${map.latLngToContainerPoint([siteData.coord.latitude, siteData.coord.longitude]).y}px`;
+                card.style.left = `${map.latLngToContainerPoint([siteData.coord.latitude, siteData.coord.longitude]).x}px`;
+
+                cardContainer.appendChild(card);
+            });
+        }
+        function closeInfoCard() {
+            document.getElementById('info-card').style.display = 'none';
+        }
         function updateSidebarContent(siteData, zoneData) {
             var addSiteUrlWithId = siteDetailUrl.replace('siteId', siteData.id);
             console.log(addSiteUrlWithId);
@@ -222,6 +273,9 @@
                 console.error('Les données de zones ne sont pas un tableau:', zoneData);
                 return;
             }
+            let sourceInfo = siteData.sources.map(source =>`
+                ${source.nom}
+            `)
 
             let zonesInfo = zoneData.map(zone => `
                 <div>
@@ -235,6 +289,11 @@
                 Adresse : ${siteData.adresse}<br>
                 Latitude : ${siteData.coord.latitude}<br>
                 Longitude : ${siteData.coord.longitude}<br>
+                ${siteData.sources.length > 0 ? 'Source : ' + siteData.sources.map(source => source.nom).join(', ') : ''}<br>
+
+
+
+
                 ${zonesInfo}
             <center><button class="btn btn-info" onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button></center>
             `;
@@ -405,6 +464,7 @@
                     var siteData = sitesData.find(site => site.id === siteId);
                     if (siteData) {
                         updateSidebarContent(siteData, datas);
+                        showSourceIcon(siteData);
                     }
                 })
                 .catch(error => console.error('Erreur:', error));
@@ -412,7 +472,6 @@
 
         sitesData.forEach(function(site) {
             var iconUrl = "/images/marker-green.svg";
-            
             if (site.etat == '1') {
                 iconUrl = "/images/marker-blue.svg";
             } else if (site.etat == '2') {
@@ -440,8 +499,8 @@
 
                 e.target.getElement().classList.add('marker-icon-jump');
                 currentSelectedMarker = site.id;
-
                 fetchSiteDetails(site.id);
+
             });
         });
 
