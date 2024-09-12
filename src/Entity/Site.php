@@ -37,14 +37,14 @@ class Site
     private Collection $productions;
 
     #[ORM\ManyToMany(targetEntity: Source::class, inversedBy: 'sites')]
-    private Collection $Source;
+    private Collection $sources;
 
     public function __construct()
     {
         $this->incidents = new ArrayCollection();
         $this->objectifs = new ArrayCollection();
         $this->productions = new ArrayCollection();
-        $this->Source = new ArrayCollection();
+        $this->sources = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -202,23 +202,23 @@ class Site
     /**
      * @return Collection<int, Source>
      */
-    public function getSource(): Collection
+    public function getSources(): Collection
     {
-        return $this->Source;
+        return $this->sources;
     }
 
-    public function addSource(Source $source): static
+    public function addSources(Source $sources): static
     {
-        if (!$this->Source->contains($source)) {
-            $this->Source->add($source);
+        if (!$this->sources->contains($sources)) {
+            $this->sources->add($sources);
         }
 
         return $this;
     }
 
-    public function removeSource(Source $source): static
+    public function removeSource(Source $sources): static
     {
-        $this->Source->removeElement($source);
+        $this->sources->removeElement($sources);
 
         return $this;
     }

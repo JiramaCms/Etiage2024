@@ -37,7 +37,7 @@
                     <li class="dropdown-header text-start">
                       <h6 id="filter-title">Menu</h6>
                     </li>
-                    <li><a class="dropdown-item" href="#filter-title"  id="filter-today">Modifier le site</a></li>
+                    <li><a class="dropdown-item" href="{{ path('app_update_site', {'id': site.id}) }}"  id="filter-today">Modifier le site</a></li>
                   </ul>
                 </div>
 
@@ -49,6 +49,11 @@
                         <div class="site-data col-6">
                             <p class="mb-0 bold">Nom du site : {{site.libelle}}</p>
                             <p class="mb-0">Adresse : {{site.adresse}}</p>
+                            <p class="mb-0">Sources : 
+                                  {% for source in site.sources %}
+                                      {{ source.nom }}{% if not loop.last %}, {% endif %}
+                                  {% endfor %}
+                            </p>
                             <p class="mb-0">Latitude : {{site.coord.latitude}}</p>
                             <p class="mb-0">Longitude : {{site.coord.longitude}}</p>
                         </div>

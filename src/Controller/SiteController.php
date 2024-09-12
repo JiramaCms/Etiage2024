@@ -2,16 +2,15 @@
 
 namespace App\Controller;
 
-use App\Entity\Production;
 use App\Util\Util;
 use App\Entity\Site;
 use App\Entity\Zone;
+use App\Entity\Production;
+use App\Form\SiteFormType;
 use App\Entity\ProductionMonth;
-use Doctrine\ORM\EntityManager;
-use App\Repository\ZoneRepository;
+use App\Entity\Source;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
-use App\Repository\ProductionMonthRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -91,20 +90,21 @@ class SiteController extends AbstractController
     }
 
     #[Route('/updateSite/{id}', name:'app_update_site')]
-    public function updateObjectif(Site $site,Request $req,ManagerRegistry $mr): Response
+    public function updateSite(Site $site,Request $req,ManagerRegistry $mr): Response
     {
         $form = $this->createForm(SiteFormType::class,$site);
         $form->handleRequest($req);
         if($form->isSubmitted() && $form->isValid()){
-            $objectif = $form->getData();
+            $site = $form->getData();
+            //dump($site);die();
             $em = $mr->getManager();
 
-            $em->persist($objectif);
+            $em->persist($site);
             $em->flush();
 
-            return $this->redirectToRoute('app_liste_objectif');
+            return $this->redirectToRoute('site_liste');
         }
-        return $this->render('objectif/updateSite.html.twig',[
+        return $this->render('site/updateSite.html.twig',[
             'form'=>$form->createView()
         ]);
     }

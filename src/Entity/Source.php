@@ -18,7 +18,7 @@ class Source
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[ORM\ManyToMany(targetEntity: Site::class, mappedBy: 'Source')]
+    #[ORM\ManyToMany(targetEntity: Site::class, mappedBy: 'sources')]
     private Collection $sites;
 
     public function __construct()
@@ -55,7 +55,7 @@ class Source
     {
         if (!$this->sites->contains($site)) {
             $this->sites->add($site);
-            $site->addSource($this);
+            $site->addSources($this);
         }
 
         return $this;
