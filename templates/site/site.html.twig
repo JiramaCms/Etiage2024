@@ -76,26 +76,56 @@
         .marker-icon-jump {
             animation: jumpMarker 0.8s infinite alternate;
         }
-        .source-card {
-            position: absolute;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
+        #overview-content {
+            display: flex;
+            flex-direction: column;
         }
 
-        .card-pointer {
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 10px solid white;
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            transform: translateX(-50%);
+        .source-container {
+            display: flex;
+            flex-direction: row-reverse; /* Align icons from right to left */
+            gap: 10px; /* Add some space between cards */
+        }
+
+        .source-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .card-content img {
+            width: 50px;
+            height: 50px;
+        }
+        .incident-card {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd; /* Ajoute une bordure autour de chaque incident */
+            border-radius: 5px;    /* Ajoute des coins arrondis */
+            background-color: #f9f9f9; /* Couleur de fond */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Ombre légère */
+        }
+
+        .incident-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .incident-description {
+            margin-bottom: 5px;
+        }
+
+        .incident-date {
+            color: #666; /* Couleur de texte plus claire pour la date */
+            font-size: 0.9em; /* Réduit légèrement la taille de la police */
+        }
+
+        /* Séparateur entre les incidents */
+        .incident-card + .incident-card {
+            border-top: 1px solid #ddd; /* Trait de séparation */
+            padding-top: 10px;
+            margin-top: 10px;
         }
         @keyframes jumpMarker {
             from {
@@ -156,7 +186,7 @@
                                     </div>
                                     <div class="tab-pane fade" id="statistique" role="tabpanel">
                                         <h4>Statistique</h4>
-                                        <p id="statistique-content"></p>
+                                        <p id="reportsChart"></p>
                                         <!-- Canvas for Chart.js -->
                                         <div>
                                             <canvas id="myChart" width="450" height="450"></canvas>
@@ -218,50 +248,26 @@
                 let formattedDate = date.toISOString().slice(0, 10); // 'YYYY-MM-DD'
                 let formattedTime = date.toISOString().slice(11, 19); // 'HH:MM:SS'
 
-                return `
-                    <div>Incident : ${incident.libelle}</div>
-                    <div>Description : ${incident.description}</div>
-                    <div>Date et heure : ${formattedDate} ${formattedTime}</div>
-                `;
-            }).join('');
+            return `
+                <div class="incident-card">
+                    <div class="incident-title">Incident : ${incident.libelle}</div>
+                    <div class="incident-description">Description : ${incident.description}</div>
+                    <div class="incident-date">Date et heure : ${formattedDate} ${formattedTime}</div>
+                </div>
+            `}).join('');
                 var addObservationUrlWithId = addObservationUrl.replace('siteId', siteData.id);
                 document.getElementById('incidents-content').innerHTML = `
                     ${incidentInfo}
-                    <button  class="btn btn-secondary" onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
+                    <button  class="btn btn-info" onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
 
                 `;
             } else {
                 document.getElementById('incidents-content').innerHTML = `
                     Aucun incident trouvé.
-                    <button class="btn btn-secondary" onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
+                    <button class="btn btn-info" onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
 
                 `;
             }
-        }
-    
-        function showSourceIcon(siteData) {
-            const cardContainer = document.getElementById('card-container');
-            cardContainer.innerHTML = ''; // Clear any existing content
-
-            siteData.sources.forEach(source => {
-                const iconUrl = `/images/${source.nom.toLowerCase()}.svg`;
-                const card = document.createElement('div');
-                card.classList.add('source-card');
-
-                card.innerHTML = `
-                    <div class="card-content">
-                        <img src="${iconUrl}" alt="${source.nom}" style="width: 50px; height: 50px;">
-                        <div>${source.nom}</div>
-                    </div>
-                    <div class="card-pointer"></div>
-                `;
-
-                card.style.position = 'absolute';
-                card.style.top = `${map.latLngToContainerPoint([siteData.coord.latitude, siteData.coord.longitude]).y}px`;
-                card.style.left = `${map.latLngToContainerPoint([siteData.coord.latitude, siteData.coord.longitude]).x}px`;
-
-                cardContainer.appendChild(card);
-            });
         }
         function closeInfoCard() {
             document.getElementById('info-card').style.display = 'none';
@@ -273,7 +279,7 @@
                 console.error('Les données de zones ne sont pas un tableau:', zoneData);
                 return;
             }
-            let sourceInfo = siteData.sources.map(source =>`
+            let sourceInfo = siteData.sources.map(source => `
                 ${source.nom}
             `)
 
@@ -285,17 +291,33 @@
             `);
 
             document.getElementById('overview-content').innerHTML = `
-                <strong>Nom : ${siteData.libelle}</strong><br>
+                <strong>Nom : ${siteData.libelle}</strong>
                 Adresse : ${siteData.adresse}<br>
                 Latitude : ${siteData.coord.latitude}<br>
                 Longitude : ${siteData.coord.longitude}<br>
-                ${siteData.sources.length > 0 ? 'Source : ' + siteData.sources.map(source => source.nom).join(', ') : ''}<br>
 
+                ${siteData.sources.length > 0 ? `
+                    <strong>Sources : </strong><br>
+                    <div id="cardContainer" style="display: flex; gap: 10px; align-items: center;"> 
+                        ${siteData.sources.map(source => {
+                            const iconUrl = `/images/${source.nom.toLowerCase()}.svg`;
+                            return `
+                                <div class="source-card">
+                                    <div class="card-content">
+                                        <img src="${iconUrl}" alt="${source.nom}" style="width: 50px; height: 50px;">
+                                        <div><strong>${source.nom}</ strong></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                ` : '' }<br>
 
-
-
-                ${zonesInfo}
-            <center><button class="btn btn-info" onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button></center>
+                ${zonesInfo.join('')}
+                
+                <center>
+                    <button class="btn btn-info" onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button>
+                </center>
             `;
             document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
             sidebar.classList.remove('hidden2');
@@ -303,52 +325,84 @@
             showStatistics();
         }
 
+        let chart = null;
+        function getDataByDay() {
+            var siteId = currentSelectedMarker
+            return fetch(`/site/production/day/${siteId}`)
+            .then(response => response.json())
+            .then(data => {
+                let datas = JSON.parse(data);
+                datas.reverse();
+                return datas; 
+            })
+            .catch(error => {
+                console.error('Error fetching daily production data:', error);
+                return [];
+            });
+        }
+
         function showStatistics() {
-            var siteId = currentSelectedMarker;
-            var siteData = sitesData.find(site => site.id === siteId);
-            var lastTenProductions = siteData.productions.slice(-10);
-
-            // Vérifie que siteData et siteData.productions existent
-            if (siteData.productions.length>1) {
-                // Extraire les dates et les quantités
-                var labels = lastTenProductions.map(production => {
-                    var date = new Date(production.daty.timestamp * 1000); // Multiplier par 1000 pour convertir en millisecondes
-                    return date.toLocaleDateString();
-                });
-                var data = siteData.productions.map(production => production.quantite);
-
-                var ctx = document.getElementById('myChart').getContext('2d');
-                if (myChart) {
-                    myChart.destroy();
+            getDataByDay().then(dayData => {
+                if (!dayData || dayData.length === 0) {
+                    document.getElementById('reportsChart').innerHTML = 'Aucune donnée de production disponible pour ce site.';
+                    return;
                 }
-                myChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels, // Les dates pour l'axe x
-                        datasets: [{
-                            label: 'Quantité de production',
-                            data: data, // Les quantités pour l'axe y
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            borderColor: 'rgba(75, 192, 192, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
+
+                const labels = dayData.map(production => 
+                    new Date(production.daty.timestamp * 1000).toLocaleDateString());
+                const data = dayData.map(production => production.quantite);
+
+                if (!labels || !data || labels.length === 0 || data.length === 0) {
+                    console.error('Invalid data or labels');
+                    return;
+                }
+
+                if (chart) {
+                    chart.updateSeries([{
+                        name: 'Production m³',
+                        data: data,
+                    }]);
+                    chart.updateOptions({
+                        xaxis: { categories: labels },
+                    });
+                } else {
+                    chart = new ApexCharts(document.querySelector("#reportsChart"), {
+                        series: [{
+                            name: 'Production m³',
+                            data: data,
+                        }],
+                        chart: {
+                            height: 350,
+                            type: 'area',
+                            toolbar: { show: false },
+                        },
+                        markers: {
+                            size: 4
+                        },
+                        colors: ['#4154f1'],
+                        fill: {
+                            type: "gradient",
+                            gradient: {
+                                shadeIntensity: 1,
+                                opacityFrom: 0.3,
+                                opacityTo: 0.4,
+                                stops: [0, 90, 100]
                             }
-                        }
-                    }
-                });
-
-                document.getElementById('statistique-content').innerHTML = 'Voici le statistique de production.';
-            } else {
-                if (myChart) {
-                    myChart.destroy();
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        stroke: {
+                            curve: 'smooth',
+                            width: 2
+                        },
+                        xaxis: { categories: labels },
+                    });
+                    chart.render();
                 }
-                document.getElementById('statistique-content').innerHTML = 'Aucune donnée de production disponible pour ce site.';
-            }
+            }).catch(error => {
+                console.error('Error fetching or processing data:', error);
+            });
         }
 
         function fetchZoneDetails(zoneId) {
@@ -464,7 +518,6 @@
                     var siteData = sitesData.find(site => site.id === siteId);
                     if (siteData) {
                         updateSidebarContent(siteData, datas);
-                        showSourceIcon(siteData);
                     }
                 })
                 .catch(error => console.error('Erreur:', error));
@@ -477,7 +530,7 @@
             } else if (site.etat == '2') {
                 iconUrl = "/images/marker-green.svg";
             } else if (site.etat == '3') {
-                iconUrl = "/images/waterfall.svg";
+                iconUrl = "/images/marker-orange.svg";
             }
 
             var markerIcon = L.icon({
