@@ -59,12 +59,49 @@ class SiteController extends AbstractController
        $rsite = $entityManager->getRepository(Site::class);
         $site = $rsite->find(2);
         $siteJ = (Util::toJson($site));
-
         //dump($zoneOfSite,$site);die();
         return $this->render('site/predictionProd.html.twig', [
             'site' => $site,
             'sitej' => $siteJ,
         ]);
+    }
+    #[Route('site/prediction/production/{id}', name : 'site_production_prediction')]
+    public function siteProductionPrediction(Site $site,EntityManagerInterface $entityManager,Request $request): Response
+    {   
+        $siteName = $site->getLibelle();
+        $startDate = $request->getContent(); // Lire les données JSON envoyées
+        $data = json_decode($startDate, true);        
+        $start = new \DateTime($data['start-date']);
+        $end = new \DateTime($data['end-date']);
+        $end->modify('+1 day');  // Inclure le dernier jour
+    
+        $stationId = 43;
+        $siteId = 18;
+        $source = 0;
+    
+        $data = [];
+        $interval = new \DateInterval('P1D');
+        $datePeriod = new \DatePeriod($start, $interval, $end);
+    
+        foreach ($datePeriod as $date) {
+            $data[] = [
+                'station_id' => $stationId,
+                'site_id' => $siteId,
+                'source' => $source,
+                'year' => $date->format('Y'),
+                'month' => $date->format('m'),
+                'day' => $date->format('d'),
+            ];
+        }
+    
+        $client = HttpClient::create();
+        $response = $client->request('POST', 'http://127.0.0.1:5000/predict', [
+            'json' => $data,
+        ]);
+    
+        $rep = $response->toArray();
+        $repon = Util::toJson($rep);
+        return new JsonResponse($repon);
     }
 
     #[Route('/site/test', name: 'app_site_test')]
@@ -104,6 +141,7 @@ class SiteController extends AbstractController
             'pred' => $data,
         ]);
     }
+   
     #[Route('site/production/month/{siteId}', name : 'site_production_month')]
     public function siteProductionMonth($siteId,EntityManagerInterface $entityManager): Response
     {

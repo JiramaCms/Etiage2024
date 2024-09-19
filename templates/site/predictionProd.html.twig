@@ -31,7 +31,7 @@
                 <div class="d-flex">
                     <!-- Données du site à gauche -->
                     <div class="site-data col-12">
-                        <p class="mb-0 bold">Nom du site : {{site.libelle}}</p>
+                        <p class="mb-0 bold">Nom du site : {{site.libelle}} {{site.id}}</p>
                         <form>
                             <div class="row mb-3">
                                 <label for="start-date">Date de début:</label>
@@ -46,7 +46,7 @@
                                 </div>
                             </div>
                             <div class="col-sm-10">
-                                <button type="submit" class="btn btn-secondary">Faire une prédiction</button>
+                                <button type="submit" id="submitPrediction" class="btn btn-secondary">Faire une prédiction</button>
                             </div>
                         </form>
 
@@ -74,6 +74,40 @@
                     minDate: minDate,
                     maxDate: maxDate
                 });
+
+                 document.getElementById('submitPrediction').addEventListener('click', function(event) {
+                    event.preventDefault(); // Empêche la soumission par défaut du formulaire
+
+                    var startDate = document.getElementById('start-date').value;
+                    var endDate = document.getElementById('end-date').value;
+
+                    if (startDate && endDate) {
+                        showLoadingIndicator(true);
+                        fetch('{{ path('site_production_prediction', {'id': site.id}) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                            },
+                            body: JSON.stringify({ 'start-date': startDate, 'end-date': endDate })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            let datas = JSON.parse(data);
+                            showLoadingIndicator(false);
+                            console.log('Response data:', datas);  // Affichez les données reçues pour vérification
+                                const labels = datas.predictions.map(item => item.date);
+                                const predictions = datas.predictions.map(item => item.prediction);
+                                updateChartWithData(labels, predictions);
+                        })
+                        .catch(error => {
+                            console.error('Error during prediction:', error);
+                            showLoadingIndicator(false);
+                        });
+                    } else {
+                        alert('Veuillez sélectionner une date de début et une date de fin.');
+                    }
+                });
         });
         </script>
 
@@ -94,50 +128,29 @@
 
                 <script>
                 let site = {{sitej|raw}};
-                console.log(site);
-
                 document.addEventListener("DOMContentLoaded", () => {
                 // Initialiser avec les données du jour
                 getDataByDay().then(dayData => {
+                    showLoadingIndicator(true);
                     const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
                     const data = dayData.map(production => production.quantite);
-                    updateChartWithData(labels, data, 'jour');
-                });
-
-                document.querySelector('#filter-today').addEventListener('click', function () {
-                    showLoadingIndicator(true);
-                    getDataByDay().then(dayData => {
-                    const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
-                    const data = dayData.map(production => production.quantite);
-                    updateChartWithData(labels, data, 'jour');
+                    updateChartWithData(labels, data);
                     showLoadingIndicator(false);
 
-                    });
-                });
-                document.querySelector('#filter-month').addEventListener('click', function () {
-                    showLoadingIndicator(true);
-                    getDataByMonth().then(monthlyData => {
-                    console.log(monthlyData);
-                    const labels = monthlyData.map(production =>new Date (production.mois.timestamp * 1000).toLocaleDateString('default', { year: 'numeric', month: 'short' }));
-                    const data = monthlyData.map(production => production.quantite);
-                    updateChartWithData(labels, data, 'mois');
-                    showLoadingIndicator(false);
-
-                    });
                 });
                 });
 
                 function showLoadingIndicator(show) {
                 const loadingElement = document.querySelector('#loading');
-                if (loadingElement) {
-                    loadingElement.style.display = show ? 'block' : 'none';
-                    if (!show) {
-                        setTimeout(() => {
-                            loadingElement.style.display = 'none';
-                        }, 500); // délai de 500 ms avant de masquer le spinner
+                    if (loadingElement) {
+                        loadingElement.style.display = show ? 'block' : 'none';
+                        if (!show) {
+                            setTimeout(() => {
+                                loadingElement.style.display = 'none';
+                            }, 500); // délai de 500 ms avant de masquer le spinner
+                        }
                     }
                 }
-            }
 
                 function getDataByDay() {
                 return fetch(`/site/production/day/${site.id}`)
@@ -153,23 +166,9 @@
                     return [];
                     });
                 }
-
-                function getDataByMonth() {
-                return fetch(`/site/production/month/${site.id}`)
-                    .then(response => response.json())
-                    .then(data => {
-                    let datas = JSON.parse(data);
-                    return datas;
-                    })
-                    .catch(error => {
-                    console.error('Error fetching monthly production data:', error);
-                    return [];
-                    });
-                }
-
                 let chart; // Déclaration d'une instance globale pour le graphique
 
-                function updateChartWithData(labels, data, filterType) {
+                function updateChartWithData(labels, data) {
                     if (chart) {
                         chart.updateSeries([{
                             name: 'Production m³',
@@ -213,8 +212,6 @@
                         });
                         chart.render();
                     }
-
-                    document.querySelector('#filter-title').innerText = `Par ${filterType}`;
                 }
                 
                 </script>
