@@ -1,0 +1,234 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello SiteController!{% endblock %}
+
+{% block body %}
+<div class="container">
+ <style>
+  .info-card .card-body .bold {
+      font-weight: 700;
+}
+</style>
+  <main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Site : Alasora</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Map</a></li>
+          <li class="breadcrumb-item active">Dashboard</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+    <section class="section dashboard">
+      <div class="row">
+        <div class="col-12">
+            <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Site <span>| Zone</span></h5>
+
+                <div class="d-flex">
+                    <!-- Données du site à gauche -->
+                    <div class="site-data col-12">
+                        <p class="mb-0 bold">Nom du site : {{site.libelle}}</p>
+                        <form>
+                            <div class="row mb-3">
+                                <label for="start-date">Date de début:</label>
+                                <div class="col-sm-10">
+                                    <input type="text" id="start-date" name="start-date">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                            <label for="end-date">Date fin:</label>
+                                <div class="col-sm-10">
+                                    <input type="text" id="end-date" name="end-date">
+                                </div>
+                            </div>
+                            <div class="col-sm-10">
+                                <button type="submit" class="btn btn-secondary">Faire une prédiction</button>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                var minDate = "2024-01-01"; // Exemple de date minimum
+                var maxDate = "2024-12-31"; // Exemple de date maximum
+
+                var startDatePicker = flatpickr("#start-date", {
+                    minDate: minDate,
+                    maxDate: maxDate,
+                    onChange: function(selectedDates, dateStr, instance) {
+                        var minDate = instance.selectedDates[0];
+                        minDate.setDate(minDate.getDate() + 1);
+                        endDatePicker.set('minDate', minDate);
+                    }
+                });
+
+                var endDatePicker = flatpickr("#end-date", {
+                    minDate: minDate,
+                    maxDate: maxDate
+                });
+        });
+        </script>
+
+        <!-- Statst -->
+        <div class="col-12">
+            <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Reports <span>/Today</span></h5>
+
+                <!-- Line Chart -->
+                <div class="d-flex justify-content-center">
+                <div id="loading" class="spinner-border" role="status" style="display: none;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                </div>
+
+                <div id="reportsChart"></div>
+
+                <script>
+                let site = {{sitej|raw}};
+                console.log(site);
+
+                document.addEventListener("DOMContentLoaded", () => {
+                // Initialiser avec les données du jour
+                getDataByDay().then(dayData => {
+                    const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
+                    const data = dayData.map(production => production.quantite);
+                    updateChartWithData(labels, data, 'jour');
+                });
+
+                document.querySelector('#filter-today').addEventListener('click', function () {
+                    showLoadingIndicator(true);
+                    getDataByDay().then(dayData => {
+                    const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
+                    const data = dayData.map(production => production.quantite);
+                    updateChartWithData(labels, data, 'jour');
+                    showLoadingIndicator(false);
+
+                    });
+                });
+                document.querySelector('#filter-month').addEventListener('click', function () {
+                    showLoadingIndicator(true);
+                    getDataByMonth().then(monthlyData => {
+                    console.log(monthlyData);
+                    const labels = monthlyData.map(production =>new Date (production.mois.timestamp * 1000).toLocaleDateString('default', { year: 'numeric', month: 'short' }));
+                    const data = monthlyData.map(production => production.quantite);
+                    updateChartWithData(labels, data, 'mois');
+                    showLoadingIndicator(false);
+
+                    });
+                });
+                });
+
+                function showLoadingIndicator(show) {
+                const loadingElement = document.querySelector('#loading');
+                if (loadingElement) {
+                    loadingElement.style.display = show ? 'block' : 'none';
+                    if (!show) {
+                        setTimeout(() => {
+                            loadingElement.style.display = 'none';
+                        }, 500); // délai de 500 ms avant de masquer le spinner
+                    }
+                }
+            }
+
+                function getDataByDay() {
+                return fetch(`/site/production/day/${site.id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                    let datas = JSON.parse(data);
+                    datas.reverse();
+                    console.log(datas[0].daty.timestamp);// assuming the data structure is correct
+                    return datas; 
+                    })
+                    .catch(error => {
+                    console.error('Error fetching daily production data:', error);
+                    return [];
+                    });
+                }
+
+                function getDataByMonth() {
+                return fetch(`/site/production/month/${site.id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                    let datas = JSON.parse(data);
+                    return datas;
+                    })
+                    .catch(error => {
+                    console.error('Error fetching monthly production data:', error);
+                    return [];
+                    });
+                }
+
+                let chart; // Déclaration d'une instance globale pour le graphique
+
+                function updateChartWithData(labels, data, filterType) {
+                    if (chart) {
+                        chart.updateSeries([{
+                            name: 'Production m³',
+                            data: data,
+                        }]);
+                        chart.updateOptions({
+                            xaxis: { categories: labels },
+                        });
+                    } else {
+                        chart = new ApexCharts(document.querySelector("#reportsChart"), {
+                            series: [{
+                                name: 'Production m³',
+                                data: data,
+                            }],
+                            chart: {
+                                height: 350,
+                                type: 'area',
+                                toolbar: { show: false },
+                            },
+                            markers: {
+                        size: 4
+                    },
+                    colors: ['#4154f1'],
+                    fill: {
+                        type: "gradient",
+                        gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.3,
+                        opacityTo: 0.4,
+                        stops: [0, 90, 100]
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'smooth',
+                        width: 2
+                    },
+                            xaxis: { categories: labels },
+                        });
+                        chart.render();
+                    }
+
+                    document.querySelector('#filter-title').innerText = `Par ${filterType}`;
+                }
+                
+                </script>
+                <!-- End Line Chart -->
+
+            </div>
+
+            </div>
+        </div><!-- End stats -->
+    </section>
+
+  </main><!-- End #main -->
+
+
+</div>
+
+{% endblock %}

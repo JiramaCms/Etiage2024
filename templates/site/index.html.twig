@@ -56,31 +56,31 @@
 
                         <!-- Table with stripped rows -->
                         <form method="post" action="{{ path('site_insert') }}">
-                        <div class="form-row">
-                            <div class="form-group col-12 col-md-6">
-                                <label  for="name">Libelle</label>
-                                <input type="text" class="form-control" value="" id="name" name="libelle">
+                            <div class="form-row">
+                                <div class="form-group col-12 col-md-6">
+                                    <label  for="name">Libelle</label>
+                                    <input type="text" class="form-control" value="" id="name" name="libelle">
+                                </div>
+                                <div class="form-group col-12 col-md-6">
+                                    <label for="name">Adresse</label>
+                                    <input type="text" class="form-control" value="" id="name" name="adresse">
+                                </div>
                             </div>
-                            <div class="form-group col-12 col-md-6">
-                                <label for="name">Adresse</label>
-                                <input type="text" class="form-control" value="" id="name" name="adresse">
+                            <div class="form-row">
+                                <div class="form-group col-6 col-md-6">
+                                    <label for="name">coordonnées</label>
+                                    <input type="text" class="form-control" value="" id="coord" name="coord">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-6 col-md-6">
-                                <label for="name">coordonnées</label>
-                                <input type="text" class="form-control" value="" id="coord" name="coord">
+                            <div id="mapid" style="height: 500px;">
+                                <!-- Div de la carte -->
                             </div>
-                        </div>
-                        <div id="mapid" style="height: 500px;">
-                            <!-- Div de la carte -->
-                        </div>
-                        </div>
-                        <br><br>
-                        <button type="submit" class="btn btn-default m-4">Confirmer</button>
-                    </form>
+                            </div>
+                            <br><br>
+                            <button type="submit" class="btn btn-default m-4">Confirmer</button>
+                        </form>
                         <!-- End Table with stripped rows -->
-
+                        
                     </div>
                 </div>
 

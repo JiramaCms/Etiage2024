@@ -26,11 +26,15 @@
             </button>
         </li>
     </ul>
+    {% for prediction in pred.predictions %}
+        {{prediction}}
+    {% endfor %}
 
     {% for production in productions %}
         <p> {{production.quantite}}</p>
         <p>{{production.mois|date('m/Y') }}<p>
     {% endfor %}
+
 </div>
 
 {% endblock %}

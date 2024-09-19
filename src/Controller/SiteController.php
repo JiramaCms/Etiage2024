@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpClient\HttpClient;
+
 
 class SiteController extends AbstractController
 {
@@ -26,14 +28,80 @@ class SiteController extends AbstractController
         ]);
     }
 
+    #[Route('/site/prediction', name: 'app_prediction_production_site')]
+    public function predictionProduction(EntityManagerInterface $entityManager): Response
+    {
+        /*$data = [
+            [
+                'station_id' => 43,
+                'site_id' => 18,
+                'source' => 0,
+                'year' => 2024,
+                'month' => 7,
+                'day' => 9
+            ],
+            [
+                'station_id' => 43,
+                'site_id' => 18,
+                'source' => 0,
+                'year' => 2024,
+                'month' => 7,
+                'day' => 10
+            ]
+        ];
+       // Appel de l'API Flask
+       $client = HttpClient::create();
+       $response = $client->request('POST', 'http://127.0.0.1:5000/predict', [
+        'json' => $data,
+
+        ]);
+       $data = $response->toArray();*/
+       $rsite = $entityManager->getRepository(Site::class);
+        $site = $rsite->find(2);
+        $siteJ = (Util::toJson($site));
+
+        //dump($zoneOfSite,$site);die();
+        return $this->render('site/predictionProd.html.twig', [
+            'site' => $site,
+            'sitej' => $siteJ,
+        ]);
+    }
+
     #[Route('/site/test', name: 'app_site_test')]
     public function test(EntityManagerInterface $entityManager): Response
     {
         $rproduction = $entityManager->getRepository(ProductionMonth::class);
         $production = $rproduction->findAll();
-       // dump($production);die();
+        $data = [
+            [
+                'station_id' => 43,
+                'site_id' => 18,
+                'source' => 0,
+                'year' => 2024,
+                'month' => 7,
+                'day' => 9
+            ],
+            [
+                'station_id' => 43,
+                'site_id' => 18,
+                'source' => 0,
+                'year' => 2024,
+                'month' => 7,
+                'day' => 10
+            ]
+        ];
+   
+       // Appel de l'API Flask
+       $client = HttpClient::create();
+       $response = $client->request('POST', 'http://127.0.0.1:5000/predict', [
+        'json' => $data,
+
+        ]);
+       $data = $response->toArray();
+       #dump($data);die();
         return $this->render('site/test.html.twig', [
             'productions' => $production,
+            'pred' => $data,
         ]);
     }
     #[Route('site/production/month/{siteId}', name : 'site_production_month')]
