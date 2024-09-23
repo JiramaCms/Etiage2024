@@ -187,10 +187,9 @@
                                     <div class="tab-pane fade" id="statistique" role="tabpanel">
                                         <h4>Statistique</h4>
                                         <p id="reportsChart"></p>
-                                        <!-- Canvas for Chart.js -->
-                                        <div>
-                                            <canvas id="myChart" width="450" height="450"></canvas>
-                                        </div>
+                                        <h5>Gap Statistics</h5>
+                                        <p id="reportsChartGap"></p>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -226,7 +225,6 @@
         var zones = {{ zone|raw }};
         let sitesData =  {{ sites|raw }};
         var polygons = [];
-        var myChart;
         var zonesVisible = true;
         var addObservationUrl = "{{ path('app_add_incidentById', {'id': 'siteId'}) }}";
         var siteDetailUrl = "{{ path('detail_site',{'id' : 'siteId'})}}";
@@ -323,9 +321,13 @@
             sidebar.classList.remove('hidden2');
             showIncidents();
             showStatistics();
+            showGapStatistics(); // Call the function to display gap statistics
+
         }
 
         let chart = null;
+        let gapChart = null;
+
         function getDataByDay() {
             var siteId = currentSelectedMarker
             return fetch(`/site/production/day/${siteId}`)
@@ -333,6 +335,7 @@
             .then(data => {
                 let datas = JSON.parse(data);
                 datas.reverse();
+                console.log(datas[0]);
                 return datas; 
             })
             .catch(error => {
@@ -401,6 +404,64 @@
                 }
             }).catch(error => {
                 console.error('Error fetching or processing data:', error);
+            });
+        }
+        function showGapStatistics() {
+            getDataByDay().then(gapData => {
+                if (!gapData || gapData.length === 0) {
+                    document.getElementById('reportsChartGap').innerHTML = 'Aucune donnée de gap disponible pour ce site.';
+                    return;
+                }
+
+                const labels = gapData.map(gap => 
+                    new Date(gap.daty.timestamp * 1000).toLocaleDateString());
+                const data = gapData.map(production => production.gap);
+
+                if (gapChart) {
+                    gapChart.updateSeries([{
+                        name: 'Gap',
+                        data: data,
+                    }]);
+                    gapChart.updateOptions({
+                        xaxis: { categories: labels },
+                    });
+                } else {
+                    gapChart = new ApexCharts(document.querySelector("#reportsChartGap"), {
+                        series: [{
+                            name: 'Gap',
+                            data: data,
+                        }],
+                        chart: {
+                            height: 350,
+                            type: 'area',
+                            toolbar: { show: false },
+                        },
+                        markers: {
+                            size: 4
+                        },
+                        colors: ['#ff5733'], // Change color as needed
+                        fill: {
+                            type: "gradient",
+                            gradient: {
+                                shadeIntensity: 1,
+                                opacityFrom: 0.3,
+                                opacityTo: 0.4,
+                                stops: [0, 90, 100]
+                            }
+                        },
+                        dataLabels: {
+                            enabled: false
+                        },
+                        stroke: {
+                            curve: 'smooth',
+                            width: 2
+                        },
+                        xaxis: { categories: labels },
+                    });
+                    gapChart.render();
+                }
+            }).catch(error => {
+                console.error('Error fetching or processing gap data:', error);
             });
         }
 

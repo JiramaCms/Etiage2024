@@ -70,7 +70,8 @@ class ObservationController extends AbstractController
 
             $em->persist($observation);
             $em->flush();
-            return $this->redirectToRoute('app_liste_action');
+            return $this->redirectToRoute('app_detail_action',['id' => $action->getId()]);
+
         }
 
         return $this->render('observation/addObservation.html.twig', [

@@ -5,22 +5,30 @@ namespace App\Controller;
 use App\Util\Util;
 use App\Entity\Site;
 use App\Entity\Zone;
+use App\Entity\Source;
 use App\Entity\Production;
 use App\Form\SiteFormType;
 use App\Entity\ProductionMonth;
-use App\Entity\Source;
+use App\Service\ProductionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpClient\HttpClient;
 
 
 class SiteController extends AbstractController
 {
+    private $productionService;
+
+    public function __construct(ProductionService $productionService)
+    {
+        $this->productionService = $productionService;
+    }
+    
     #[Route('/site', name: 'app_insert_site')]
     public function index(): Response
     {
@@ -154,17 +162,19 @@ class SiteController extends AbstractController
     #[Route('/site/production/day/{siteId}', name :'site_production_day')]
     public function getProductionByDay($siteId, EntityManagerInterface $entityManager): Response
     {
-        $rsite = $entityManager->getRepository(Production::class);
-        $site = $rsite->findBy(
+        $rproduction = $entityManager->getRepository(Production::class);
+        $productions = $rproduction->findBy(
             ['site' => $siteId], // Filtrer par idSite
             ['daty' => 'DESC'],      // Trier par id en ordre décroissant
             10                     // Limiter à 10 résultats
         );
-        $taille = count($site);
+        
+        foreach ($productions as $production) {
+            $gap = $this->productionService->calculateGap($production);
+            $production->setGap($gap);
+        }
 
-        //dump($taille); // Voir la taille des résultats
-        //die();
-        $rep = (Util::toJson($site));
+        $rep = (Util::toJson($productions));
         return new JsonResponse($rep);
     }
     

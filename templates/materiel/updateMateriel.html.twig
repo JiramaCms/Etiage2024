@@ -5,7 +5,7 @@
         <div class="row justify-content-center">
             <div class="card col-md-8"> <!-- Utilisation de la classe Bootstrap 'card' -->
                 <div class="card-body">
-                    <h5 class="card-title">Ajouter un matériel</h5> <!-- Titre de la carte -->
+                    <h5 class="card-title">Modifier le matériel</h5> <!-- Titre de la carte -->
 
                     {{ form_start(form, { attr: { novalidate: 'novalidate', class: 'row g-3' } }) }}
 
@@ -39,10 +39,27 @@
                         </div>
                     </div>
 
+                    <div class="col-4">
+                        {{ form_label(form.type, "Type", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_widget(form.type, { 'attr': { 'class': 'form-control form-control-lg' } }) }}
+                        <div class="form-text">{{ form_help(form.type) }}</div>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.cout) }}
+                        </div>
+                    </div>
                     <!-- Champ Capacité -->
-                    <div class="col-12">
+                    <div class="col-4">
+                        {{ form_label(form.cout, "Cout de l'usage", { 'label_attr': { 'class': 'form-label' } }) }}
+                        {{ form_widget(form.cout, { 'attr': { 'class': 'form-control form-control-lg','placeholder': 'Coût d\'usage en Ariary' } }) }}
+                        <div class="form-text">{{ form_help(form.cout) }}</div>
+                        <div class="invalid-feedback">
+                            {{ form_errors(form.cout) }}
+                        </div>
+                    </div>
+                    <!-- Champ Cout -->
+                    <div class="col-4">
                         {{ form_label(form.capacite, "Capacité", { 'label_attr': { 'class': 'form-label' } }) }}
-                        {{ form_widget(form.capacite, { 'attr': { 'class': 'form-control form-control-lg' } }) }}
+                        {{ form_widget(form.capacite, { 'attr': { 'class': 'form-control form-control-lg','placeholder':'Capacité d\'apport en eau en m³ ' } }) }}
                         <div class="form-text">{{ form_help(form.capacite) }}</div>
                         <div class="invalid-feedback">
                             {{ form_errors(form.capacite) }}

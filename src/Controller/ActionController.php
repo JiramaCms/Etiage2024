@@ -102,7 +102,7 @@ class ActionController extends AbstractController
             $em->persist($action);
             $em->flush();
 
-            return $this->redirectToRoute('app_liste_action');
+            return $this->redirectToRoute('app_detail_action',['id' => $action->getId()]);
         }
         return $this->render('action/updateAction.html.twig',[
             'form'=>$form->createView()
