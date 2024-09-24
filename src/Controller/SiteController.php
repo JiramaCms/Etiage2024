@@ -163,11 +163,7 @@ class SiteController extends AbstractController
     public function getProductionByDay($siteId, EntityManagerInterface $entityManager): Response
     {
         $rproduction = $entityManager->getRepository(Production::class);
-        $productions = $rproduction->findBy(
-            ['site' => $siteId], // Filtrer par idSite
-            ['daty' => 'DESC'],      // Trier par id en ordre décroissant
-            10                     // Limiter à 10 résultats
-        );
+        $productions = $rproduction->findLatestProductionsBySiteId($siteId,10);
         
         foreach ($productions as $production) {
             $gap = $this->productionService->calculateGap($production);

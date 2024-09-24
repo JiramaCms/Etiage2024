@@ -2,9 +2,11 @@
 
 namespace App\Repository;
 
+use App\Entity\Site;
 use App\Entity\Production;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<Production>
@@ -21,29 +23,37 @@ class ProductionRepository extends ServiceEntityRepository
         parent::__construct($registry, Production::class);
     }
 
-//    /**
-//     * @return Production[] Returns an array of Production objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('p.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findLatestProductionsBySiteId(int $siteId, int $limit = 10)
+    {   
+        $entityManager = $this->getEntityManager();
 
-//    public function findOneBySomeField($value): ?Production
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+         // Créez un ResultSetMapping
+         $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+
+         // Ajoutez le mapping pour l'entité ZoneVente
+         $rsm->addRootEntityFromClassMetadata('App\Entity\Production', 'p');
+
+        $nativeQuery = $entityManager->createNativeQuery('
+            SELECT p.*
+            FROM production p
+            INNER JOIN (
+                SELECT site_id, daty, MAX(id) AS max_id
+                FROM production
+                WHERE site_id = :siteId
+                GROUP BY site_id, daty
+            ) latest ON p.id = latest.max_id
+            ORDER BY p.daty DESC
+            LIMIT :limit
+        ',$rsm);
+        
+
+        $nativeQuery->setParameter('siteId', $siteId);
+        $nativeQuery->setParameter('limit', $limit);
+
+        
+        $result = $nativeQuery->getResult();
+
+        return $result;
+    }
 
 }
