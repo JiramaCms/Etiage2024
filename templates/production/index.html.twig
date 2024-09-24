@@ -6,12 +6,16 @@
             <div class="col-md-12">
                 <div class="card mt-4 ">
                     <div class="card-body ">
-                        <h5 class="card-title">Importer la production d'eau</h5>
+                        <h5 class="card-title">Importation de la production d'eau</h5>
 
-                        <form method="post" enctype="multipart/form-data">
-                            <input type="file" name="excel_file" accept=".xlsx, .xls" required>
-                            <button type="submit" class="btn btn-secondary">Importer</button>
-                        </form>  
+                        <p>Production index</p>
+                        {% for label, messages in app.flashes %}
+                        <div class="alert alert-{{ label }}">
+                            {% for message in messages %}
+                                {{ message }}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
                     </div>
                 </div>
             </div>

@@ -346,15 +346,24 @@
 
         function showStatistics() {
             getDataByDay().then(dayData => {
-                if (!dayData || dayData.length === 0) {
-                    document.getElementById('reportsChart').innerHTML = 'Aucune donnée de production disponible pour ce site.';
+                // Réinitialise le conteneur du graphique avant chaque mise à jour
+                 const chartContainer = document.querySelector("#reportsChart");
+
+                // Vérifier si le site a des données
+                if (!dayData || dayData.length == 0) {
+                    // Si aucune donnée n'est disponible, afficher un message et détruire l'ancien graphique s'il existe
+                    chartContainer.innerHTML = 'Aucune donnée de production disponible pour ce site.';
+                    if (chart) {
+                        chart.destroy();  // Détruire l'ancien graphique pour éviter les conflits
+                        chart = null;  // Réinitialiser la variable chart
+                    }
                     return;
                 }
 
                 const labels = dayData.map(production => 
                     new Date(production.daty.timestamp * 1000).toLocaleDateString());
                 const data = dayData.map(production => production.quantite);
-                if (!labels || !data || labels.length === 0 || data.length === 0) {
+                if (!labels || !data || labels.length == 0 || data.length == 0) {
                     console.error('Invalid data or labels');
                     return;
                 }
@@ -376,7 +385,18 @@
                         chart: {
                             height: 350,
                             type: 'area',
-                            toolbar: { show: false },
+                            toolbar: { 
+                                show: true,
+                                tools: {
+                                    download: true,
+                                    selection: false,
+                                    zoom: false,  // Active le bouton de zoom
+                                    zoomin: false,  // Active le bouton de zoom avant
+                                    zoomout: false,  // Active le bouton de zoom arrière
+                                    pan: false,  // Désactive le mode panoramique
+                                    reset: false  
+                                }
+                            }
                         },
                         markers: {
                             size: 4
@@ -408,11 +428,19 @@
         }
         function showGapStatistics() {
             getDataByDay().then(gapData => {
-                if (!gapData || gapData.length === 0) {
-                    document.getElementById('reportsChartGap').innerHTML = 'Aucune donnée de gap disponible pour ce site.';
+                
+                 const chartContainerGAP = document.querySelector("#reportsChartGap");
+
+                // Vérifier si le site a des données
+                if (!gapData || gapData.length == 0) {
+                    // Si aucune donnée n'est disponible, afficher un message et détruire l'ancien graphique s'il existe
+                    chartContainerGAP.innerHTML = 'Aucune donnée de gap disponible pour ce site.';
+                    if (gapChart) {
+                        gapChart.destroy();  // Détruire l'ancien graphique pour éviter les conflits
+                        gapChart = null;  // Réinitialiser la variable chart
+                    }
                     return;
                 }
-
                 const labels = gapData.map(gap => 
                     new Date(gap.daty.timestamp * 1000).toLocaleDateString());
                 const data = gapData.map(production => production.gap);
@@ -433,21 +461,19 @@
                         }],
                         chart: {
                             height: 350,
-                            type: 'area',
-                            toolbar: { show: false },
+                            type: 'bar',
+                            toolbar: { show: true },
+
                         },
                         markers: {
                             size: 4
                         },
-                        colors: ['#ff5733'], // Change color as needed
-                        fill: {
-                            type: "gradient",
-                            gradient: {
-                                shadeIntensity: 1,
-                                opacityFrom: 0.3,
-                                opacityTo: 0.4,
-                                stops: [0, 90, 100]
-                            }
+                        plotOptions: {
+                        bar: {
+                            horizontal: false,
+                            columnWidth: '55%',
+                            endingShape: 'rounded'
+                        },
                         },
                         dataLabels: {
                             enabled: false

@@ -26,44 +26,54 @@ class ProductionController extends AbstractController
         if ($request->isMethod('POST')) {
             $file = $request->files->get('excel_file');
 
-            // Charger le fichier Excel
-            $spreadsheet = IOFactory::load($file->getPathname());
-            $worksheet = $spreadsheet->getActiveSheet();
-            $rows = $worksheet->toArray();
-            $em = $mr->getManager();
-            
+            try {
+                // Charger le fichier Excel
+                $spreadsheet = IOFactory::load($file->getPathname());
+                $worksheet = $spreadsheet->getActiveSheet();
+                $rows = $worksheet->toArray();
+                $em = $mr->getManager(); // Récupérer l'EntityManager
 
-            // Boucle sur les lignes pour insérer dans la base de données
-            foreach ($rows as $index => $row) {
-                // Ignorer l'en-tête si nécessaire (index 0)
-                if ($index === 0) {
-                    continue;
-                }
-                // Créez une nouvelle entité Production et assignez les valeurs
-                $production = new Production();
-                $production->setDescription($row[0]); // Description
-                $production->setQuantite((int)$row[1]); // Quantité
-                $production->setDaty(new \DateTime($row[2])); // Date
-                $production->setGap($row[3]); // Gap
-                $id=($row[4]); // Site ID
-                $site = $em->getRepository(Site::class)->find($id);
-                if(!$site){
-                    throw $this->createNotFoundException('Pas de Site trouvé');
-                }
-                $production->setSite($site);
+                // Boucle sur les lignes pour insérer dans la base de données
+                foreach ($rows as $index => $row) {
+                    if ($index === 0) {
+                        continue; // Ignorer la première ligne (l'en-tête)
+                    }
 
-                // Enregistrez l'entité
-                $entityManager = $mr->getManager();
-                $entityManager->persist($production);
+                    // Chaque ligne est une chaîne avec des valeurs séparées par un point-virgule
+                    $data = explode(';', $row[0]);
+
+                    // Créer une nouvelle entité Production et assigner les valeurs
+                    $production = new Production();
+                    $production->setDaty(new \DateTime($data[0]));
+                    $site = $em->getRepository(Site::class)->find($data[1]); // Site ID
+
+                    // Vérification du site
+                    if (!$site) {
+                        throw $this->createNotFoundException('Pas de Site trouvé pour ID ' . $data[1]);
+                    }
+
+                    $production->setSite($site);
+                    $production->setQuantite((int)$data[2]); // Quantité
+
+                    // Persister l'entité
+                    $em->persist($production);
+                }
+
+                $em->flush(); // Sauvegarder toutes les entités persistées
+
+                // Ajouter un message flash de succès
+                $this->addFlash('success', 'Les données ont été importées avec succès !');
+                
+            } catch (\Exception $e) {
+                // Ajouter un message flash d'erreur
+                $this->addFlash('error', 'Erreur lors de l\'importation : ' . $e->getMessage());
             }
 
-            $entityManager->flush();
-
-            // Redirigez ou affichez un message de succès
-            return $this->redirectToRoute('app_production'); // Ou une autre route de succès
+            // Rediriger après l'importation
+            return $this->redirectToRoute('app_production');
         }
 
-        return $this->render('import.html.twig'); // Créez un template pour le téléchargement
+        return $this->render('production/import.html.twig');
     }
     
 }
