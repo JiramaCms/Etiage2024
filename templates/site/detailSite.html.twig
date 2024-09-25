@@ -158,9 +158,7 @@
                     });
 
                     document.querySelector('#filter-day').addEventListener('click', function () {
-                      console.log("tafiditra jours");
                       showLoadingIndicator(true);
-                      console.log("tafiditra jours");
                       getDataByDay().then(dayData => {
                         const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
                         const data = dayData.map(production => production.quantite);
@@ -172,7 +170,6 @@
 
                     document.querySelector('#filter-month').addEventListener('click', function () {
                       showLoadingIndicator(true);
-                      console.log("tafiditra month");
                       getDataByMonth().then(monthlyData => {
                         const labels = monthlyData.map(production =>new Date (production.mois.timestamp * 1000).toLocaleDateString('default', { year: 'numeric', month: 'short' }));
                         const data = monthlyData.map(production => production.quantite);

@@ -83,9 +83,9 @@ class SiteController extends AbstractController
         $end = new \DateTime($data['end-date']);
         $end->modify('+1 day');  // Inclure le dernier jour
     
-        $stationId = 43;
-        $siteId = 18;
-        $source = 0;
+        $stationId = 17;
+        $siteId = 0;
+        $source = 4;
     
         $data = [];
         $interval = new \DateInterval('P1D');
