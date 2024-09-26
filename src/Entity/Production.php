@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Entity;
-use App\Service\ProductionService;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\ProductionRepository;
@@ -26,8 +25,10 @@ class Production
     #[ORM\Column(nullable: true)]
     private ?float $gap = null;
 
-    #[ORM\ManyToOne(inversedBy: 'productions')]
-    private ?Site $site = null;
+    #[ORM\ManyToOne(inversedBy: 'production')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Station $station = null;
+
 
     public function getId(): ?int
     {
@@ -81,15 +82,16 @@ class Production
         return $this;
     }
 
-    public function getSite(): ?Site
+    public function getStation(): ?Station
     {
-        return $this->site;
+        return $this->station;
     }
 
-    public function setSite(?Site $site): static
+    public function setStation(?Station $station): static
     {
-        $this->site = $site;
+        $this->station = $station;
 
         return $this;
     }
+
 }

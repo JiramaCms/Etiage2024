@@ -33,18 +33,19 @@ class Site
     #[ORM\OneToMany(targetEntity: Objectif::class, mappedBy: 'site')]
     private Collection $objectifs;
 
-    #[ORM\OneToMany(targetEntity: Production::class, mappedBy: 'site')]
-    private Collection $productions;
 
     #[ORM\ManyToMany(targetEntity: Source::class, inversedBy: 'sites')]
     private Collection $sources;
+
+    #[ORM\OneToMany(targetEntity: Station::class, mappedBy: 'site')]
+    private Collection $stations;
 
     public function __construct()
     {
         $this->incidents = new ArrayCollection();
         $this->objectifs = new ArrayCollection();
-        $this->productions = new ArrayCollection();
         $this->sources = new ArrayCollection();
+        $this->stations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -170,36 +171,6 @@ class Site
     }
 
     /**
-     * @return Collection<int, Production>
-     */
-    public function getProductions(): Collection
-    {
-        return $this->productions;
-    }
-
-    public function addProduction(Production $production): static
-    {
-        if (!$this->productions->contains($production)) {
-            $this->productions->add($production);
-            $production->setSite($this);
-        }
-
-        return $this;
-    }
-
-    public function removeProduction(Production $production): static
-    {
-        if ($this->productions->removeElement($production)) {
-            // set the owning side to null (unless already changed)
-            if ($production->getSite() === $this) {
-                $production->setSite(null);
-            }
-        }
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, Source>
      */
     public function getSources(): Collection
@@ -219,6 +190,36 @@ class Site
     public function removeSource(Source $sources): static
     {
         $this->sources->removeElement($sources);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Station>
+     */
+    public function getStations(): Collection
+    {
+        return $this->stations;
+    }
+
+    public function addStation(Station $station): static
+    {
+        if (!$this->stations->contains($station)) {
+            $this->stations->add($station);
+            $station->setSite($this);
+        }
+
+        return $this;
+    }
+
+    public function removeStation(Station $station): static
+    {
+        if ($this->stations->removeElement($station)) {
+            // set the owning side to null (unless already changed)
+            if ($station->getSite() === $this) {
+                $station->setSite(null);
+            }
+        }
 
         return $this;
     }
