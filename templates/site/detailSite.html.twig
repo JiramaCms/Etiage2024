@@ -142,9 +142,9 @@
                       <div class="col-sm-3">
                         <select class="form-select" aria-label="Default select example">
                           <option selected>Toutes les stations</option>
-                          <option value="1">station 1</option>
-                          <option value="2">station 2</option>
-                          <option value="3">station 3</option>
+                        {% for station in site.stations %}
+                            <option value="1">{{station.code}}</option>
+                        {% endfor %}
                         </select>
                       </div>
                   </div>
@@ -165,16 +165,16 @@
                     document.addEventListener("DOMContentLoaded", () => {
                     // Initialiser avec les données du jour
                     getDataByDay().then(dayData => {
-                      const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
-                      const data = dayData.map(production => production.quantite);
+                      const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
+                      const data = dayData.map(production => production.sommeProduction);
                       updateChartWithData(labels, data, 'jour');
                     });
 
                     document.querySelector('#filter-day').addEventListener('click', function () {
                       showLoadingIndicator(true);
                       getDataByDay().then(dayData => {
-                        const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
-                        const data = dayData.map(production => production.quantite);
+                        const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
+                        const data = dayData.map(production => production.sommeProduction);
                         updateChartWithData(labels, data, 'jour');
                         showLoadingIndicator(false);
 
@@ -211,7 +211,7 @@
                       .then(data => {
                         let datas = JSON.parse(data);
                         datas.reverse();
-                        console.log(datas[0].daty.timestamp);// assuming the data structure is correct
+                        //console.log(datas[0].daty.timestamp);// assuming the data structure is correct
                         return datas; 
                       })
                       .catch(error => {

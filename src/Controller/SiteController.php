@@ -8,6 +8,7 @@ use App\Entity\Zone;
 use App\Entity\Source;
 use App\Entity\Production;
 use App\Form\SiteFormType;
+use App\Entity\SiteProduction;
 use App\Entity\ProductionMonth;
 use App\Service\ProductionService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -150,6 +151,15 @@ class SiteController extends AbstractController
         ]);
     }
    
+    #[Route('station/production/month/{siteId}', name : 'station_production_month')]
+    public function stationProductionMonth($stationId,EntityManagerInterface $entityManager): Response
+    {
+        $rproduction = $entityManager->getRepository(ProductionMonth::class);
+        $production = $rproduction->findBy(['stationId' => $stationId],['mois' => 'ASC']);
+        //dump($production);die();
+        $rep = Util::toJson($production);
+        return new JsonResponse($rep);
+    }
     #[Route('site/production/month/{siteId}', name : 'site_production_month')]
     public function siteProductionMonth($siteId,EntityManagerInterface $entityManager): Response
     {
@@ -159,11 +169,28 @@ class SiteController extends AbstractController
         $rep = Util::toJson($production);
         return new JsonResponse($rep);
     }
+    //Done mandeha
     #[Route('/site/production/day/{siteId}', name :'site_production_day')]
     public function getProductionByDay($siteId, EntityManagerInterface $entityManager): Response
     {
+        $rproduction = $entityManager->getRepository(SiteProduction::class);
+        $productions = $rproduction->findProductionsBySite($siteId);
+        //dd($productions);
+        
+        foreach ($productions as $production) {
+            $gap = $this->productionService->calculateGap($production);
+            $production->setGap($gap);
+        }
+
+        $rep = (Util::toJson($productions));
+        return new JsonResponse($rep);
+    }
+    //A VOIR
+    #[Route('/station/production/day/{siteId}', name :'station_production_day')]
+    public function getStationProductionByDay($siteId, EntityManagerInterface $entityManager): Response
+    {
         $rproduction = $entityManager->getRepository(Production::class);
-        $productions = $rproduction->findLatestProductionsBySiteId($siteId,10);
+        $productions = $rproduction->findLatestProductionsByStationId($siteId,10);
         
         foreach ($productions as $production) {
             $gap = $this->productionService->calculateGap($production);

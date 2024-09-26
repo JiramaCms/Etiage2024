@@ -3,6 +3,7 @@ namespace App\Service;
 
 use App\Entity\Besoin;
 use App\Entity\Production;
+use App\Entity\SiteProduction;
 use App\Repository\BesoinRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -21,10 +22,10 @@ class ProductionService
         return $besoin ? $besoin->getQuantite() : 0.0;
     }
 
-    public function calculateGap(Production $production): float
+    public function calculateGap(SiteProduction $production): float
     {
-        $besoin = $this->getBesoinForProduction($production->getSite()->getId(), $production->getDaty());
-        $gap=($production->getQuantite() - $besoin)/$production->getQuantite();
+        $besoin = $this->getBesoinForProduction($production->getSiteId(), $production->getDateProduction());
+        $gap=($production->getSommeProduction() - $besoin)/$production->getSommeProduction();
         return round($gap, 2);;
     }
 }

@@ -23,7 +23,7 @@ class ProductionRepository extends ServiceEntityRepository
         parent::__construct($registry, Production::class);
     }
 
-    public function findLatestProductionsBySiteId(int $siteId, int $limit = 10)
+    public function findLatestProductionsBySiteId(int $stationId, int $limit = 10)
     {   
         $entityManager = $this->getEntityManager();
 
@@ -37,17 +37,17 @@ class ProductionRepository extends ServiceEntityRepository
             SELECT p.*
             FROM production p
             INNER JOIN (
-                SELECT site_id, daty, MAX(id) AS max_id
+                SELECT station_id, daty, MAX(id) AS max_id
                 FROM production
-                WHERE site_id = :siteId
-                GROUP BY site_id, daty
+                WHERE station_id = :stationId
+                GROUP BY station_Id, daty
             ) latest ON p.id = latest.max_id
             ORDER BY p.daty DESC
             LIMIT :limit
         ',$rsm);
         
 
-        $nativeQuery->setParameter('siteId', $siteId);
+        $nativeQuery->setParameter('stationId', $stationId);
         $nativeQuery->setParameter('limit', $limit);
 
         

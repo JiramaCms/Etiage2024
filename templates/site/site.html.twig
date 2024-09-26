@@ -361,8 +361,8 @@
                 }
 
                 const labels = dayData.map(production => 
-                    new Date(production.daty.timestamp * 1000).toLocaleDateString());
-                const data = dayData.map(production => production.quantite);
+                    new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
+                const data = dayData.map(production => production.sommeProduction);
                 if (!labels || !data || labels.length == 0 || data.length == 0) {
                     console.error('Invalid data or labels');
                     return;
@@ -442,7 +442,7 @@
                     return;
                 }
                 const labels = gapData.map(gap => 
-                    new Date(gap.daty.timestamp * 1000).toLocaleDateString());
+                    new Date(gap.dateProduction.timestamp * 1000).toLocaleDateString());
                 const data = gapData.map(production => production.gap);
 
                 if (gapChart) {
