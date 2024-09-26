@@ -24,6 +24,7 @@ class ProductionService
     public function calculateGap(Production $production): float
     {
         $besoin = $this->getBesoinForProduction($production->getSite()->getId(), $production->getDaty());
-        return $production->getQuantite() - $besoin;
+        $gap=($production->getQuantite() - $besoin)/$production->getQuantite();
+        return round($gap, 2);;
     }
 }
