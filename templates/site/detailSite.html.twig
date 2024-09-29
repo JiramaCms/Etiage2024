@@ -163,162 +163,159 @@
                     console.log(site);
 
                     document.addEventListener("DOMContentLoaded", () => {
-                    // Initialiser avec les données du jour
-                    getDataByDay().then(dayData => {
-                      const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
-                      const data = dayData.map(production => production.sommeProduction);
-                      updateChartWithData(labels, data, 'jour');
-                    });
+  // Initialiser avec les données du jour
+  getDataByDay().then(dayData => {
+    const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
+    const data = dayData.map(production => production.sommeProduction);
+    updateChartWithData(labels, data, 'jour');
+  });
 
-                    document.querySelector('#filter-day').addEventListener('click', function () {
-                      showLoadingIndicator(true);
-                      getDataByDay().then(dayData => {
-                        const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
-                        const data = dayData.map(production => production.sommeProduction);
-                        updateChartWithData(labels, data, 'jour');
-                        showLoadingIndicator(false);
+  document.querySelector('#filter-day').addEventListener('click', function () {
+    showLoadingIndicator(true);
+    const stationId = document.querySelector('#station-select').value;
+    if (stationId == 0) {
+      getDataByDay().then(dayData => {
+        const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
+        const data = dayData.map(production => production.sommeProduction);
+        updateChartWithData(labels, data, 'jour');
+        showLoadingIndicator(false);
+      });
+    } else {
+      getDataByDayForStation(stationId).then(dayData => {
+        const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
+        const data = dayData.map(production => production.quantite);
+        updateChartWithData(labels, data, 'jour');
+        showLoadingIndicator(false);
+      });
+    }
+  });
 
-                      });
-                    });
+  document.querySelector('#filter-month').addEventListener('click', function () {
+    showLoadingIndicator(true);
+    const stationId = document.querySelector('#station-select').value;
+    if (stationId == 0) {
+      getDataByMonth().then(monthlyData => {
+        const labels = monthlyData.map(production => new Date(production.mois.timestamp * 1000).toLocaleDateString('default', { year: 'numeric', month: 'short' }));
+        const data = monthlyData.map(production => production.quantite);
+        updateChartWithData(labels, data, 'mois');
+        showLoadingIndicator(false);
+      });
+    } else {
+      getDataByMonthForStation(stationId).then(monthlyData => {
+        const labels = monthlyData.map(production => new Date(production.mois.timestamp * 1000).toLocaleDateString('default', { year: 'numeric', month: 'short' }));
+        const data = monthlyData.map(production => production.quantite);
+        updateChartWithData(labels, data, 'mois');
+        showLoadingIndicator(false);
+      });
+    }
+  });
 
-                    document.querySelector('#filter-month').addEventListener('click', function () {
-                      showLoadingIndicator(true);
-                      getDataByMonth().then(monthlyData => {
-                        const labels = monthlyData.map(production =>new Date (production.mois.timestamp * 1000).toLocaleDateString('default', { year: 'numeric', month: 'short' }));
-                        const data = monthlyData.map(production => production.quantite);
-                        updateChartWithData(labels, data, 'mois');
-                        showLoadingIndicator(false);
+  document.querySelector('#station-select').addEventListener('change', function () {
+    const stationId = this.value;
+    showLoadingIndicator(true);
 
-                      });
-                    });
-                  });
+    // Si l'utilisateur sélectionne une station spécifique
+    if (stationId == 0) {
+      getDataByDay().then(dayData => {
+        const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
+        const data = dayData.map(production => production.sommeProduction);
+        updateChartWithData(labels, data, 'jour');
+        showLoadingIndicator(false);
+      });
+    } else {
+      getDataByDayForStation(stationId).then(dayData => {
+        const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
+        const data = dayData.map(production => production.quantite);
+        updateChartWithData(labels, data, 'jour');
+        showLoadingIndicator(false);
+      });
+    }
+  });
+});
 
-                  function showLoadingIndicator(show) {
-                    const loadingElement = document.querySelector('#loading');
-                    if (loadingElement) {
-                        loadingElement.style.display = show ? 'block' : 'none';
-                        if (!show) {
-                            setTimeout(() => {
-                                loadingElement.style.display = 'none';
-                            }, 500); // délai de 500 ms avant de masquer le spinner
-                        }
-                    }
-                }
-                document.querySelector('#station-select').addEventListener('change', function () {
-                  const stationId = this.value;
-                  showLoadingIndicator(true);
+// Fonctions pour récupérer les données des API
+function getDataByDay() {
+  return fetch(`/site/production/day/${site.id}`)
+    .then(response => response.json())
+    .then(data => JSON.parse(data).reverse())
+    .catch(error => {
+      console.error('Error fetching daily production data:', error);
+      return [];
+    });
+}
 
-                  // Vérifie si "Toutes les stations" est sélectionnée (valeur 0)
-                  if (stationId == 0) {
-                    // Si toutes les stations sont sélectionnées, on utilise la logique par défaut pour toutes les stations
-                    getDataByDay(site.id).then(dayData => {
-                      const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
-                      const data = dayData.map(production => production.sommeProduction);
-                      updateChartWithData(labels, data, 'jour');
-                      showLoadingIndicator(false);
-                    });
-                  } else {
-                    // Sinon, on récupère les données spécifiques à la station
-                    getDataByDayForStation(stationId).then(dayData => {
-                      const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
-                      const data = dayData.map(production => production.quantite);
-                      updateChartWithData(labels, data, 'jour');
-                      showLoadingIndicator(false);
-                    });
-                  }
-                });
+function getDataByDayForStation(stationId) {
+  return fetch(`/station/production/day/${stationId}`)
+    .then(response => response.json())
+    .then(data => JSON.parse(data).reverse())
+    .catch(error => {
+      console.error('Error fetching daily production data for station:', error);
+      return [];
+    });
+}
 
-                  function getDataByDay() {
-                    return fetch(`/site/production/day/${site.id}`)
-                      .then(response => response.json())
-                      .then(data => {
-                        let datas = JSON.parse(data);
-                        datas.reverse();
-                        //console.log(datas[0].daty.timestamp);// assuming the data structure is correct
-                        return datas; 
-                      })
-                      .catch(error => {
-                        console.error('Error fetching daily production data:', error);
-                        return [];
-                      });
-                  }
-                  function getDataByDayForStation(stationId) {
-                      return fetch(`/station/production/day/${stationId}`)
-                        .then(response => response.json())
-                        .then(data => {
-                          let datas = JSON.parse(data);
-                          datas.reverse();
-                          return datas;
-                        })
-                        .catch(error => {
-                          console.error('Error fetching daily production data for station:', error);
-                          return [];
-                        });
-                    }
+function getDataByMonth() {
+  return fetch(`/site/production/month/${site.id}`)
+    .then(response => response.json())
+    .then(data => JSON.parse(data))
+    .catch(error => {
+      console.error('Error fetching monthly production data:', error);
+      return [];
+    });
+}
 
-                  function getDataByMonth() {
-                    return fetch(`/site/production/month/${site.id}`)
-                      .then(response => response.json())
-                      .then(data => {
-                        let datas = JSON.parse(data);
-                        return datas;
-                        
-                      })
-                      .catch(error => {
-                        console.error('Error fetching monthly production data:', error);
-                        return [];
-                      });
-                  }
+function getDataByMonthForStation(stationId) {
+  return fetch(`/station/production/month/${stationId}`)
+    .then(response => response.json())
+    .then(data => JSON.parse(data))
+    .catch(error => {
+      console.error('Error fetching monthly production data for station:', error);
+      return [];
+    });
+}
+function showLoadingIndicator(show) {
+    const loadingElement = document.querySelector('#loading');
+    if (loadingElement) {
+        loadingElement.style.display = show ? 'block' : 'none';
+        if (!show) {
+            setTimeout(() => {
+                loadingElement.style.display = 'none';
+            }, 500); // délai de 500 ms avant de masquer le spinner
+        }
+    }
+}
 
-                  let chart; // Déclaration d'une instance globale pour le graphique
+let chart
 
-                  function updateChartWithData(labels, data, filterType) {
-                      if (chart) {
-                          chart.updateSeries([{
-                              name: 'Production m³',
-                              data: data,
-                          }]);
-                          chart.updateOptions({
-                              xaxis: { categories: labels },
-                          });
-                      } else {
-                          chart = new ApexCharts(document.querySelector("#reportsChart"), {
-                              series: [{
-                                  name: 'Production m³',
-                                  data: data,
-                              }],
-                              chart: {
-                                  height: 350,
-                                  type: 'area',
-                                  toolbar: { show: false },
-                              },
-                              markers: {
-                          size: 4
-                        },
-                        colors: ['#4154f1'],
-                        fill: {
-                          type: "gradient",
-                          gradient: {
-                            shadeIntensity: 1,
-                            opacityFrom: 0.3,
-                            opacityTo: 0.4,
-                            stops: [0, 90, 100]
-                          }
-                        },
-                        dataLabels: {
-                          enabled: false
-                        },
-                        stroke: {
-                          curve: 'smooth',
-                          width: 2
-                        },
-                              xaxis: { categories: labels },
-                          });
-                          chart.render();
-                      }
+// Mise à jour du graphique
+function updateChartWithData(labels, data, filterType) {
+  if (chart) {
+    chart.updateSeries([{ name: 'Production m³', data: data }]);
+    chart.updateOptions({ xaxis: { categories: labels } });
+  } else {
+    chart = new ApexCharts(document.querySelector("#reportsChart"), {
+      series: [{ name: 'Production m³', data: data }],
+      chart: { height: 350, type: 'area', toolbar: { show: false } },
+      markers: { size: 4 },
+      colors: ['#4154f1'],
+      fill: {
+        type: "gradient",
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.3,
+          opacityTo: 0.4,
+          stops: [0, 90, 100],
+        },
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 2 },
+      xaxis: { categories: labels },
+    });
+    chart.render();
+  }
+  document.querySelector('#filter-title').innerText = `Par ${filterType}`;
+}
 
-                      document.querySelector('#filter-title').innerText = `Par ${filterType}`;
-                  }
                     
                   </script>
                   <!-- End Line Chart -->

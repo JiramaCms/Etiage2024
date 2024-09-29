@@ -11,6 +11,7 @@ use App\Form\SiteFormType;
 use App\Entity\SiteProduction;
 use App\Entity\ProductionMonth;
 use App\Service\ProductionService;
+use App\Entity\StationProductionMonth;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpClient\HttpClient;
@@ -151,11 +152,11 @@ class SiteController extends AbstractController
         ]);
     }
    
-    #[Route('station/production/month/{siteId}', name : 'station_production_month')]
+    #[Route('station/production/month/{stationId}', name : 'station_production_month')]
     public function stationProductionMonth($stationId,EntityManagerInterface $entityManager): Response
     {
-        $rproduction = $entityManager->getRepository(ProductionMonth::class);
-        $production = $rproduction->findBy(['stationId' => $stationId],['mois' => 'ASC']);
+        $rproduction = $entityManager->getRepository(StationProductionMonth::class);
+        $production = $rproduction->findBy(['idStation' => $stationId],['mois' => 'ASC']);
         //dump($production);die();
         $rep = Util::toJson($production);
         return new JsonResponse($rep);
