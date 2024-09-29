@@ -23,7 +23,7 @@ class ProductionRepository extends ServiceEntityRepository
         parent::__construct($registry, Production::class);
     }
 
-    public function findLatestProductionsBySiteId(int $stationId, int $limit = 10)
+    public function findLatestProductionsByStationId(int $stationId, int $limit = 10)
     {   
         $entityManager = $this->getEntityManager();
 

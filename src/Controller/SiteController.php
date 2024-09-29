@@ -186,17 +186,13 @@ class SiteController extends AbstractController
         return new JsonResponse($rep);
     }
     //A VOIR
-    #[Route('/station/production/day/{siteId}', name :'station_production_day')]
-    public function getStationProductionByDay($siteId, EntityManagerInterface $entityManager): Response
+    #[Route('/station/production/day/{stationId}', name :'station_production_day')]
+    public function getStationProductionByDay($stationId, EntityManagerInterface $entityManager): Response
     {
         $rproduction = $entityManager->getRepository(Production::class);
-        $productions = $rproduction->findLatestProductionsByStationId($siteId,10);
+        $productions = $rproduction->findLatestProductionsByStationId($stationId,10);
+        //dd($productions);
         
-        foreach ($productions as $production) {
-            $gap = $this->productionService->calculateGap($production);
-            $production->setGap($gap);
-        }
-
         $rep = (Util::toJson($productions));
         return new JsonResponse($rep);
     }

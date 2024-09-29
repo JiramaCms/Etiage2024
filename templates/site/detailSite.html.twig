@@ -119,7 +119,7 @@
 
             </div><!-- End Gap Card -->
 
-            <!-- Statst -->
+            <!-- Stats -->
             <div class="col-12">
               <div class="card">
 
@@ -136,18 +136,18 @@
 
                 <div class="card-body">
                   <h5 class="card-title">Reports <span>/Today</span></h5>
-                  <form>
+                  <form id="filterForm">
                     <div class="row mb-3">
                       <label class="col-2 col-form-label">Stations : </label>
                       <div class="col-sm-3">
-                        <select class="form-select" aria-label="Default select example">
-                          <option selected>Toutes les stations</option>
-                        {% for station in site.stations %}
-                            <option value="1">{{station.code}}</option>
-                        {% endfor %}
+                        <select class="form-select" id="station-select" name="station_id">
+                          <option value="0" selected>Toutes les stations</option>
+                          {% for station in site.stations %}
+                            <option value="{{ station.id }}">{{ station.code }}</option>
+                          {% endfor %}
                         </select>
                       </div>
-                  </div>
+                    </div>
                   </form>
 
                   <!-- Line Chart -->
@@ -204,6 +204,29 @@
                         }
                     }
                 }
+                document.querySelector('#station-select').addEventListener('change', function () {
+                  const stationId = this.value;
+                  showLoadingIndicator(true);
+
+                  // Vérifie si "Toutes les stations" est sélectionnée (valeur 0)
+                  if (stationId == 0) {
+                    // Si toutes les stations sont sélectionnées, on utilise la logique par défaut pour toutes les stations
+                    getDataByDay(site.id).then(dayData => {
+                      const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
+                      const data = dayData.map(production => production.sommeProduction);
+                      updateChartWithData(labels, data, 'jour');
+                      showLoadingIndicator(false);
+                    });
+                  } else {
+                    // Sinon, on récupère les données spécifiques à la station
+                    getDataByDayForStation(stationId).then(dayData => {
+                      const labels = dayData.map(production => new Date(production.daty.timestamp * 1000).toLocaleDateString());
+                      const data = dayData.map(production => production.quantite);
+                      updateChartWithData(labels, data, 'jour');
+                      showLoadingIndicator(false);
+                    });
+                  }
+                });
 
                   function getDataByDay() {
                     return fetch(`/site/production/day/${site.id}`)
@@ -219,6 +242,19 @@
                         return [];
                       });
                   }
+                  function getDataByDayForStation(stationId) {
+                      return fetch(`/station/production/day/${stationId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                          let datas = JSON.parse(data);
+                          datas.reverse();
+                          return datas;
+                        })
+                        .catch(error => {
+                          console.error('Error fetching daily production data for station:', error);
+                          return [];
+                        });
+                    }
 
                   function getDataByMonth() {
                     return fetch(`/site/production/month/${site.id}`)
