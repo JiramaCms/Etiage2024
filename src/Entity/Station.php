@@ -30,9 +30,13 @@ class Station
     #[ORM\JoinColumn(nullable: false)]
     private ?Site $site = null;
 
+    #[ORM\ManyToMany(targetEntity: Source::class, mappedBy: 'stations')]
+    private Collection $sources;
+
     public function __construct()
     {
         $this->production = new ArrayCollection();
+        $this->sources = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -102,6 +106,33 @@ class Station
     public function setSite(?Site $site): static
     {
         $this->site = $site;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Source>
+     */
+    public function getSources(): Collection
+    {
+        return $this->sources;
+    }
+
+    public function addSource(Source $source): static
+    {
+        if (!$this->sources->contains($source)) {
+            $this->sources->add($source);
+            $source->addStation($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSource(Source $source): static
+    {
+        if ($this->sources->removeElement($source)) {
+            $source->removeStation($this);
+        }
 
         return $this;
     }

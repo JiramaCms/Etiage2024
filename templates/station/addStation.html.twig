@@ -1,0 +1,61 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Formulaire d'une station</h5>
+
+                        {{ form_start(form, { attr: { novalidate: 'novalidate', class: 'row g-3' } }) }}
+                        
+                        <div class="col-6">
+                            {{ form_label(form.libelle, "Libelle", {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.libelle, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'mettez le Libelle ici'}}) }}
+                            <small>{{ form_help(form.libelle) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.libelle) }}
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            {{ form_label(form.code, " Nom de code de la station", {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.code, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'mettez le Libelle ici'}}) }}
+                            <small>{{ form_help(form.code) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.code) }}
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            {{ form_label(form.sources, "Sources", {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.sources, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                            <small>{{ form_help(form.sources) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.sources) }}
+                            </div>
+                        </div>
+
+                        {% if form.site is defined %}
+                        <div class="col-6">
+                            {{ form_label(form.site, "Site", {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.site, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                            <small>{{ form_help(form.site) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(form.site) }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary">Ajouter</button>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

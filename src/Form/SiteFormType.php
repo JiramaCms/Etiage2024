@@ -27,16 +27,8 @@ class SiteFormType extends AbstractType
                 'data' => $options['data']->getLongitude(), // Pre-populate with the current longitude
                 'label' => 'Longitude'
             ])
-            //->add('etat')
-            ->add('sources', EntityType::class, [ // Changed to sources
-                'class' => Source::class,
-                'query_builder' => function(EntityRepository $er){
-                    return $er->createQueryBuilder('p')
-                            ->orderBy('p.nom', 'ASC');
-                },
-                'choice_label' => 'nom',
-                'multiple' => true, // Assuming you want to select multiple sources
-            ])
+            ->add('code')
+            
         ;
     }
 

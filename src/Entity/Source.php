@@ -18,12 +18,12 @@ class Source
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[ORM\ManyToMany(targetEntity: Site::class, mappedBy: 'sources')]
-    private Collection $sites;
+    #[ORM\ManyToMany(targetEntity: Station::class, inversedBy: 'sources')]
+    private Collection $stations;
 
     public function __construct()
     {
-        $this->sites = new ArrayCollection();
+        $this->stations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -44,28 +44,25 @@ class Source
     }
 
     /**
-     * @return Collection<int, Site>
+     * @return Collection<int, Station>
      */
-    public function getSites(): Collection
+    public function getStations(): Collection
     {
-        return $this->sites;
+        return $this->stations;
     }
 
-    public function addSite(Site $site): static
+    public function addStation(Station $station): static
     {
-        if (!$this->sites->contains($site)) {
-            $this->sites->add($site);
-            $site->addSources($this);
+        if (!$this->stations->contains($station)) {
+            $this->stations->add($station);
         }
 
         return $this;
     }
 
-    public function removeSite(Site $site): static
+    public function removeStation(Station $station): static
     {
-        if ($this->sites->removeElement($site)) {
-            $site->removeSource($this);
-        }
+        $this->stations->removeElement($station);
 
         return $this;
     }

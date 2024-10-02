@@ -33,18 +33,16 @@ class Site
     #[ORM\OneToMany(targetEntity: Objectif::class, mappedBy: 'site')]
     private Collection $objectifs;
 
-
-    #[ORM\ManyToMany(targetEntity: Source::class, inversedBy: 'sites')]
-    private Collection $sources;
-
     #[ORM\OneToMany(targetEntity: Station::class, mappedBy: 'site')]
     private Collection $stations;
+
+    #[ORM\Column(length: 255,nullable: true)]
+    private ?string $code = null;
 
     public function __construct()
     {
         $this->incidents = new ArrayCollection();
         $this->objectifs = new ArrayCollection();
-        $this->sources = new ArrayCollection();
         $this->stations = new ArrayCollection();
     }
 
@@ -171,30 +169,6 @@ class Site
     }
 
     /**
-     * @return Collection<int, Source>
-     */
-    public function getSources(): Collection
-    {
-        return $this->sources;
-    }
-
-    public function addSources(Source $sources): static
-    {
-        if (!$this->sources->contains($sources)) {
-            $this->sources->add($sources);
-        }
-
-        return $this;
-    }
-
-    public function removeSource(Source $sources): static
-    {
-        $this->sources->removeElement($sources);
-
-        return $this;
-    }
-
-    /**
      * @return Collection<int, Station>
      */
     public function getStations(): Collection
@@ -220,6 +194,18 @@ class Site
                 $station->setSite(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(?string $code): static
+    {
+        $this->code = $code;
 
         return $this;
     }

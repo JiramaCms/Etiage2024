@@ -98,7 +98,7 @@
             width: 50px;
             height: 50px;
         }
-        .incident-card {
+        .station-card {
             padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ddd; /* Ajoute une bordure autour de chaque incident */
@@ -107,22 +107,22 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Ombre légère */
         }
 
-        .incident-title {
+        .station-title {
             font-weight: bold;
             margin-bottom: 5px;
         }
 
-        .incident-description {
+        .station-description {
             margin-bottom: 5px;
         }
 
-        .incident-date {
+        .station-date {
             color: #666; /* Couleur de texte plus claire pour la date */
             font-size: 0.9em; /* Réduit légèrement la taille de la police */
         }
 
         /* Séparateur entre les incidents */
-        .incident-card + .incident-card {
+        .station-card + .station-card {
             border-top: 1px solid #ddd; /* Trait de séparation */
             padding-top: 10px;
             margin-top: 10px;
@@ -168,7 +168,7 @@
                                         <a class="nav-link active" id="tabOverview" data-bs-toggle="tab" href="#overview" role="tab" aria-selected="true">Overview</a>
                                     </li>
                                     <li class="nav-item" role="presentation">
-                                        <a class="nav-link" id="tabIncident" data-bs-toggle="tab" href="#incidents" role="tab" aria-selected="false">Incidents</a>
+                                        <a class="nav-link" id="tabStation" data-bs-toggle="tab" href="#stations" role="tab" aria-selected="false">Stations</a>
                                     </li>
                                     <li class="nav-item" role="presentation">
                                         <a class="nav-link" id="tabStatistique" data-bs-toggle="tab" href="#statistique" role="tab" aria-selected="false">Statistique</a>
@@ -180,9 +180,9 @@
                                         <div id="source-icons"></div> <!-- Placeholder for source icons -->
                                         <p id="overview-content"></p>
                                     </div>
-                                    <div class="tab-pane fade" id="incidents" role="tabpanel">
-                                        <h4>Incidents</h4>
-                                        <p id="incidents-content"></p>
+                                    <div class="tab-pane fade" id="stations" role="tabpanel">
+                                        <h4>Stations : </h4>
+                                        <p id="stations-content"></p>
                                     </div>
                                     <div class="tab-pane fade" id="statistique" role="tabpanel">
                                         <h4>Statistique</h4>
@@ -233,54 +233,57 @@
             fetchSiteDetails(siteId);
         }
 
-        function showIncidents() {
+        function showStations() {
             var siteId = currentSelectedMarker;
             var siteData = sitesData.find(site => site.id === siteId);
+            console.log(siteData);
 
-            if (siteData && siteData.incidents.length >= 1) {
-                let incidentInfo = siteData.incidents.map(incident =>{
-                // Convertion dua timestamp en millisecondes
-                let timestampInMilliseconds = incident.daty.timestamp * 1000;
-                let date = new Date(timestampInMilliseconds);
-                // Formatage de la date et de l'heure en UTC
-                let formattedDate = date.toISOString().slice(0, 10); // 'YYYY-MM-DD'
-                let formattedTime = date.toISOString().slice(11, 19); // 'HH:MM:SS'
-
-            return `
-                <div class="incident-card">
-                    <div class="incident-title">Incident : ${incident.libelle}</div>
-                    <div class="incident-description">Description : ${incident.description}</div>
-                    <div class="incident-date">Date et heure : ${formattedDate} ${formattedTime}</div>
-                </div>
-            `}).join('');
+            if (siteData && siteData.stations.length >= 1) {
+                let stationInfo = siteData.stations.map(station =>{
+                    return `
+                        <div class="station-card">
+                            <div class="station-title">Station : ${station.code}</div>
+                            <div class="station-description">Nom de la station : ${station.libelle}</div>
+                            ${station.sources.length > 0 ? `
+                            Sources:
+                            <div id="cardContainer" style="display: flex; gap: 10px; align-items: center;"> 
+                                ${station.sources.map(source => {
+                                    const iconUrl = `/images/${source.nom.toLowerCase()}.svg`;
+                                    return `
+                                        <div class="source-card">
+                                            <div class="card-content">
+                                                <img src="${iconUrl}" alt="${source.nom}" style="width: 50px; height: 50px;">
+                                                <div><strong>${source.nom}</strong></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        ` : '' }<br>
+                            </div>
+                        </div>
+                `}).join('');
                 var addObservationUrlWithId = addObservationUrl.replace('siteId', siteData.id);
-                document.getElementById('incidents-content').innerHTML = `
-                    ${incidentInfo}
-                    <button  class="btn btn-info" onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
-
+                document.getElementById('stations-content').innerHTML = `
+                    ${stationInfo}
                 `;
             } else {
-                document.getElementById('incidents-content').innerHTML = `
-                    Aucun incident trouvé.
-                    <button class="btn btn-info" onclick="window.location.href='${addObservationUrlWithId}'">Ajouter un incident</button>
-
+                document.getElementById('stations-content').innerHTML = `
+                    Aucune station trouvée.
+                    <button class="btn btn-info" onclick="window.location.href='${addObservationUrlWithId}'">Créer une nouvelle station</button>
                 `;
             }
         }
+
         function closeInfoCard() {
             document.getElementById('info-card').style.display = 'none';
         }
         function updateSidebarContent(siteData, zoneData) {
             var addSiteUrlWithId = siteDetailUrl.replace('siteId', siteData.id);
-            console.log(addSiteUrlWithId);
             if (!Array.isArray(zoneData)) {
                 console.error('Les données de zones ne sont pas un tableau:', zoneData);
                 return;
             }
-            let sourceInfo = siteData.sources.map(source => `
-                ${source.nom}
-            `)
-
             let zonesInfo = zoneData.map(zone => `
                 <div>
                     <strong>Zone : ${zone.libelle}</strong><br>
@@ -293,24 +296,6 @@
                 Adresse : ${siteData.adresse}<br>
                 Latitude : ${siteData.coord.latitude}<br>
                 Longitude : ${siteData.coord.longitude}<br>
-
-                ${siteData.sources.length > 0 ? `
-                    <strong>Sources : </strong><br>
-                    <div id="cardContainer" style="display: flex; gap: 10px; align-items: center;"> 
-                        ${siteData.sources.map(source => {
-                            const iconUrl = `/images/${source.nom.toLowerCase()}.svg`;
-                            return `
-                                <div class="source-card">
-                                    <div class="card-content">
-                                        <img src="${iconUrl}" alt="${source.nom}" style="width: 50px; height: 50px;">
-                                        <div><strong>${source.nom}</ strong></div>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                ` : '' }<br>
-
                 ${zonesInfo.join('')}
                 
                 <center>
@@ -319,7 +304,7 @@
             `;
             document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
             sidebar.classList.remove('hidden2');
-            showIncidents();
+            showStations();
             showStatistics();
             showGapStatistics(); // Call the function to display gap statistics
 
@@ -335,7 +320,6 @@
             .then(data => {
                 let datas = JSON.parse(data);
                 datas.reverse();
-                console.log(datas[0]);
                 return datas; 
             })
             .catch(error => {
@@ -497,6 +481,7 @@
                 .then(data => {
                     let datas = JSON.parse(data);
                     var zoneData = zones.find(zone => zone.id === zoneId);
+                    console.log(datas);
                     if (zoneData) {
                         showZoneSidebar(zoneData, datas);
                     }
@@ -541,8 +526,60 @@
             document.getElementById('overview-content').innerHTML = zoneInfo;
             document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
             sidebar.classList.remove('hidden2');
-            showIncidents();
-            showStatistics();
+            showZoneStations(siteData);
+            //showStatistics();
+        }
+        function showZoneStations(data) {
+            // Variable pour stocker l'ensemble des stations pour chaque zone
+            let siteInf = data.map(siteData => {
+                // Vérification si le champ `stations` existe et contient au moins une station
+                if (siteData.stations && siteData.stations.length > 0) {
+                    let stationZoneInfo = siteData.stations.map(station => {
+                        return `
+                            <div class="station-card">
+                                <div class="station-title">Station : ${station.code}</div>
+                                <div class="station-description">Nom de la station : ${station.libelle}</div>
+                                ${station.sources.length > 0 ?  `
+                                    ${station.sources.map(source => {
+                                    const iconUrl = `/images/${source.nom.toLowerCase()}.svg`;
+                                    return `
+                                        <div class="source-card">
+                                            <div class="card-content">
+                                                <img src="${iconUrl}" alt="${source.nom}" style="width: 50px; height: 50px;">
+                                                <div><strong>${source.nom}</strong></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                                ` : 'Aucune source disponible.'}<br>
+                            </div>
+                        `;
+                    }).join(''); // Concaténation des informations des stations
+
+                    // Retourne la structure HTML complète pour chaque zone
+                    return `
+                        <div class="zone-section">
+                            <h3 style="margin-bottom: 0px;">Site : ${siteData.libelle}</h3>
+                            <div class="zone-stations">
+                                ${stationZoneInfo}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Si aucune station n'est trouvée dans la zone
+                    return `
+                        <div class="zone-section">
+                            <h3>Site : ${siteData.libelle}</h3>
+                            <div class="zone-stations">
+                                Aucune station sur cette site.
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join(''); // Concaténation des sections des zonesstations-content
+
+            // Mise à jour du contenu de l'élément avec toutes les informations des zones et stations
+            document.getElementById('stations-content').innerHTML = siteInf;
         }
 
         function removePolygons() {

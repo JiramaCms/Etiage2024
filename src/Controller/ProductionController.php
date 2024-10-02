@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Site;
+use App\Entity\Station;
 use App\Entity\Production;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Doctrine\Persistence\ManagerRegistry;
@@ -45,12 +46,12 @@ class ProductionController extends AbstractController
                     $production = new Production();
                     $production->setDaty(new \DateTime($data[0])); // Colonne date_p
 
-                    $site = $em->getRepository(Site::class)->find($data[1]); // Colonne site_id
-                    if (!$site) {
-                        throw $this->createNotFoundException('Pas de Site trouvé pour ID ' . $data[1]);
+                    $station = $em->getRepository(Station::class)->findOneBy(['code' => $data[1]]); // Colonne site_id correspond à 'code'
+                    if (!$station) {
+                        throw $this->createNotFoundException('Pas de station trouvé pour l\'ID ' . $data[1]);
                     }
 
-                    $production->setSite($site);
+                    $production->setStation($station);
                     $production->setQuantite((int)$data[2]); // Colonne qte_produite
                     //dd($production);
                     // Persister l'entité

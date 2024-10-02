@@ -28,7 +28,7 @@
                             {{ form_errors(form.adresse) }}
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         {{ form_label(form.latitude, "Latitude", {'label_attr': {'class': 'form-label-lg'}}) }}
                         {{ form_widget(form.latitude, {'attr': {'class': 'form-control-lg'}}) }}
                         <small>{{ form_help(form.latitude) }}</small>
@@ -36,7 +36,7 @@
                             {{ form_errors(form.latitude) }}
                         </div>
                     </div>
-                    <div class="col-6">
+                    <div class="col-4">
                         {{ form_label(form.longitude, "Longitude", {'label_attr': {'class': 'form-label-lg'}}) }}
                         {{ form_widget(form.longitude, {'attr': {'class': 'form-control-lg'}}) }}
                         <small>{{ form_help(form.longitude) }}</small>
@@ -44,12 +44,12 @@
                             {{ form_errors(form.longitude) }}
                         </div>
                     </div>
-                    <div class="col-12">
-                        {{ form_label(form.sources, "Sources", {'label_attr': {'class': 'form-label-lg'}}) }}
-                        {{ form_widget(form.sources, {'attr': {'class': 'form-control-lg'}}) }}
-                        <small>{{ form_help(form.sources) }}</small>
+                    <div class="col-4">
+                        {{ form_label(form.code, "Code", {'label_attr': {'class': 'form-label-lg'}}) }}
+                        {{ form_widget(form.code, {'attr': {'class': 'form-control-lg'}}) }}
+                        <small>{{ form_help(form.code) }}</small>
                         <div class="form_error">
-                            {{ form_errors(form.sources) }}
+                            {{ form_errors(form.code) }}
                         </div>
                     </div>
 
