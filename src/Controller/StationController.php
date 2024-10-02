@@ -39,7 +39,12 @@ class StationController extends AbstractController
         $form->handleRequest($req);
         if($form->isSubmitted() && $form->isValid()){
             $station = $form->getData();
-            $em = $mr->getManager();
+            ///pour le MANYTOMANY voici quoi faire
+            foreach ($station->getSources() as $source) {
+                $station->addSource($source); // Ajout explicite des sources
+                $source->addStation($station);
+            }
+            //dd($station);
 
             $em->persist($station);
             $em->flush();
@@ -50,22 +55,47 @@ class StationController extends AbstractController
         ]);
     }
 
-    #[Route('/updateStation/{id}', name:'app_update_station')]
-    public function updateObjectif(Station $station,Request $req,ManagerRegistry $mr): Response
+    #[Route('/updateStation/{id}', name: 'app_update_station')]
+    public function updateStation($id, Request $request, ManagerRegistry $mr): Response
     {
-        $form = $this->createForm(StationFormType::class,$station);
-        $form->handleRequest($req);
-        if($form->isSubmitted() && $form->isValid()){
-            $station = $form->getData();
-            $em = $mr->getManager();
+        $em = $mr->getManager();
+    
+        // Récupérer l'entité Station à mettre à jour
+        $station = $em->getRepository(Station::class)->find($id);
+        if (!$station) {
+            throw $this->createNotFoundException('Station non trouvée pour l\'id ' . $id);
+        }
+    
+        // Créer le formulaire
+        $form = $this->createForm(StationFormType::class, $station);
+        $form->handleRequest($request);
+    
+        if ($form->isSubmitted() && $form->isValid()) {
+            $newstation = $form->getData();
 
+            // Supprimer les sources qui ne sont plus présentes
+            foreach ($station->getSources() as $existingSource) {
+                    $station->removeSource($existingSource);  // Supprime la source de la station
+                    $existingSource->removeStation($station); // Supprime la station de la source (bidirectionnel)
+                
+            }
+    
+            // Ajouter les nouvelles sources
+            foreach ($newstation->getSources() as $newSource) {
+                    $newstation->addSource($newSource);  // Ajoute la source à la station
+                    $newSource->addStation($newstation); // Ajoute la station à la source (bidirectionnel)
+            }
+    
+            // Persister et enregistrer les modifications
             $em->persist($station);
+            $em->persist($newstation);
             $em->flush();
 
-            return $this->redirectToRoute('app_liste_objectif');
-        }
-        return $this->render('station/updateStation.html.twig',[
-            'form'=>$form->createView()
-        ]);
+        return $this->redirectToRoute('app_liste_objectif');
     }
+
+    return $this->render('station/updateStation.html.twig', [
+        'form' => $form->createView(),
+    ]);
+}
 }

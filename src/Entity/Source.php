@@ -18,7 +18,8 @@ class Source
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
 
-    #[ORM\ManyToMany(targetEntity: Station::class, inversedBy: 'sources')]
+    #[ORM\ManyToMany(targetEntity: Station::class, inversedBy: 'sources',cascade: ['all'])]
+    //#[ORM\JoinTable(name: 'source_station')]
     private Collection $stations;
 
     public function __construct()
@@ -55,6 +56,8 @@ class Source
     {
         if (!$this->stations->contains($station)) {
             $this->stations->add($station);
+            $station->addSource($this); // Met à jour la relation inverse
+
         }
 
         return $this;

@@ -30,7 +30,7 @@ class Station
     #[ORM\JoinColumn(nullable: false)]
     private ?Site $site = null;
 
-    #[ORM\ManyToMany(targetEntity: Source::class, mappedBy: 'stations')]
+    #[ORM\ManyToMany(targetEntity: Source::class, mappedBy: 'stations',cascade: ['all'])]
     private Collection $sources;
 
     public function __construct()
@@ -123,6 +123,7 @@ class Station
         if (!$this->sources->contains($source)) {
             $this->sources->add($source);
             $source->addStation($this);
+
         }
 
         return $this;
