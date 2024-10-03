@@ -273,6 +273,12 @@ class SiteController extends AbstractController
         $rsite =  $entityManager->getRepository(Site::class);
         $rzone = $entityManager->getRepository(Zone::class);
         $sites = $rsite->findAll();
+        //dd($sites);
+        $this->productionService->calulateEtatSite($sites[1]);
+        foreach ($sites as $site) {
+            $this->productionService->calulateEtatSite($site);
+        }
+        //dd($sites);
         $zones = $rzone->findAll();
         $zone=(Util::toJson($zones));
         $site = (Util::toJson($sites));

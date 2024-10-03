@@ -647,13 +647,16 @@
         }
 
         sitesData.forEach(function(site) {
-            var iconUrl = "/images/marker-green.svg";
+            var iconUrl = "/images/marker-gray.svg";
             if (site.etat == '1') {
                 iconUrl = "/images/marker-blue.svg";
             } else if (site.etat == '2') {
-                iconUrl = "/images/marker-green.svg";
+                iconUrl = "/images/marker-yellow.svg";
             } else if (site.etat == '3') {
                 iconUrl = "/images/marker-orange.svg";
+            }
+            else if (site.etat == '4') {
+                iconUrl = "/images/marker-red.svg";
             }
 
             var markerIcon = L.icon({
