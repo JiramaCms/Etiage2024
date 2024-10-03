@@ -30,8 +30,16 @@
                         <div class="d-flex">
                             <!-- Données du site à gauche -->
                             <div class="site-data col-12">
-                                <p class="mb-0 bold">Nom du site : {{site.libelle}} {{site.id}}</p>
                                 <form>
+                                    <label for="station-select" class="col-2 col-form-label">Stations : </label>
+                                    <div class="col-sm-3">
+                                        <select class="form-select" id="station-select" name="station_id">
+                                        <option value="0" selected>Toutes les stations</option>
+                                        {% for station in site.stations %}
+                                            <option value="{{ station.id }}">{{ station.code }}</option>
+                                        {% endfor %}
+                                        </select>
+                                    </div>
                                     <div class="row mb-3">
                                         <label for="start-date">Date de début:</label>
                                         <div class="col-sm-10">
@@ -54,7 +62,6 @@
                 </div>
             </div>
         </div>
-            eto
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     var minDate = "2024-01-01"; // Exemple de date minimum
@@ -80,16 +87,17 @@
 
                         var startDate = document.getElementById('start-date').value;
                         var endDate = document.getElementById('end-date').value;
+                        var station = document.getElementById('station-select').value;
 
                         if (startDate && endDate) {
                             showLoadingIndicator(true);
-                            fetch('{{ path('site_production_prediction', {'id': site.id}) }}', {
+                            fetch('{{ path('site_production_prediction') }}', {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json',
                                     'X-Requested-With': 'XMLHttpRequest',
                                 },
-                                body: JSON.stringify({ 'start-date': startDate, 'end-date': endDate })
+                                body: JSON.stringify({ 'start-date': startDate, 'end-date': endDate,'stationId':station })
                             })
                             .then(response => response.json())
                             .then(data => {

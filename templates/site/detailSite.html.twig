@@ -32,46 +32,49 @@
             <div class="card info-card sales-card">
 
               <div class="filter">
-                  <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
-                  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                    <li class="dropdown-header text-start">
-                      <h6 id="filter-title">Menu</h6>
-                    </li>
-                    <li><a class="dropdown-item" href="{{ path('app_update_site', {'id': site.id}) }}"  id="filter-today">Modifier le site</a></li>
-                  </ul>
+                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                  <li class="dropdown-header text-start">
+                    <h6 id="filter-title">Menu</h6>
+                  </li>
+                  <li><a class="dropdown-item" href="{{ path('app_update_site', {'id': site.id}) }}"  id="filter-today">Modifier le site</a></li>
+                </ul>
+              </div>
+              <div class="card-body">
+                <h5 class="card-title">Site <span>| Stations</span></h5>
+                <div class="d-flex">
+                      <!-- Données du site à gauche -->
+                      <div class="site-data col-6">
+                          <p class="mb-0 bold">Nom du site : {{site.libelle}}</p>
+                          <p class="mb-0"><strong style=" color:rgba(1, 41, 112, 0.6);">Adresse</strong> : {{site.adresse}}</p>
+                          <p class="mb-0 "><strong style=" color:rgba(1, 41, 112, 0.6);">Stations</strong> : 
+                                {% for station in site.stations %}
+                                  {{ station.code }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                          </p>
+                          <p class="mb-0"><strong style=" color:rgba(1, 41, 112, 0.6);">Latitude</strong> : {{site.coord.latitude}}</p>
+                          <p class="mb-0"><strong style=" color:rgba(1, 41, 112, 0.6);">Longitude </strong>: {{site.coord.longitude}}</p>
+                      </div>
+
+                      <!-- Ligne de séparation -->
+                      <div class="separator" style="border-left: 1px solid red; height: 100%;"></div>
+
+                      <!-- Données de la zone à droite -->
+                      <div class="zone-data col-6 ps-3">
+                      {% if zonej is not null %}
+                        {% for zone in zonej %}
+                              <p class="mb-0 bold">Nom de la zone : {{zone.libelle}}</p>
+                              <p class="mb-0">Description : {{zone.description}}</p>
+                        {% endfor %}
+                      {% endif %}  
+                      </div>
+                  </div>
+                  <div class="d-flex justify-content-end mt-1">
+                    <a class="nav-link btn btn-secondary" href="{{ path('app_prediction_production_site', {'id': site.id}) }}">
+                        <span class="fa fa-home"></span> Faire une Prevision
+                    </a>
                 </div>
-
-                <div class="card-body">
-                    <h5 class="card-title">Site <span>| Stations</span></h5>
-
-                    <div class="d-flex">
-                        <!-- Données du site à gauche -->
-                        <div class="site-data col-6">
-                            <p class="mb-0 bold">Nom du site : {{site.libelle}}</p>
-                            <p class="mb-0"><strong style=" color:rgba(1, 41, 112, 0.6);">Adresse</strong> : {{site.adresse}}</p>
-                            <p class="mb-0 "><strong style=" color:rgba(1, 41, 112, 0.6);">Stations</strong> : 
-                                  {% for station in site.stations %}
-                                   {{ station.code }}{% if not loop.last %}, {% endif %}
-                                  {% endfor %}
-                            </p>
-                            <p class="mb-0"><strong style=" color:rgba(1, 41, 112, 0.6);">Latitude</strong> : {{site.coord.latitude}}</p>
-                            <p class="mb-0"><strong style=" color:rgba(1, 41, 112, 0.6);">Longitude </strong>: {{site.coord.longitude}}</p>
-                        </div>
-
-                        <!-- Ligne de séparation -->
-                        <div class="separator" style="border-left: 1px solid red; height: 100%;"></div>
-
-                        <!-- Données de la zone à droite -->
-                        <div class="zone-data col-6 ps-3">
-                        {% if zonej is not null %}
-                          {% for zone in zonej %}
-                                <p class="mb-0 bold">Nom de la zone : {{zone.libelle}}</p>
-                                <p class="mb-0">Description : {{zone.description}}</p>
-                          {% endfor %}
-                        {% endif %}  
-                        </div>
-                    </div>
-                </div>
+              </div>
             </div>
         </div><!-- End SIte Card -->
 

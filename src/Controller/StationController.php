@@ -82,8 +82,8 @@ class StationController extends AbstractController
     
             // Ajouter les nouvelles sources
             foreach ($newstation->getSources() as $newSource) {
-                    $newstation->addSource($newSource);  // Ajoute la source à la station
-                    $newSource->addStation($newstation); // Ajoute la station à la source (bidirectionnel)
+                    $station->addSource($newSource);  // Ajoute la source à la station
+                    $newSource->addStation($station); // Ajoute la station à la source (bidirectionnel)
             }
     
             // Persister et enregistrer les modifications

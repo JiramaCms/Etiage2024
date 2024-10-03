@@ -6,6 +6,7 @@ use App\Util\Util;
 use App\Entity\Site;
 use App\Entity\Zone;
 use App\Entity\Source;
+use App\Entity\Station;
 use App\Entity\Production;
 use App\Form\SiteFormType;
 use App\Entity\SiteProduction;
@@ -37,9 +38,8 @@ class SiteController extends AbstractController
         return $this->render('site/index.html.twig', [
         ]);
     }
-
-    #[Route('/site/prediction', name: 'app_prediction_production_site')]
-    public function predictionProduction(EntityManagerInterface $entityManager): Response
+    #[Route('/site/prediction/{id}', name: 'app_prediction_production_site')]
+    public function predictionProduction($id,EntityManagerInterface $entityManager): Response
     {
         /*$data = [
             [
@@ -67,7 +67,7 @@ class SiteController extends AbstractController
         ]);
        $data = $response->toArray();*/
        $rsite = $entityManager->getRepository(Site::class);
-        $site = $rsite->find(2);
+        $site = $rsite->find($id);
         $siteJ = (Util::toJson($site));
         //dump($zoneOfSite,$site);die();
         return $this->render('site/predictionProd.html.twig', [
@@ -75,19 +75,39 @@ class SiteController extends AbstractController
             'sitej' => $siteJ,
         ]);
     }
-    #[Route('site/prediction/production/{id}', name : 'site_production_prediction')]
-    public function siteProductionPrediction(Site $site,EntityManagerInterface $entityManager,Request $request): Response
+    #[Route('site/predict/production', name : 'site_production_prediction')]
+    public function siteProductionPrediction(EntityManagerInterface $entityManager,Request $request): Response
     {   
-        $siteName = $site->getLibelle();
         $startDate = $request->getContent(); // Lire les données JSON envoyées
         $data = json_decode($startDate, true);        
         $start = new \DateTime($data['start-date']);
         $end = new \DateTime($data['end-date']);
         $end->modify('+1 day');  // Inclure le dernier jour
+
+        $stationI = $data['stationId'];
+        $rstation = $entityManager->getRepository(Station::class);
+        $station = $rstation->findOneBy(['id' => $stationI]); // Utiliser un tableau associatif pour rechercher par ID
+        $sources = $station->getSources(); // Récupérer la collection de sources
+        $sourceNames = [];
+        $sourcesArray = $sources->toArray(); // Convertir la collection en tableau
+
+
+        foreach ($sourcesArray as $index => $source) {
+            if ($index === 0) {
+                $sourceNames[] = $source->getNom(); // Garder le premier nom tel quel
+            } else {
+                $sourceNames[] = strtolower($source->getNom()); // Mettre les autres noms en minuscules
+            }
+        }
+        
+        // Joindre les noms avec un '/' comme séparateur
+        $sourceNamesString = implode('/', $sourceNames);
+        $siteCode = $station->getSite()->getCode();
+
     
-        $stationId = 17;
-        $siteId = 0;
-        $source = 4;
+        $stationId = $station->getCode();
+        $siteId = $siteCode;
+        $source = $sourceNamesString;
     
         $data = [];
         $interval = new \DateInterval('P1D');
@@ -378,4 +398,5 @@ class SiteController extends AbstractController
             'sites' => $site,
         ]);
     }    
+    
 }
