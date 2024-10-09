@@ -5,137 +5,139 @@
 {% block menuactive %}map{% endblock %}
 
 {% block body %}
-    <style>
+<style>
         /* Custom styles for the map */
-        #map {
-            height: 500px; 
-            position: relative;
+    #map {
+        height: 600px;
+        width: 100%; 
+        position: relative;
+        z-index: 999;
+    }
+    .legend {
+        background: white;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        position: absolute;
+        bottom: 18px;
+        left: 18px;
+        z-index: 1000;
+    }
+    .legend i {
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        margin-right: 8px;
+        border-radius: 50%;
+    }
+    .legend .toggle-zones {
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .legend .zone-polygon {
+        background: blue; /* Couleur de remplissage du polygone */
+        clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%); /* Pentagone */
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        margin-right: 8px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .strikethrough {
+        opacity: 0.3;
+        text-decoration: line-through;
+    }
+    .sidebar-info {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 380px;
+        height: 100%;
+        background-color: rgba(255, 255, 255, 0.9);
+        padding: 20px;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.5);
+        overflow-y: auto;
+        z-index: 1000;
+        margin: 2px;
+        border-radius: 15px;
+    }
+    .hidden2 {
+        display: none;
+    }
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: transparent;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    .marker-icon-jump {
+        animation: jumpMarker 0.8s infinite alternate;
+    }
+    #overview-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .source-container {
+        display: flex;
+        flex-direction: row-reverse; /* Align icons from right to left */
+        gap: 10px; /* Add some space between cards */
+    }
+
+    .source-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .card-content img {
+        width: 50px;
+        height: 50px;
+    }
+    .station-card {
+        padding: 10px;
+        margin-bottom: 10px;
+        border: 1px solid #ddd; /* Ajoute une bordure autour de chaque incident */
+        border-radius: 5px;    /* Ajoute des coins arrondis */
+        background-color: #f9f9f9; /* Couleur de fond */
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Ombre légère */
+    }
+
+    .station-title {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .station-description {
+        margin-bottom: 5px;
+    }
+
+    .station-date {
+        color: #666; /* Couleur de texte plus claire pour la date */
+        font-size: 0.9em; /* Réduit légèrement la taille de la police */
+    }
+
+    /* Séparateur entre les incidents */
+    .station-card + .station-card {
+        border-top: 1px solid #ddd; /* Trait de séparation */
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+    @keyframes jumpMarker {
+        from {
+            opacity: 1;
         }
-        .legend {
-            background: white;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            position: absolute;
-            bottom: 18px;
-            left: 18px;
-            z-index: 1000;
-        }
-        .legend i {
-            width: 15px;
-            height: 15px;
-            display: inline-block;
-            margin-right: 8px;
-            border-radius: 50%;
-        }
-        .legend .toggle-zones {
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .legend .zone-polygon {
-            background: blue; /* Couleur de remplissage du polygone */
-            clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%); /* Pentagone */
-            width: 15px;
-            height: 15px;
-            display: inline-block;
-            margin-right: 8px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .strikethrough {
+        to {
             opacity: 0.3;
-            text-decoration: line-through;
         }
-        .sidebar-info {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 380px;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 20px;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.5);
-            overflow-y: auto;
-            z-index: 1000;
-            margin: 2px;
-            border-radius: 15px;
-        }
-        .hidden2 {
-            display: none;
-        }
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: transparent;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-        }
-        .marker-icon-jump {
-            animation: jumpMarker 0.8s infinite alternate;
-        }
-        #overview-content {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .source-container {
-            display: flex;
-            flex-direction: row-reverse; /* Align icons from right to left */
-            gap: 10px; /* Add some space between cards */
-        }
-
-        .source-card {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .card-content img {
-            width: 50px;
-            height: 50px;
-        }
-        .station-card {
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd; /* Ajoute une bordure autour de chaque incident */
-            border-radius: 5px;    /* Ajoute des coins arrondis */
-            background-color: #f9f9f9; /* Couleur de fond */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Ombre légère */
-        }
-
-        .station-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .station-description {
-            margin-bottom: 5px;
-        }
-
-        .station-date {
-            color: #666; /* Couleur de texte plus claire pour la date */
-            font-size: 0.9em; /* Réduit légèrement la taille de la police */
-        }
-
-        /* Séparateur entre les incidents */
-        .station-card + .station-card {
-            border-top: 1px solid #ddd; /* Trait de séparation */
-            padding-top: 10px;
-            margin-top: 10px;
-        }
-        @keyframes jumpMarker {
-            from {
-                opacity: 1;
-            }
-            to {
-                opacity: 0.3;
-            }
-        }
-    </style>
+    }
+</style>
 
     <main id="main" class="main">
 
@@ -157,8 +159,10 @@
 
                 <div class="card">
                     <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title">Sites Madagascar</h5>
-
+                        <button class="btn btn-secondary" onclick="{{ path('site_liste') }}">Faire une prévision sur la map</button>
+                        </div>
                         <div id="map">
                             <div id="card-container"></div>
                             <div class="sidebar-info hidden2" id="sidebar-info">
@@ -195,14 +199,17 @@
                             </div>
                         </div>
                         <div id="legend" class="legend">
-                            <h5>Légende</h5>
-                            <div><i style="background: blue;"></i> Site bleu</div>
-                            <div><i style="background: green;"></i> Site vert</div>
-                            <div><i style="background: orange;"></i> Site orange</div>
+                            <cente><h5>Légende</h5></center>
+                            <div><i style="background: gray;"></i>Pas de Gap</div>
+                            <div><i style="background: blue;"></i>Production juste </div>
+                            <div><i style="background: yellow;"></i>Gap < 25%</div>
+                            <div><i style="background: orange;"></i>25% < Gap < 50%</div>
+                            <div><i style="background: red;"></i>Gap > 50%</div>
                             <i class="zone-polygon" id="legend-text" onclick="toggleZonesVisibility()"></i> 
                             <span id="zone-label" class="">Zone</span>
                         </div>
                         <!-- End Table with stripped rows -->
+                        
 
                     </div>
                 </div>
@@ -216,11 +223,14 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
     <script src="https://unpkg.com/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
     <script>
-        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 10);
+        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 6);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
         }).addTo(map);
+
+        map.addControl(new L.Control.Fullscreen());
+
 
         var zones = {{ zone|raw }};
         let sitesData =  {{ sites|raw }};
@@ -232,7 +242,7 @@
             var siteId = currentSelectedMarker;
             fetchSiteDetails(siteId);
         }
-
+        
         function showStations() {
             var siteId = currentSelectedMarker;
             var siteData = sitesData.find(site => site.id === siteId);
@@ -650,7 +660,7 @@
             var iconUrl = "/images/marker-gray.svg";
             if (site.etat == '1') {
                 iconUrl = "/images/marker-blue.svg";
-            } else if (site.etat == '2') {
+            }  else if (site.etat == '2') {
                 iconUrl = "/images/marker-yellow.svg";
             } else if (site.etat == '3') {
                 iconUrl = "/images/marker-orange.svg";
@@ -682,6 +692,7 @@
 
             });
         });
+        
 
         map.zoomControl.setPosition('bottomright');
     </script>

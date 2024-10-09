@@ -38,34 +38,59 @@ class SiteController extends AbstractController
         return $this->render('site/index.html.twig', [
         ]);
     }
+    #[Route('/prevision', name: 'app_map_prevision')]
+    public function previsionMap(EntityManagerInterface $entityManager): Response
+    {
+        $rsite =  $entityManager->getRepository(Site::class);
+        $rzone = $entityManager->getRepository(Zone::class);
+        $sites = $rsite->findAll();
+        $zones = $rzone->findAll();
+        $zone=(Util::toJson($zones));
+        $site = (Util::toJson($sites));
+        return $this->render('site/previsionMap.html.twig', [
+            'sites' => $site,
+            'zone' => $zone,
+        ]);
+    }
+    #[Route('site/prevision/etiage', name : 'site_etiage_prevision')]
+    public function siteEtiagePrediction(EntityManagerInterface $entityManager,Request $request): Response
+    {   
+        $startDate = $request->getContent(); // Lire les données JSON envoyées
+        $data = json_decode($startDate, true);        
+        //$start = new \DateTime($data['start-date']);
+        //$end = new \DateTime($data['end-date']);
+        //$end->modify('+1 day');  // Inclure le dernier jour
+        $start = new \DateTime("2024-12-01");
+        $end = new \DateTime("2024-12-31");
+
+        $rsite =  $entityManager->getRepository(Site::class);
+        $sites = $rsite->findAll();
+        $rep = [];
+        // Boucle sur chaque site pour générer les prévisions
+        foreach ($sites as $site) {
+            // Vérifier que le site a des stations associées
+            $stations = $site->getStations(); // getStations() doit être une méthode qui retourne les stations d'un site
+            if (count($stations) > 0) {
+                $station = $stations[0]; // Prendre la première station
+                // Appeler le service de production pour générer la prévision
+                $prevision = $this->productionService->makePrevision($station, $start, $end, $entityManager);
+                $this->productionService->calulateEtatSitePrevision($site,$prevision);
+                // Ajouter les résultats dans le tableau de réponse
+                $rep[] = [
+                    'site' =>$site, // ou autre méthode pour obtenir le nom du site
+                    'prevision'=>$prevision,
+                ];
+            }
+        }
+        $reponse = (Util::toJson($rep));
+
+    
+        // Convertir le tableau en JSON et retourner la réponse
+        return new JsonResponse($reponse);
+    }
     #[Route('/site/prediction/{id}', name: 'app_prediction_production_site')]
     public function predictionProduction($id,EntityManagerInterface $entityManager): Response
     {
-        /*$data = [
-            [
-                'station_id' => 43,
-                'site_id' => 18,
-                'source' => 0,
-                'year' => 2024,
-                'month' => 7,
-                'day' => 9
-            ],
-            [
-                'station_id' => 43,
-                'site_id' => 18,
-                'source' => 0,
-                'year' => 2024,
-                'month' => 7,
-                'day' => 10
-            ]
-        ];
-       // Appel de l'API Flask
-       $client = HttpClient::create();
-       $response = $client->request('POST', 'http://127.0.0.1:5000/predict', [
-        'json' => $data,
-
-        ]);
-       $data = $response->toArray();*/
        $rsite = $entityManager->getRepository(Site::class);
         $site = $rsite->find($id);
         $siteJ = (Util::toJson($site));
@@ -87,6 +112,13 @@ class SiteController extends AbstractController
         $stationI = $data['stationId'];
         $rstation = $entityManager->getRepository(Station::class);
         $station = $rstation->findOneBy(['id' => $stationI]); // Utiliser un tableau associatif pour rechercher par ID
+        if ($station === null) {
+            // Si la station n'existe pas, retourne un tableau vide
+            return new JsonResponse([
+                'error' => 'Station not found',
+                'data' => []
+            ], 404);
+        }
         $sources = $station->getSources(); // Récupérer la collection de sources
         $sourceNames = [];
         $sourcesArray = $sources->toArray(); // Convertir la collection en tableau
@@ -242,7 +274,7 @@ class SiteController extends AbstractController
 
 
         // Rediriger vers
-        return $this->redirectToRoute('app_site');
+        return $this->redirectToRoute('site_liste');
     }
 
     #[Route('/updateSite/{id}', name:'app_update_site')]
@@ -274,7 +306,7 @@ class SiteController extends AbstractController
         $rzone = $entityManager->getRepository(Zone::class);
         $sites = $rsite->findAll();
         //dd($sites);
-        $this->productionService->calulateEtatSite($sites[1]);
+        //$this->productionService->calulateEtatSite($sites[1]);
         foreach ($sites as $site) {
             $this->productionService->calulateEtatSite($site);
         }

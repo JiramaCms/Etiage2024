@@ -48,7 +48,7 @@ class StationController extends AbstractController
 
             $em->persist($station);
             $em->flush();
-            return $this->redirectToRoute('app_liste_objectif');
+            return $this->redirectToRoute('site_liste');
         }
         return $this->render('station/addStation.html.twig', [
             'form'=>$form->createView()
@@ -91,7 +91,7 @@ class StationController extends AbstractController
             $em->persist($newstation);
             $em->flush();
 
-        return $this->redirectToRoute('app_liste_objectif');
+        return $this->redirectToRoute('site_liste');
     }
 
     return $this->render('station/updateStation.html.twig', [

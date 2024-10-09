@@ -1,0 +1,460 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Map of Madagascar prévision{% endblock %}
+
+{% block menuactive %}map{% endblock %}
+
+{% block body %}
+<style>
+    #map {
+        height: 700px;
+        width: 100%;
+        position: relative;
+    }
+
+    .content-container {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .map-section {
+        width: 65%;
+        position: relative;
+    }
+
+    .form-chart-column {
+        width: 35%;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+        background-color: #fffffc;
+        color: #444;
+    }
+
+    .form-section {
+        margin-bottom: 20px;
+    }
+
+    .chart-section {
+        background-color: #ffffff;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .marker-icon-jump {
+        animation: jumpMarker 0.8s infinite alternate;
+    }
+
+    @keyframes jumpMarker {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0.3;
+        }
+    }
+
+    /* Style pour la légende */
+    .legend {
+        position: absolute;
+        bottom: 30px;
+        background-color: white;
+        border: 0.5px solid #444;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        font-size: 14px;
+        line-height: 18px;
+        color: #333;
+        z-index: 1000;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .legend h5 {
+        margin-top: 0;
+        font-size: 16px;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    .legend div {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    /* Retirer la bordure inférieure du dernier élément */
+    .legend div:last-child {
+        border-bottom: none;
+    }
+
+    /* Style des icônes FontAwesome */
+    .legend i {
+        font-size: 18px;
+        margin-right: 8px;
+    }
+
+    /* Couleurs des icônes */
+    .legend .fa-map-marker-gray {
+        color: gray;
+    }
+
+    .legend .fa-map-marker-blue {
+        color: blue;
+    }
+
+    .legend .fa-map-marker-yellow {
+        color: yellow;
+    }
+
+    .legend .fa-map-marker-orange {
+        color: orange;
+    }
+
+    .legend .fa-map-marker-red {
+        color: red;
+    }
+
+    .zone-polygon {
+    background: blue; /* Couleur de remplissage du polygone */
+        clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%); /* Pentagone */
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        margin-right: 8px;
+        cursor: pointer;
+        text-decoration: none;    }
+</style>
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Map Madagascar Prévision</h1>
+        </div>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="content-container">
+            <!-- Section Carte -->
+            <div class="map-section">
+                <div id="map"></div>
+                <div id="legend" class="legend">
+                    <h5>Légende</h5>
+                    <div><i class="fa fa-map-marker fa-map-marker-gray"></i>Pas de Gap</div>
+                    <div><i class="fa fa-map-marker fa-map-marker-blue"></i>Production juste</div>
+                    <div><i class="fa fa-map-marker fa-map-marker-yellow"></i>Gap < 25%</div>
+                    <div><i class="fa fa-map-marker fa-map-marker-orange"></i>25% < Gap < 50%</div>
+                    <div><i class="fa fa-map-marker fa-map-marker-red"></i>Gap > 50%</div>
+                    <i class="zone-polygon" id="legend-text" onclick="toggleZonesVisibility()"></i>
+                    <span id="zone-label">Zone</span>
+                </div>
+            </div>
+
+            <!-- Section Formulaire et Graphique (Colonne de droite) -->
+            <div class="form-chart-column">
+                <!-- Formulaire -->
+                <div class="form-section">
+                    <h5>Prévision des productions</h5>
+                    <form id="dateForm">
+                        <div class="mb-3">
+                            <label for="start-date" class="form-label">Date de début :</label>
+                            <input type="date" class="form-control" id="start-date" name="start-date">
+                        </div>
+                        <div class="mb-3">
+                            <label for="end-date" class="form-label">Date de fin :</label>
+                            <input type="date" class="form-control" id="end-date" name="end-date">
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="submitPrevision">Soumettre</button>
+                        <div id="error-message" style="color: red; display: none;"></div>
+                    </form>
+                </div>
+
+                <!-- Graphique -->
+                <div class="chart-section">
+                    <h5>Graphique de Prévision</h5>
+                    <div id="chart"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<!-- Leaflet and fullscreen -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
+<script src="https://unpkg.com/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
+
+<!-- Chart.js or ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var zones = {{ zone|raw }};
+    let sitesData =  {{ sites|raw }};
+    var polygons = [];
+    let previsions = [];
+    var zonesVisible = true;
+
+    function addPolygons(zones) {
+        removePolygons();
+        zones.forEach(function(zone) {
+            var coordinates = zone.coord.map(function(coord) {
+                return [coord.latitude, coord.longitude];
+            });
+            var polygon = L.polygon(coordinates).addTo(map).bindPopup(zone.libelle);
+            polygons.push(polygon);
+        });
+    }
+
+    function removePolygons() {
+        polygons.forEach(function(polygon) {
+            map.removeLayer(polygon);
+        });
+        polygons = [];
+    }
+
+    function toggleZonesVisibility() {
+        var toggleElement = document.querySelector('.zone-polygon');
+        var zoneLabel = document.getElementById('zone-label');
+        zonesVisible = !zonesVisible;
+        if (zonesVisible) {
+            addPolygons(zones);
+            toggleElement.classList.remove('strikethrough');
+            zoneLabel.classList.remove('strikethrough');
+        } else {
+            removePolygons();
+            toggleElement.classList.add('strikethrough');
+            zoneLabel.classList.add('strikethrough');
+        }
+    }
+
+    addPolygons(zones);
+
+    var markers = [];
+    sitesData.forEach(function(site){
+        var iconUrl = "/images/marker-gray.svg";
+        if (site.etat == '1') {
+            iconUrl = "/images/marker-blue.svg";
+        }  else if (site.etat == '2') {
+            iconUrl = "/images/marker-yellow.svg";
+        } else if (site.etat == '3') {
+            iconUrl = "/images/marker-orange.svg";
+        }
+        else if (site.etat == '4') {
+            iconUrl = "/images/marker-red.svg";
+        }
+        var markerIcon = L.icon({
+            iconUrl: iconUrl,
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34]
+        });
+        var marker = L.marker([site.latitude, site.longitude], { icon: markerIcon }).addTo(map).bindPopup(site.libelle);
+        markers.push(marker);
+
+        marker.on('click', function(e) {
+            map.setView(e.latlng, 12);
+
+            markers.forEach(function(m) {
+                m.getElement().classList.remove('marker-icon-jump');
+            });
+
+            e.target.getElement().classList.add('marker-icon-jump');
+            
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        var minDate = "2024-01-01"; // Exemple de date minimum
+        var maxDate = "2025-12-31"; // Exemple de date maximum
+
+        var startDatePicker = flatpickr("#start-date", {
+            minDate: minDate,
+            maxDate: maxDate,
+            onChange: function(selectedDates, dateStr, instance) {
+                var minDate = instance.selectedDates[0];
+                minDate.setDate(minDate.getDate() + 1);
+                endDatePicker.set('minDate', minDate);
+            }
+        });
+
+        var endDatePicker = flatpickr("#end-date", {
+            minDate: minDate,
+            maxDate: maxDate
+        });
+    document.getElementById('submitPrevision').addEventListener('click', function(event) {
+    event.preventDefault(); // Empêche la soumission par défaut du formulaire
+
+    var startDate = document.getElementById('start-date').value;
+    var endDate = document.getElementById('end-date').value;
+
+    if (startDate && endDate) {
+        fetch('{{ path('site_etiage_prevision') }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ 'start-date': startDate, 'end-date': endDate })
+        })
+        .then(response => response.json())
+        .then(data => {
+            let datas = JSON.parse(data);
+            previsions = datas;
+            console.log('Response previsions:', previsions);
+
+            // 1. Efface les anciens marqueurs de la carte
+            markers.forEach(function(marker) {
+                map.removeLayer(marker);
+            });
+            markers = [];
+
+            // 2. Ajoute les nouveaux marqueurs avec les nouvelles données
+            datas.forEach(function(data) {
+                //console.log(data.site.etat);
+                var iconUrl = "/images/marker-gray.svg"; // Défaut
+                if (data.site.etat == '1') {
+                    iconUrl = "/images/marker-blue.svg";
+                } else if (data.site.etat == '2') {
+                    iconUrl = "/images/marker-yellow.svg";
+                } else if (data.site.etat == '3') {
+                    iconUrl = "/images/marker-orange.svg";
+                } else if (data.site.etat == '4') {
+                    iconUrl = "/images/marker-red.svg";
+                }
+
+                var markerIcon = L.icon({
+                    iconUrl: iconUrl,
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34]
+                });
+
+                var marker = L.marker([data.site.latitude, data.site.longitude], { icon: markerIcon }).addTo(map).bindPopup(data.site.code);
+                markers.push(marker);
+
+                marker.on('click', function(e) {
+                    map.setView(e.latlng, 12);
+
+                    markers.forEach(function(m) {
+                        m.getElement().classList.remove('marker-icon-jump');
+                    });
+
+                    e.target.getElement().classList.add('marker-icon-jump');
+                    updateChartWithForecasty(previsions, data.site.id);
+
+                });
+            });
+
+        })
+        .catch(error => {
+            console.error('Error during prediction:', error);
+            var errorMessageElement = document.getElementById('error-message');
+            errorMessageElement.style.display = 'block';
+            errorMessageElement.textContent = 'Une erreur est survenue lors de la prévision. Veuillez réessayer.';
+        });
+        } else {
+            alert('Veuillez sélectionner une date de début et une date de fin.');
+        }
+    });
+    });
+
+    let chart; // Déclaration d'une instance globale pour le graphique
+
+    function updateChartWithData(labels, data) {
+        if (chart) {
+            chart.updateSeries([{
+                name: 'Production m³',
+                data: data,
+            }]);
+            chart.updateOptions({
+                xaxis: { categories: labels },
+            });
+        } else {
+            chart = new ApexCharts(document.querySelector("#chart"), {
+                series: [{
+                    name: 'Production m³',
+                    data: data,
+                }],
+                chart: {
+                    height: 350,
+                    type: 'area',
+                    toolbar: { show: false },
+                },
+                markers: {
+            size: 4
+        },
+        colors: ['#4154f1'],
+        fill: {
+            type: "gradient",
+            gradient: {
+            shadeIntensity: 1,
+            opacityFrom: 0.3,
+            opacityTo: 0.4,
+            stops: [0, 90, 100]
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+                xaxis: { categories: labels },
+            });
+            chart.render();
+        }
+    }
+
+    // Fonction pour mettre à jour le graphique avec les prévisions
+    function updateChartWithForecasty(prevision, siteId) {
+        // 1. Extraire les prévisions pour le site correspondant
+        let production = null;
+        prevision.forEach(function(prev) {
+            if (prev.site.id === siteId) {
+                production = prev.prevision.predictions;
+                return; // Arrêter la boucle dès que le site est trouvé
+            }
+        });
+
+        // Vérifier si des données de prévision ont été trouvées pour le site
+        if (!production || production.length === 0) {
+            console.error('Aucune prévision trouvée pour le site avec l\'ID:', siteId);
+            return; // Si aucune prévision, arrêter la fonction
+        }
+        //console.log(production);
+
+         // 2. Extraire les 10 dernières données de prévision
+        const last10Data = production.slice(-10).map(item => ({
+            date: item.date, 
+            prediction: item.prediction // La quantité produite de la prévision
+        }));
+
+        // Extraire les labels (dates) et les données (prévisions)
+        const labels = last10Data.map(item => item.date);
+        const data = last10Data.map(item => item.prediction);
+
+        //console.log(labels, data);
+
+        // Mettre à jour le graphique avec les labels et les données
+        updateChartWithData(labels, data);
+    }
+
+</script>
+{% endblock %}
