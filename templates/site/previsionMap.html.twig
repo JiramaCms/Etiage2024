@@ -63,7 +63,7 @@
     /* Style pour la légende */
     .legend {
         position: absolute;
-        bottom: 30px;
+        bottom: 0px;
         background-color: white;
         border: 0.5px solid #444;
         padding: 10px;
@@ -184,8 +184,9 @@
 
                 <!-- Graphique -->
                 <div class="chart-section">
-                    <h5>Graphique de Prévision</h5>
-                    <div id="chart"></div>
+                    <div id="chart">
+                        <h5>Statistique de Prévision</h5>
+                    </div>
                 </div>
             </div>
         </div>
@@ -345,7 +346,7 @@
                     popupAnchor: [1, -34]
                 });
 
-                var marker = L.marker([data.site.latitude, data.site.longitude], { icon: markerIcon }).addTo(map).bindPopup(data.site.code);
+                var marker = L.marker([data.site.latitude, data.site.longitude], { icon: markerIcon }).addTo(map).bindPopup(data.site.libelle);
                 markers.push(marker);
 
                 marker.on('click', function(e) {
@@ -373,6 +374,7 @@
         }
     });
     });
+
 
     let chart; // Déclaration d'une instance globale pour le graphique
 
@@ -416,7 +418,12 @@
             curve: 'smooth',
             width: 2
         },
-                xaxis: { categories: labels },
+        yaxis: {
+            title: {
+            text: 'Production en m³'
+            }
+        },
+        xaxis: { categories: labels },
             });
             chart.render();
         }

@@ -4,7 +4,10 @@ namespace App\Controller;
 
 use App\Entity\Type;
 use App\Form\TypeFormType;
+use App\Repository\TypeRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,13 +16,21 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class TypeController extends AbstractController
 {
     #[Route('/materiel', name: 'app_liste_materiel')]
-    public function index(ManagerRegistry $mr): Response
+    public function index(EntityManagerInterface $entityManager,Request $request, PaginatorInterface $paginator): Response
     {
-        $allMateriel= $mr->getRepository(Type::class)->findAll();
-        //dump($allAction);die();
-        return $this->render('materiel/index.html.twig', [
-            'materiaux' => $allMateriel,
-        ]);
+         // Création de la requête avec QueryBuilder
+         $materiauxQuery = $entityManager->getRepository(Type::class)->createQueryBuilder('t')->getQuery();
+
+         // Pagination
+         $materiaux = $paginator->paginate(
+             $materiauxQuery,
+             $request->query->getInt('page', 1),
+             10 // Nombre d'éléments par page
+         );
+ 
+         return $this->render('materiel/index.html.twig', [
+             'materiaux' => $materiaux,
+         ]);
     }
 
     #[Route('/addMateriel',name: 'app_add_materiel')]

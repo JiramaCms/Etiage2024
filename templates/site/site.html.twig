@@ -143,9 +143,17 @@
 
     <div class="pagetitle">
 
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-1">
             <h1>Map Madagascar</h1>
+            <div class="filter">
+                <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+                <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <li><a class="dropdown-item" href="{{ path('new_zone') }}"  id="filter-day">Nouvelle Zone</a></li>
+                <li><a class="dropdown-item" href="{{ path('app_insert_site') }}"  id="filter-month">Nouveau Site</a></li>
+                </ul>
+            </div>
         </div>
+        
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
@@ -161,7 +169,9 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title">Sites Madagascar</h5>
-                        <button class="btn btn-secondary" onclick="{{ path('site_liste') }}">Faire une prévision sur la map</button>
+                        <a class="nav-link btn btn-secondary" href="{{ path('app_map_prevision') }}">
+                            Faire une Simulation sur la map
+                        </a>
                         </div>
                         <div id="map">
                             <div id="card-container"></div>
@@ -180,7 +190,7 @@
                                 </ul>
                                 <div class="tab-content">
                                     <div class="tab-pane fade show active" id="overview" role="tabpanel">
-                                        <h4>Overview</h4>
+                                        <h4>Overview : </h4>
                                         <div id="source-icons"></div> <!-- Placeholder for source icons -->
                                         <p id="overview-content"></p>
                                     </div>

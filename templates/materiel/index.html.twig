@@ -33,6 +33,7 @@
                                     <th>Code</th>
                                     <th>Capacité en m³</th>
                                     <th>Disposition</th>
+                                    <th>Coût</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -48,6 +49,7 @@
                                                 Indisponible
                                             {% endif %}
                                         </td>
+                                        <td>{{materiel.cout | number_format(0, ',', ' ') }}Ar</td>
                                         <td>
                                             <a href="{{ path('app_update_materiel', {'id': materiel.id}) }}" class="btn btn-secondary">Modifier</a>
                                         </td>
@@ -56,7 +58,11 @@
                             </tbody>
                         </table>
                         <!-- End Table with stripped rows -->
-
+                        <!-- Ajout de la pagination -->
+                            {{ knp_pagination_render(
+                                materiaux,
+                                '@KnpPaginator/Pagination/twitter_bootstrap_v4_pagination.html.twig',
+                            ) }}
                     </div>
                 </div>
 
