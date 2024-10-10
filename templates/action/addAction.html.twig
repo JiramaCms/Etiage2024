@@ -47,10 +47,8 @@
                                 {{ form_errors(form.avancement) }}
                             </div>
                         </div>
-
-                        
-
                         <div class="text-center mt-4">
+                            <a href="{{ path('app_detail_observation', {'id': form.vars.value.objectif.id}) }}"><button type='button' class="btn btn-info">Retour</button></a>
                             <button type="submit" class="btn btn-secondary">Ajouter l'action</button>
                         </div>
 

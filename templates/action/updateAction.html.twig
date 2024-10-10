@@ -30,7 +30,7 @@
                     </div>
 
                     <div class="col-12">
-                        {{ form_label(form.dateDebut, "Début du projet", {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_label(form.dateDebut, "Début de l'action", {'label_attr': {'class': 'form-label'}}) }}
                         {{ form_widget(form.dateDebut, {'attr': {'class': 'form-control'}}) }}
                         <small>{{ form_help(form.dateDebut) }}</small>
                         <div class="form_error">
@@ -39,7 +39,7 @@
                     </div>
 
                     <div class="col-12">
-                        {{ form_label(form.dateFin, "Fin du projet", {'label_attr': {'class': 'form-label'}}) }}
+                        {{ form_label(form.dateFin, "Fin de l'action", {'label_attr': {'class': 'form-label'}}) }}
                         {{ form_widget(form.dateFin, {'attr': {'class': 'form-control'}}) }}
                         <small>{{ form_help(form.dateFin) }}</small>
                         <div class="form_error">
@@ -55,9 +55,9 @@
                             {{ form_errors(form.avancement) }}
                         </div>
                     </div>
-
                     <!-- Bouton de soumission -->
                     <div class="text-center">
+                        <a href="{{ path('app_detail_action', {'id': form.vars.value.objectif.id}) }}"><button type='button' class="btn btn-info">Retour</button></a>
                         <input type="submit" value="Modifier l'action" class="btn btn-secondary">
                     </div>
                     

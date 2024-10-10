@@ -12,11 +12,13 @@
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Site : Alasora</h1>
+      <h1>Site : {{site.libelle}}</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Map</a></li>
-          <li class="breadcrumb-item active">Dashboard</li>
+            <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
+            <li class="breadcrumb-item "><a href="{{ path('detail_site', {'id':site.id}) }}">Site</a></li>
+            <li class="breadcrumb-item active">Prédiction</li>
+
         </ol>
       </nav>
     </div><!-- End Page Title -->

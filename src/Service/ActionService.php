@@ -198,6 +198,86 @@ class ActionService
             'cout' => $min_cost
         ];
     }
+
+    public function bestActionToTakeWithoutBudget($capacite_cible) {
+
+        $allMateriel = $this->typeRepository->findAll();
+        usort($allMateriel, function($a, $b) {
+            return $a->getCout() <=> $b->getCout();
+        });
+    
+        // Variables pour stocker la meilleure combinaison trouvée
+        $best_combination = [];
+        $min_cost = PHP_INT_MAX;
+        $best_capacity = 0;
+        $min_materials_combination = []; // Pour stocker la combinaison avec le minimum de matériaux
+        $min_materials_count = PHP_INT_MAX; // Pour stocker le nombre minimal de matériaux utilisés
+    
+        // Fonction récursive pour explorer toutes les combinaisons possibles
+        function findCombin($current_combination, $current_cost, $current_capacity, $index, $allMateriel, $capacite_cible, &$best_combination, &$min_cost, &$best_capacity, &$min_materials_combination, &$min_materials_count) {
+            // Vérifier si la capacité cible est atteinte ou dépassée
+            if ($current_capacity >= $capacite_cible) {
+                // Si on trouve une combinaison avec un coût inférieur et moins de matériaux utilisés
+                if ($current_cost < $min_cost || ($current_cost == $min_cost && count($current_combination) < $min_materials_count)) {
+                    $best_combination = $current_combination;
+                    $min_cost = $current_cost;
+                    $best_capacity = $current_capacity;
+                    $min_materials_combination = $current_combination;
+                    $min_materials_count = count($current_combination);
+                }
+            }
+    
+            // Retourner si l'index dépasse la taille de l'ensemble des matériaux
+            if ($index >= count($allMateriel)) {
+                return;
+            }
+    
+            // Explorer l'ajout du matériau actuel
+            $materiel = $allMateriel[$index];
+            $new_cost = $current_cost + $materiel->getCout();
+    
+            // Explorer avec le matériau actuel
+            findCombin(
+                array_merge($current_combination, [$materiel]),
+                $new_cost,
+                $current_capacity + $materiel->getCapacite(),
+                $index + 1,
+                $allMateriel,
+                $capacite_cible,
+                $best_combination,
+                $min_cost,
+                $best_capacity,
+                $min_materials_combination,
+                $min_materials_count
+            );
+    
+            // Explorer sans ajouter le matériau actuel
+            findCombin(
+                $current_combination,
+                $current_cost,
+                $current_capacity,
+                $index + 1,
+                $allMateriel,
+                $capacite_cible,
+                $best_combination,
+                $min_cost,
+                $best_capacity,
+                $min_materials_combination,
+                $min_materials_count
+            );
+        }
+    
+        // Appel initial de la fonction récursive
+        findCombin([], 0, 0, 0, $allMateriel, $capacite_cible, $best_combination, $min_cost, $best_capacity, $min_materials_combination, $min_materials_count);
+    
+        // Retourne la meilleure combinaison avec son coût total, sa capacité totale et le nombre minimal de matériaux utilisés
+        return [
+            'types' => $best_combination,
+            'capacite' => $best_capacity,
+            'cout' => $min_cost,
+            'nombre_de_materiaux' => count($best_combination),
+        ];
+    }
     
     
 }

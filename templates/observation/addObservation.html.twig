@@ -46,9 +46,9 @@
                             <div class="form_error">
                                 {{ form_errors(form.dateHeure) }}
                             </div>
-                        </div>
-                        
+                        </div>                        
                         <div class="text-center">
+                            <a href="{{ path('app_detail_action', {'id': form.vars.value.action.id}) }}"><button type='button' class="btn btn-info">Retour</button></a>
                             <button type="submit" class="btn btn-secondary">Ajouter l'observation</button>
                         </div>
                         

@@ -11,6 +11,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 
 class ObjectifFormType extends AbstractType
 {
@@ -18,7 +19,7 @@ class ObjectifFormType extends AbstractType
     {
         $builder
             ->add('libelle')
-            ->add('description')
+            ->add('description',TextareaType::class)
             ->add('budget')
             ->add('deadline',DateType::class,[
                 'widget' => 'single_text',

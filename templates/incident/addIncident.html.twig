@@ -52,7 +52,8 @@
 
                     <!-- Bouton de soumission -->
                     <div class="text-center">
-                        <input type="submit" value="Ajouter incident" class="btn btn-primary btn-lg">
+                        <a href="{{ path('detail_site', {'id': form.vars.data.site.id}) }}"><button type='button' class="btn btn-info ">Retour</button></a>
+                        <input type="submit" value="Ajouter incident" class="btn btn-primary ">
                     </div>
                     
                     {{ form_end(form) }}

@@ -13,29 +13,70 @@
         position: relative;
         z-index: 999;
     }
-    .legend {
-        background: white;
-        padding: 10px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+       .legend {
         position: absolute;
-        bottom: 18px;
-        left: 18px;
+        bottom: 20px;
+        left: 20px;
+        background-color: white;
+        border: 0.5px solid #444;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        font-size: 14px;
+        line-height: 18px;
+        color: #333;
         z-index: 1000;
+        font-family: 'Poppins', sans-serif;
     }
+
+    .legend h5 {
+        margin-top: 0;
+        font-size: 16px;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    .legend div {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    /* Retirer la bordure inférieure du dernier élément */
+    .legend div:last-child {
+        border-bottom: none;
+    }
+
+    /* Style des icônes FontAwesome */
     .legend i {
-        width: 15px;
-        height: 15px;
-        display: inline-block;
+        font-size: 18px;
         margin-right: 8px;
-        border-radius: 50%;
     }
-    .legend .toggle-zones {
-        cursor: pointer;
-        text-decoration: none;
+
+    /* Couleurs des icônes */
+    .legend .fa-map-marker-gray {
+        color: gray;
     }
-    .legend .zone-polygon {
+
+    .legend .fa-map-marker-blue {
+        color: blue;
+    }
+
+    .legend .fa-map-marker-yellow {
+        color: yellow;
+    }
+
+    .legend .fa-map-marker-orange {
+        color: orange;
+    }
+
+    .legend .fa-map-marker-red {
+        color: red;
+    }
+
+    .zone-polygon {
         background: blue; /* Couleur de remplissage du polygone */
         clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%); /* Pentagone */
         width: 15px;
@@ -43,8 +84,8 @@
         display: inline-block;
         margin-right: 8px;
         cursor: pointer;
-        text-decoration: none;
-    }
+        text-decoration: none;    }
+
     .strikethrough {
         opacity: 0.3;
         text-decoration: line-through;
@@ -209,14 +250,14 @@
                             </div>
                         </div>
                         <div id="legend" class="legend">
-                            <cente><h5>Légende</h5></center>
-                            <div><i style="background: gray;"></i>Pas de Gap</div>
-                            <div><i style="background: blue;"></i>Production juste </div>
-                            <div><i style="background: yellow;"></i>Gap < 25%</div>
-                            <div><i style="background: orange;"></i>25% < Gap < 50%</div>
-                            <div><i style="background: red;"></i>Gap > 50%</div>
-                            <i class="zone-polygon" id="legend-text" onclick="toggleZonesVisibility()"></i> 
-                            <span id="zone-label" class="">Zone</span>
+                            <h5>Légende</h5>
+                            <div><i class="fa fa-map-marker fa-map-marker-gray"></i>Pas de Gap</div>
+                            <div><i class="fa fa-map-marker fa-map-marker-blue"></i>Production juste</div>
+                            <div><i class="fa fa-map-marker fa-map-marker-yellow"></i>Gap < 25%</div>
+                            <div><i class="fa fa-map-marker fa-map-marker-orange"></i>25% < Gap < 50%</div>
+                            <div><i class="fa fa-map-marker fa-map-marker-red"></i>Gap > 50%</div>
+                            <i class="zone-polygon" id="legend-text" onclick="toggleZonesVisibility()"></i>
+                            <span id="zone-label">Zone</span>
                         </div>
                         <!-- End Table with stripped rows -->
                         
@@ -319,7 +360,7 @@
                 ${zonesInfo.join('')}
                 
                 <center>
-                    <button class="btn btn-info" onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button>
+                    <button class="btn btn-secondary" onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button>
                 </center>
             `;
             document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview

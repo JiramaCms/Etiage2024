@@ -74,9 +74,10 @@
                                 </div>
                             </div>
                         {% endif %}
-
                         <div class="text-center">
+                            <a href="{{ path('app_detail_observation', {'id': form.vars.value.id}) }}"><button type='button' class="btn btn-dark mr-10">Retour</button></a>
                             <button type="submit" class="btn btn-primary">Modifier</button>
+
                         </div>
 
                         {{ form_end(form) }}
