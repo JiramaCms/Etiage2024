@@ -463,6 +463,11 @@
                             curve: 'smooth',
                             width: 2
                         },
+                        yaxis: {
+                            title: {
+                            text: 'Production d\'eau en m³'
+                            }
+                        },
                         xaxis: { categories: labels },
                     });
                     chart.render();
@@ -501,7 +506,7 @@
                 } else {
                     gapChart = new ApexCharts(document.querySelector("#reportsChartGap"), {
                         series: [{
-                            name: 'Gap',
+                            name: 'Gap en %',
                             data: data,
                         }],
                         chart: {
@@ -526,6 +531,11 @@
                         stroke: {
                             curve: 'smooth',
                             width: 2
+                        },
+                        yaxis: {
+                            title: {
+                            text: 'Gap en %'
+                            }
                         },
                         xaxis: { categories: labels },
                     });

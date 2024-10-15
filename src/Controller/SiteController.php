@@ -38,6 +38,38 @@ class SiteController extends AbstractController
         return $this->render('site/index.html.twig', [
         ]);
     }
+    #[Route('/etiage', name: 'app_map_etiage')]
+    public function etiageMap(EntityManagerInterface $entityManager): Response
+    {
+        $rsite =  $entityManager->getRepository(Site::class);
+        $rzone = $entityManager->getRepository(Zone::class);
+        $sites = $rsite->findAll();
+        $zones = $rzone->findAll();
+        $zone=(Util::toJson($zones));
+        $site = (Util::toJson($sites));
+        return $this->render('site/etiage.html.twig', [
+            'sites' => $site,
+            'zone' => $zone,
+        ]);
+    }
+    #[Route('/predict-etiage', name: 'app_predict_etiage')]
+    public function predictEtiage(EntityManagerInterface $entityManager,Request $request)
+    {
+        $datas = $request->getContent(); // Lire les données JSON envoyées
+        $data = json_decode($datas, true);        
+        //$start = new \DateTime($data['start-date']);
+        //$end = new \DateTime($data['end-date']);
+        $year = $data['year'];
+        $siteZone = $data['siteLibelle'];  // Site ou zone sélectionné(e)
+
+        // Appelle le modèle pour prédire l'étiage
+        $predictedDate = $this->productionService->makeEtiage($siteZone,$year,$entityManager);
+        //dump($predictedDate);
+        $reponse = $this->productionService->finddateEtiage($predictedDate);
+
+        // Retourne la date au frontend
+        return new JsonResponse(['predicted_date' => $reponse]);
+    }
     #[Route('/prevision', name: 'app_map_prevision')]
     public function previsionMap(EntityManagerInterface $entityManager): Response
     {
@@ -76,7 +108,7 @@ class SiteController extends AbstractController
                 $prevision = $this->productionService->makePrevision($station, $start, $end, $entityManager);
                 $this->productionService->calulateEtatSitePrevision($site,$prevision);
                 // Ajouter les résultats dans le tableau de réponse
-                $rep[] = [
+                $rep = [
                     'site' =>$site, // ou autre méthode pour obtenir le nom du site
                     'prevision'=>$prevision,
                 ];

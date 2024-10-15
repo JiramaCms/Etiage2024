@@ -1,0 +1,345 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Map of Madagascar prévision{% endblock %}
+
+{% block menuactive %}map{% endblock %}
+
+{% block body %}
+<style>
+    #map {
+        height: 700px;
+        width: 100%;
+        position: relative;
+    }
+
+    .content-container {
+        display: flex;
+        flex-direction: row;
+    }
+
+    .map-section {
+        width: 65%;
+        position: relative;
+    }
+
+    .form-chart-column {
+        width: 35%;
+        display: flex;
+        flex-direction: column;
+        padding: 20px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+    }
+
+    .form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+        background-color: #fffffc;
+        color: #444;
+    }
+
+    .form-section {
+        margin-bottom: 20px;
+    }
+
+    .chart-section {
+        background-color: #ffffff;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .marker-icon-jump {
+        animation: jumpMarker 0.8s infinite alternate;
+    }
+
+    @keyframes jumpMarker {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0.3;
+        }
+    }
+
+    /* Style pour la légende */
+    .legend {
+        position: absolute;
+        bottom: 0px;
+        background-color: white;
+        border: 0.5px solid #444;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        font-size: 14px;
+        line-height: 18px;
+        color: #333;
+        z-index: 1000;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .legend h5 {
+        margin-top: 0;
+        font-size: 16px;
+        text-align: center;
+        font-weight: 500;
+    }
+
+    .legend div {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    /* Retirer la bordure inférieure du dernier élément */
+    .legend div:last-child {
+        border-bottom: none;
+    }
+
+    /* Style des icônes FontAwesome */
+    .legend i {
+        font-size: 18px;
+        margin-right: 8px;
+    }
+
+    /* Couleurs des icônes */
+    .legend .fa-map-marker-gray {
+        color: gray;
+    }
+
+    .legend .fa-map-marker-blue {
+        color: blue;
+    }
+
+    .legend .fa-map-marker-yellow {
+        color: yellow;
+    }
+
+    .legend .fa-map-marker-orange {
+        color: orange;
+    }
+
+    .legend .fa-map-marker-red {
+        color: red;
+    }
+
+    .zone-polygon {
+    background: blue; /* Couleur de remplissage du polygone */
+        clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%); /* Pentagone */
+        width: 15px;
+        height: 15px;
+        display: inline-block;
+        margin-right: 8px;
+        cursor: pointer;
+        text-decoration: none;    }
+</style>
+
+<main id="main" class="main">
+    <div class="pagetitle">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>Map Madagascar étiage</h1>
+        </div>
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
+            </ol>
+        </nav>
+    </div>
+
+    <section class="section">
+        <div class="content-container">
+            <!-- Section Carte -->
+            <div class="map-section">
+                <div id="map"></div>
+                <div id="legend" class="legend">
+                    <h5>Légende</h5>
+                    <div><i class="fa fa-map-marker fa-map-marker-gray"></i>Pas de Gap</div>
+                    <div><i class="fa fa-map-marker fa-map-marker-blue"></i>Production juste</div>
+                    <div><i class="fa fa-map-marker fa-map-marker-yellow"></i>Gap < 25%</div>
+                    <div><i class="fa fa-map-marker fa-map-marker-orange"></i>25% < Gap < 50%</div>
+                    <div><i class="fa fa-map-marker fa-map-marker-red"></i>Gap > 50%</div>
+                    <i class="zone-polygon" id="legend-text" onclick="toggleZonesVisibility()"></i>
+                    <span id="zone-label">Zone</span>
+                </div>
+            </div>
+
+            <!-- Section Formulaire et Graphique (Colonne de droite) -->
+            <div class="form-chart-column">
+                <!-- Formulaire -->
+                <div id="sidebar">
+                    <form id="etiage-form">
+                        <div class="form-group">
+                            <label for="year">Sélectionnez une année :</label>
+                            <select id="year" name="year" class="form-control">
+                                <!-- Liste des années -->
+                                <option value="2023">2023</option>
+                                <option value="2024">2024</option>
+                                <option value="2025">2025</option>
+                                <!-- Ajoute d'autres années -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="selected-site-zone">Site/Zone sélectionné :</label>
+                            <input type="text" id="selected-site-zone" name="site-zone" class="form-control" readonly>
+                        </div>
+                        <button type="button" class="btn btn-primary" id="predict-button">Prédire l'étiage</button>
+                    </form>
+                </div>
+                <!-- Nouvelle section pour afficher les résultats -->
+                <div id="prediction-result" class="prediction-result" style="display: none; margin-top: 20px;">
+                    <h5>Résultat de la prévision d'étiage</h5>
+                    <div id="result-content">
+                        <!-- Le contenu du résultat sera injecté ici -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<!-- Leaflet and fullscreen -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
+<script src="https://unpkg.com/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
+
+<!-- Chart.js or ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+    var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 6);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var zones = {{ zone|raw }};
+    let sitesData =  {{ sites|raw }};
+    var polygons = [];
+    let previsions = [];
+    var zonesVisible = true;
+
+    function addPolygons(zones) {
+        removePolygons();
+        zones.forEach(function(zone) {
+            var coordinates = zone.coord.map(function(coord) {
+                return [coord.latitude, coord.longitude];
+            });
+            var polygon = L.polygon(coordinates).addTo(map).bindPopup(zone.libelle);
+
+            polygon.on('click', function(e) {
+                // Mettre à jour le champ "Site/Zone sélectionné" avec le libellé de la zone
+                document.getElementById('selected-site-zone').value = zone.libelle;
+            });
+            polygons.push(polygon);
+        });
+    }
+
+    function removePolygons() {
+        polygons.forEach(function(polygon) {
+            map.removeLayer(polygon);
+        });
+        polygons = [];
+    }
+
+    function toggleZonesVisibility() {
+        var toggleElement = document.querySelector('.zone-polygon');
+        var zoneLabel = document.getElementById('zone-label');
+        zonesVisible = !zonesVisible;
+        if (zonesVisible) {
+            addPolygons(zones);
+            toggleElement.classList.remove('strikethrough');
+            zoneLabel.classList.remove('strikethrough');
+        } else {
+            removePolygons();
+            toggleElement.classList.add('strikethrough');
+            zoneLabel.classList.add('strikethrough');
+        }
+    }
+
+    addPolygons(zones);
+
+    var markers = [];
+    sitesData.forEach(function(site){
+        var iconUrl = "/images/marker-gray.svg";
+        if (site.etat == '1') {
+            iconUrl = "/images/marker-blue.svg";
+        }  else if (site.etat == '2') {
+            iconUrl = "/images/marker-yellow.svg";
+        } else if (site.etat == '3') {
+            iconUrl = "/images/marker-orange.svg";
+        }
+        else if (site.etat == '4') {
+            iconUrl = "/images/marker-red.svg";
+        }
+        var markerIcon = L.icon({
+            iconUrl: iconUrl,
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34]
+        });
+        var marker = L.marker([site.latitude, site.longitude], { icon: markerIcon }).addTo(map).bindPopup(site.libelle);
+        markers.push(marker);
+
+        marker.on('click', function(e) {
+            map.setView(e.latlng, 9);
+
+            markers.forEach(function(m) {
+                m.getElement().classList.remove('marker-icon-jump');
+            });
+
+            e.target.getElement().classList.add('marker-icon-jump');
+            document.getElementById('selected-site-zone').value = site.libelle;
+
+            
+        });
+    });
+    document.getElementById('predict-button').addEventListener('click', function() {
+        var year = document.getElementById('year').value;
+        var selectedZone = document.getElementById('selected-site-zone').value;
+        if (!year) {
+            alert("Veuillez sélectionner une année.");
+            return;
+        }
+        if (!selectedZone) {
+            alert("Veuillez sélectionner une zone ou un site.");
+            return;
+        }
+
+        var data = {
+            'siteLibelle': selectedZone,
+            'year': year
+        };
+        fetch('/predict-etiage', {  // Adjust the URL to your backend route
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(responseData => {
+            console.log(responseData);
+            // Afficher les résultats dans la div "prediction-result"
+            var resultDiv = document.getElementById('prediction-result');
+            var resultContent = document.getElementById('result-content');
+            
+            // Assurez-vous que la div du résultat est visible
+            resultDiv.style.display = 'block';
+            
+            // Insérer le contenu du résultat (modifiez cela en fonction de la réponse que vous obtenez)
+            resultContent.innerHTML = `
+            
+                <p>Année: ${responseData.year}</p>
+                <p>Site/Zone: ${responseData.siteLibelle}</p>
+                <p>Date de l'étiage: </p>
+                <p>Durée de la période sec : </p>
+                <p>Quantité produite: ${responseData.quantite_produite} m³</p>
+                <p>Gap: ${responseData.gap}%</p>
+            `;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert("Une erreur est survenue lors de la prévision.");
+        });
+    });
+    
+
+</script>
+{% endblock %}

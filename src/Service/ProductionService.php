@@ -9,6 +9,7 @@ use App\Entity\SiteProduction;
 use App\Repository\BesoinRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\SiteProductionRepository;
+use Doctrine\ORM\EntityManager;
 use Symfony\Component\HttpClient\HttpClient;
 
 class ProductionService
@@ -154,6 +155,105 @@ class ProductionService
         }
         $client = HttpClient::create();
         $response = $client->request('POST', 'http://127.0.0.1:5000/predict', [
+            'json' => $data,
+        ]);
+    
+        $rep = $response->toArray();
+        return $rep;
+    }
+    public function makeEtiage($siteLibelle, $annee, EntityManagerInterface $entityManager) {
+        // Récupérer le repository du Site et chercher le site par son libellé
+
+        $site = $entityManager->getRepository(Site::class)->findOneBy(['libelle' => $siteLibelle]);
+        if (!$site) {
+            throw new \Exception("Site not found with libelle: " . $siteLibelle);
+        }
+    
+        // Récupérer les stations associées au site
+        $stations = $site->getStations();
+        
+        if (count($stations) > 0) {
+            $station = $stations[0]; // Prendre la première station
+            $rep = $this->makeEtiageStation($station->getId(), $annee, $entityManager);
+            return $rep; // Convertir le résultat en tableau
+        }
+    
+        return null; // Retourner null si aucune station n'est trouvée
+    }
+    public function finddateEtiage($data)
+{
+    $lowestPrediction = null;
+    $latestPrediction = null;  // Stocke la prévision la plus récente dans les mois ciblés
+    dump('eto');
+    foreach ($data as $predictions) {
+        foreach ($predictions as $prediction) {
+        dump($prediction);
+        if (!isset($prediction['date'])) {
+            // Si la clé 'date' n'existe pas, continuez à la prochaine itération
+            continue;
+        }
+
+        // Convertir la date en objet DateTime et récupérer le mois
+        $month = (new \DateTime($prediction['date']))->format('m');
+
+        // Vérification si la date est dans les mois d'août, septembre ou octobre
+        if (in_array($month, ['08', '09', '10'])) {
+            // Trouver la production la plus faible
+            if ($lowestPrediction === null || $prediction['production'] < $lowestPrediction['production']) {
+                $lowestPrediction = $prediction;
+            }
+
+            // Stocker la prédiction la plus récente
+            if ($latestPrediction === null || $prediction['date'] > $latestPrediction['date']) {
+                $latestPrediction = $prediction;
+            }
+        }
+    }
+    }
+
+    return ['lowest' => $lowestPrediction, 'latest' => $latestPrediction];
+}
+    public function makeEtiageStation($stationId,$annee,EntityManagerInterface $entityManager){
+
+        $rstation = $entityManager->getRepository(Station::class);
+        $station = $rstation->findOneBy(['id' => $stationId]); // Utiliser un tableau associatif pour rechercher par ID
+        $sources = $station->getSources(); // Récupérer la collection de sources
+        $sourceNames = [];
+        $sourcesArray = $sources->toArray(); // Convertir la collection en tableau
+        foreach ($sourcesArray as $index => $source) {
+            if ($index === 0) {
+                $sourceNames[] = $source->getNom(); // Garder le premier nom tel quel
+            } else {
+                $sourceNames[] = strtolower($source->getNom()); // Mettre les autres noms en minuscules
+            }
+        }
+        $sourceNamesString = implode('/', $sourceNames);
+        $siteCode = $station->getSite()->getCode();
+        $stationId = $station->getCode();
+        $siteId = $siteCode;
+        $source = $sourceNamesString;
+
+        // Générer toutes les dates de l'année choisie
+        $start = new \DateTime("{$annee}-01-01");
+        $end = new \DateTime("{$annee}-12-31");
+        $end->setTime(23, 59, 59);
+    
+        $data = [];
+        $interval = new \DateInterval('P1D');
+        $datePeriod = new \DatePeriod($start, $interval, $end);
+    
+        foreach ($datePeriod as $date) {
+            $data[] = [
+                'station_id' => $stationId,
+                'site_id' => $siteId,
+                'source' => $source,
+                'year' => $date->format('Y'),
+                'month' => $date->format('m'),
+                'day' => $date->format('d'),
+            ];
+        }
+        $client = HttpClient::create();
+        $response = $client->request('POST', 'http://127.0.0.1:5000/prevision/etiage', [
             'json' => $data,
         ]);
     
