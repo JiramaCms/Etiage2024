@@ -43,11 +43,6 @@ class TypeFormType extends AbstractType
             ]);
         ;
 
-        if($options['is_edit']){
-            $builder->add('disposition',CheckboxType::class,[
-                'required' => false,
-            ]);
-        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void

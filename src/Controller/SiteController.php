@@ -13,6 +13,7 @@ use App\Entity\SiteProduction;
 use App\Entity\ProductionMonth;
 use App\Service\ProductionService;
 use App\Entity\StationProductionMonth;
+use App\Service\ActionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpClient\HttpClient;
@@ -26,10 +27,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class SiteController extends AbstractController
 {
     private $productionService;
+    private $actionService;
 
-    public function __construct(ProductionService $productionService)
+    public function __construct(ProductionService $productionService,ActionService $actionService)
     {
         $this->productionService = $productionService;
+        $this->actionService = $actionService;
     }
     
     #[Route('/site', name: 'app_insert_site')]
@@ -52,6 +55,24 @@ class SiteController extends AbstractController
             'zone' => $zone,
         ]);
     }
+    #[Route('/predict-action', name: 'app_predict_etiage_action')]
+    public function predictEtiageAction(EntityManagerInterface $entityManager,Request $request)
+    {
+        $datas = $request->getContent(); // Lire les données JSON envoyées
+        $data = json_decode($datas, true);        
+        //$start = new \DateTime($data['start-date']);
+        //$end = new \DateTime($data['end-date']);
+        $gap = $data['gap'];
+        $production = $data['production'];  // Site ou zone sélectionné(e)
+        $capacite = $gap * $production;
+        // Appelle le modèle pour prédire l'étiage
+        $solution = $this->actionService->bestActionToTakeWithoutBudget($capacite);
+        dump($solution);
+        $solutions = (Util::toJson($solution));
+        dump($solutions);
+        // Retourne la date au frontend
+        return new JsonResponse($solutions);
+    }
     #[Route('/predict-etiage', name: 'app_predict_etiage')]
     public function predictEtiage(EntityManagerInterface $entityManager,Request $request)
     {
@@ -68,9 +89,9 @@ class SiteController extends AbstractController
         $predictedDate = $this->productionService->makeEtiage($siteZone,$year,$entityManager);
         dump($predictedDate);
         $reponse = $this->productionService->finddateEtiage($predictedDate);
-        dump($reponse);
+        //dump($reponse);
         $besoin = $this->productionService->getBesoinForProduction($site->getId(), new \DateTime($reponse['lowest']['date']));
-        $gap = ($reponse['lowest']['production'] - $besoin) / $besoin;
+        $gap = ($besoin - $reponse['lowest']['production']) / $besoin;
         $gap =  round($gap, 2);
 
         // Retourne la date au frontend
@@ -105,6 +126,7 @@ class SiteController extends AbstractController
 
         $rsite =  $entityManager->getRepository(Site::class);
         $sites = $rsite->findAll();
+        dump($sites);
         $rep = [];
         // Boucle sur chaque site pour générer les prévisions
         foreach ($sites as $site) {
@@ -116,13 +138,16 @@ class SiteController extends AbstractController
                 $prevision = $this->productionService->makePrevision($station, $start, $end, $entityManager);
                 $this->productionService->calulateEtatSitePrevision($site,$prevision);
                 // Ajouter les résultats dans le tableau de réponse
-                $rep = [
+                dump($site,$prevision);
+
+                $rep[] = [
                     'site' =>$site, // ou autre méthode pour obtenir le nom du site
                     'prevision'=>$prevision,
                 ];
             }
         }
         $reponse = (Util::toJson($rep));
+        dump($rep);
 
     
         // Convertir le tableau en JSON et retourner la réponse

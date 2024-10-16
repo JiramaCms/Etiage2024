@@ -50,6 +50,41 @@
     .marker-icon-jump {
         animation: jumpMarker 0.8s infinite alternate;
     }
+    .etiage-result-card {
+        background-color: #f8f9fa;
+        border: 0.2px solid #ced4da;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        max-width: 600px;
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    }
+
+    .etiage-result-title {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+        color: #343a40;
+    }
+
+    .etiage-result-card p {
+        margin: 8px 0;
+        font-size: 1em;
+        color: #495057;
+    }
+
+    .etiage-result-card p strong {
+        font-weight: 600;
+    }
+
+    .etiage-year,
+    .etiage-site,
+    .etiage-date,
+    .etiage-duration,
+    .etiage-production,
+    .etiage-gap {
+        color: #007bff;
+        font-weight: 500;
+    }
 
     @keyframes jumpMarker {
         from {
@@ -182,15 +217,20 @@
                             <label for="selected-site-zone">Site/Zone sélectionné :</label>
                             <input type="text" id="selected-site-zone" name="site-zone" class="form-control" readonly>
                         </div>
-                        <button type="button" class="btn btn-primary" id="predict-button">Prédire l'étiage</button>
+                        <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-primary " id="predict-button">Prédire l'étiage</button>
+                        </div>
                     </form>
                 </div>
                 <!-- Nouvelle section pour afficher les résultats -->
-                <div id="prediction-result" class="prediction-result" style="display: none; margin-top: 20px;">
+                <div id="prediction-result" class="prediction-result" style="display: none; margin-top: 5px;">
                     <h5>Résultat de la prévision d'étiage</h5>
                     <div id="result-content">
                         <!-- Le contenu du résultat sera injecté ici -->
                     </div>
+                </div>
+                <div id="solution-result" style="display:none;" class="mt-4">
+                    <!-- La solution proposée sera insérée ici -->
                 </div>
             </div>
         </div>
@@ -291,6 +331,9 @@
         });
     });
     document.getElementById('predict-button').addEventListener('click', function() {
+
+        var solutionDiv = document.getElementById('solution-result');
+        solutionDiv.style.display = 'none';
         var year = document.getElementById('year').value;
         var selectedZone = document.getElementById('selected-site-zone').value;
         if (!year) {
@@ -322,23 +365,76 @@
             
             // Assurez-vous que la div du résultat est visible
             resultDiv.style.display = 'block';
-             var etiageDate = new Date(responseData.etiage.lowest.date);
+            var etiageDate = new Date(responseData.etiage.lowest.date);
             var year = etiageDate.getFullYear();
             
             // Insérer le contenu du résultat (modifiez cela en fonction de la réponse que vous obtenez)
             resultContent.innerHTML = `
             
-                <p>Année: ${year}</p>
-                <p>Site: ${data.siteLibelle} </p>
-                <p>Date de l'étiage: ${responseData.etiage.lowest.date} </p>
-                <p>Durée des basses eaux : ${responseData.etiage.daysBetween} </p>
-                <p>Quantité produite: ${responseData.etiage.lowest.production} m³</p>
-                <p>Gap: ${responseData.gap}%</p>
+                 <div class="etiage-result-card">
+                    <h3 class="etiage-result-title">Résultats de l'Étiage</h3>
+                    <p><strong>Site:</strong> <span class="etiage-site">${data.siteLibelle}</span></p>
+                    <p><strong>Année:</strong> <span class="etiage-year">${year}</span></p>
+                    <p><strong>Durée des basses eaux:</strong> <span class="etiage-duration">${responseData.etiage.daysBetween}</span> jours</p>
+                    <p><strong>Date de l'étiage:</strong> <span class="etiage-date">${responseData.etiage.lowest.date}</span></p>
+                    <p><strong>Quantité produite:</strong> <span class="etiage-production">${responseData.etiage.lowest.production}</span> m³</p>
+                    <p><strong>Gap:</strong> <span class="etiage-gap">${responseData.gap}</span>%</p>
+                </div>
             `;
+            if (responseData.gap > 0) {
+                const solutionButton = `
+                    <div class="d-flex justify-content-end">
+                        <button type="button" class="btn btn-secondary" id="solution-button">Solution Proposée</button>
+                    </div>
+                `;
+                resultContent.innerHTML += solutionButton;
+
+                // Ajouter un événement pour le bouton "Solution Proposée"
+                document.getElementById('solution-button').addEventListener('click', function() {
+                    // Envoyer une requête au contrôleur Symfony
+                    fetch('/predict-action', { // Ajuste l'URL vers la bonne route de ton contrôleur
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({
+                            'gap': responseData.gap,
+                            'production': responseData.etiage.lowest.production
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(solutionData => {
+                        let solutionDatas = JSON.parse(solutionData);
+                        // Afficher les solutions proposées (ajoute ici ton code de traitement)
+                        console.log(solutionDatas);
+
+                        var solutionDiv = document.getElementById('solution-result');
+                        let typeInfo = solutionDatas.types.map(type => `
+                            <div>
+                                <strong>Solution : ${type.libelle}</strong><br>
+                                Capacité : ${type.capacite} m³
+                            </div>
+                        `);
+                        solutionDiv.innerHTML = `
+                            <div class="alert alert-info">
+                                <strong>Solution Proposée :</strong>
+                                <p> Gains de capacité totale : ${solutionDatas.capacite} m³</p>
+                                <p>Cout totale : ${solutionDatas.cout}</p>
+                                ${typeInfo.join('')}
+                            </div>
+                        `;
+                        solutionDiv.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert("Une erreur est survenue lors de la prévision.");
+            alert("Ce site ne dispose pas assez de données pour une prévision.");
         });
     });
     

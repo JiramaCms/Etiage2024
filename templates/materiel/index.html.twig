@@ -32,7 +32,6 @@
                                     <th>Libelle</th>
                                     <th>Code</th>
                                     <th>Capacité en m³</th>
-                                    <th>Disposition</th>
                                     <th>Coût</th>
                                 </tr>
                             </thead>
@@ -42,13 +41,6 @@
                                         <td>{{ materiel.libelle }}</td>
                                         <td>{{ materiel.code }}</td>
                                         <td>{{ materiel.capacite }}</td>
-                                        <td>
-                                            {% if materiel.disposition == 1 %}
-                                                Disponible
-                                            {% else %}
-                                                Indisponible
-                                            {% endif %}
-                                        </td>
                                         <td>{{materiel.cout | number_format(0, ',', ' ') }}Ar</td>
                                         <td>
                                             <a href="{{ path('app_update_materiel', {'id': materiel.id}) }}" class="btn btn-secondary">Modifier</a>

@@ -32,7 +32,7 @@ class ProductionService
     public function calculateGap(SiteProduction $production): float
     {
         $besoin = $this->getBesoinForProduction($production->getSiteId(), $production->getDateProduction());
-        $gap=($production->getSommeProduction() - $besoin)/$production->getSommeProduction();
+        $gap=($besoin - $production->getSommeProduction())/$besoin;
         return round($gap, 2);;
     }
     public function gapPrevision($siteId, $production): float
@@ -64,22 +64,22 @@ class ProductionService
         }
         $derniereDateProduction = \DateTime::createFromFormat('d/m/Y', $dernierElement['date']);
         $besoin = $this->getBesoinForProduction($siteId, $derniereDateProduction);
-        $gap = ($prodEau - $besoin) / $prodEau;
+        $gap = ($besoin - $prodEau) / $besoin;
         return round($gap, 2);
     }
     public function calulateEtatSitePrevision(Site $site,$production)
     {
         $gap = $this->gapPrevision($site->getId(), $production);
-        if($gap<-0.5){
+        if($gap>0.5){
             $site->setEtat(4);
         }
-        elseif($gap < -0.25 && $gap > -0.5){
+        elseif($gap > 0.25 && $gap < 0.5){
             $site->setEtat(3);
         }
-        elseif(0 > $gap &&  $gap > -0.25){
+        elseif(0 < $gap &&  $gap < 0.25){
             $site->setEtat(2);
         }
-        elseif($gap > 0){
+        elseif($gap < 0){
             $site->setEtat(1);
         }
         else{
@@ -102,16 +102,16 @@ class ProductionService
             $site->setEtat(-1);
             return $site;
         }
-        if($gap<-0.5){
+        if($gap>0.5){
             $site->setEtat(4);
         }
-        elseif($gap < -0.25 && $gap > -0.5){
+        elseif($gap > 0.25 && $gap < 0.5){
             $site->setEtat(3);
         }
-        elseif(0 > $gap &&  $gap > -0.25){
+        elseif(0 < $gap &&  $gap < 0.25){
             $site->setEtat(2);
         }
-        elseif($gap > 0){
+        elseif($gap < 0){
             $site->setEtat(1);
         }
         else{
@@ -265,6 +265,7 @@ class ProductionService
 
     return ['lowest' => $lowestPrediction, 'latest' => $latestPrediction, 'daysBetween' => $daysBetween];
 }
+
     public function makeEtiageStation($stationId,$annee,EntityManagerInterface $entityManager){
 
         $rstation = $entityManager->getRepository(Station::class);

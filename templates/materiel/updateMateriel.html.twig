@@ -66,18 +66,6 @@
                         </div>
                     </div>
 
-                    <!-- Champ disposition (Checkbox) -->
-                    {% if form.disposition is defined %}
-                        <div class="col-12">
-                            {{ form_label(form.disposition, "Disponible", { 'label_attr': { 'class': 'form-label form-label-lg' } }) }}
-                            {{ form_widget(form.disposition, { 'attr': { 'class': 'form-check-input' } }) }}
-                            <div class="form-text">{{ form_help(form.disposition) }}</div>
-                            <div class="invalid-feedback">
-                                {{ form_errors(form.disposition) }}
-                            </div>
-                        </div>
-                    {% endif %}
-
                     <!-- Bouton de soumission -->
                     <div class="text-center mt-3">
                         <input type="submit" value="Modifier le matériel" class="btn btn-secondary">
