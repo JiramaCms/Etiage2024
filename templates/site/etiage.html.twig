@@ -322,15 +322,17 @@
             
             // Assurez-vous que la div du résultat est visible
             resultDiv.style.display = 'block';
+             var etiageDate = new Date(responseData.etiage.lowest.date);
+            var year = etiageDate.getFullYear();
             
             // Insérer le contenu du résultat (modifiez cela en fonction de la réponse que vous obtenez)
             resultContent.innerHTML = `
             
-                <p>Année: ${responseData.year}</p>
-                <p>Site/Zone: ${responseData.siteLibelle}</p>
-                <p>Date de l'étiage: </p>
-                <p>Durée de la période sec : </p>
-                <p>Quantité produite: ${responseData.quantite_produite} m³</p>
+                <p>Année: ${year}</p>
+                <p>Site: ${data.siteLibelle} </p>
+                <p>Date de l'étiage: ${responseData.etiage.lowest.date} </p>
+                <p>Durée des basses eaux : ${responseData.etiage.daysBetween} </p>
+                <p>Quantité produite: ${responseData.etiage.lowest.production} m³</p>
                 <p>Gap: ${responseData.gap}%</p>
             `;
         })

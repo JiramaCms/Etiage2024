@@ -61,14 +61,22 @@ class SiteController extends AbstractController
         //$end = new \DateTime($data['end-date']);
         $year = $data['year'];
         $siteZone = $data['siteLibelle'];  // Site ou zone sélectionné(e)
+        $site = $entityManager->getRepository(Site::class)->findOneBy(['libelle' => $siteZone]);
+
 
         // Appelle le modèle pour prédire l'étiage
         $predictedDate = $this->productionService->makeEtiage($siteZone,$year,$entityManager);
-        //dump($predictedDate);
+        dump($predictedDate);
         $reponse = $this->productionService->finddateEtiage($predictedDate);
+        dump($reponse);
+        $besoin = $this->productionService->getBesoinForProduction($site->getId(), new \DateTime($reponse['lowest']['date']));
+        $gap = ($reponse['lowest']['production'] - $besoin) / $besoin;
+        $gap =  round($gap, 2);
 
         // Retourne la date au frontend
-        return new JsonResponse(['predicted_date' => $reponse]);
+        return new JsonResponse(['etiage' => $reponse ,
+                                  'gap' => $gap 
+                                ]);
     }
     #[Route('/prevision', name: 'app_map_prevision')]
     public function previsionMap(EntityManagerInterface $entityManager): Response

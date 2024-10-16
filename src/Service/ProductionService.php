@@ -181,37 +181,89 @@ class ProductionService
         return null; // Retourner null si aucune station n'est trouvée
     }
     public function finddateEtiage($data)
-{
-    $lowestPrediction = null;
-    $latestPrediction = null;  // Stocke la prévision la plus récente dans les mois ciblés
-    dump('eto');
-    foreach ($data as $predictions) {
-        foreach ($predictions as $prediction) {
-        dump($prediction);
-        if (!isset($prediction['date'])) {
-            // Si la clé 'date' n'existe pas, continuez à la prochaine itération
-            continue;
-        }
-
-        // Convertir la date en objet DateTime et récupérer le mois
-        $month = (new \DateTime($prediction['date']))->format('m');
-
-        // Vérification si la date est dans les mois d'août, septembre ou octobre
-        if (in_array($month, ['08', '09', '10'])) {
-            // Trouver la production la plus faible
-            if ($lowestPrediction === null || $prediction['production'] < $lowestPrediction['production']) {
-                $lowestPrediction = $prediction;
+    {
+        $lowestPrediction = null;
+        $latestPrediction = null;
+        $firstDate = null;    // Stocke la première date à partir d'août
+        $lastDate = null;
+        $hasDateInTargetMonths = false;   
+        foreach ($data as $predictions) {
+            foreach ($predictions as $prediction) {
+            dump($prediction);
+            if (!isset($prediction['date'])) {
+                // Si la clé 'date' n'existe pas, continuez à la prochaine itération
+                continue;
             }
 
-            // Stocker la prédiction la plus récente
-            if ($latestPrediction === null || $prediction['date'] > $latestPrediction['date']) {
-                $latestPrediction = $prediction;
+            // Convertir la date en objet DateTime et récupérer le mois
+            $date = new \DateTime($prediction['date']);
+            $month = (new \DateTime($prediction['date']))->format('m');
+
+            // Vérification si la date est dans les mois juillet, d'août, septembre ou octobre
+            if (in_array($month, ['07','08', '09', '10'])) {
+                $hasDateInTargetMonths = true;  
+                // Trouver la production la plus faible
+                if ($lowestPrediction === null || $prediction['production'] < $lowestPrediction['production']) {
+                    $lowestPrediction = $prediction;
+                }
+
+                // Stocker la prédiction la plus récente
+                if ($latestPrediction === null || $prediction['date'] < $latestPrediction['date']) {
+                    $latestPrediction = $prediction;
+                }
+
+                // Trouver la première date (qui doit être en août ou après)
+                if ($firstDate === null || $date < $firstDate) {
+                    $firstDate = $date;
+                }
+            }
+
+            if ($lastDate === null || $date > $lastDate) {
+                $lastDate = $date;
             }
         }
     }
+    if (!$hasDateInTargetMonths) {
+        // Si aucune date dans les mois cibles, trouver la première et la dernière date globales
+        foreach ($data as $predictions) {
+            foreach ($predictions as $prediction) {
+                if (!isset($prediction['date'])) {
+                    continue;
+                }
+                // Convertir la date en objet DateTime
+                $date = new \DateTime($prediction['date']);
+
+                // Trouver la production la plus faible globale
+                if ($lowestPrediction === null || $prediction['production'] < $lowestPrediction['production']) {
+                    $lowestPrediction = $prediction;
+                }
+
+                // Stocker la prédiction la plus récente globale
+                if ($latestPrediction === null || $prediction['date'] < $latestPrediction['date']) {
+                    $latestPrediction = $prediction;
+                }
+
+                // Trouver la première date globale
+                if ($firstDate === null || $date < $firstDate) {
+                    $firstDate = $date;
+                }
+
+                // Trouver la dernière date globale
+                if ($lastDate === null || $date > $lastDate) {
+                    $lastDate = $date;
+                }
+            }
+        }
+    }
+    // Calculer le nombre de jours entre la première et la dernière date
+    if ($firstDate !== null && $lastDate !== null) {
+        $interval = $firstDate->diff($lastDate);
+        $daysBetween = $interval->days;  // Nombre total de jours
+    } else {
+        $daysBetween = 0;  // Si aucune date n'a été trouvée, retourner 0
     }
 
-    return ['lowest' => $lowestPrediction, 'latest' => $latestPrediction];
+    return ['lowest' => $lowestPrediction, 'latest' => $latestPrediction, 'daysBetween' => $daysBetween];
 }
     public function makeEtiageStation($stationId,$annee,EntityManagerInterface $entityManager){
 
