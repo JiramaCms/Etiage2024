@@ -45,6 +45,7 @@
         padding: 10px;
         border-radius: 8px;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        display : none;
     }
 
     .marker-icon-jump {
@@ -305,6 +306,8 @@
     var endDate = document.getElementById('end-date').value;
 
     if (startDate && endDate) {
+        document.querySelector('.chart-section').style.display = 'none';
+
         fetch('{{ path('site_etiage_prevision') }}', {
             method: 'POST',
             headers: {
@@ -350,13 +353,14 @@
                 markers.push(marker);
 
                 marker.on('click', function(e) {
-                    map.setView(e.latlng, 12);
+                    map.setView(e.latlng, 9);
 
                     markers.forEach(function(m) {
                         m.getElement().classList.remove('marker-icon-jump');
                     });
-
                     e.target.getElement().classList.add('marker-icon-jump');
+
+                    document.querySelector('.chart-section').style.display = 'block';
                     updateChartWithForecasty(previsions, data.site.id);
 
                 });

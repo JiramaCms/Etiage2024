@@ -118,11 +118,11 @@ class SiteController extends AbstractController
     {   
         $startDate = $request->getContent(); // Lire les données JSON envoyées
         $data = json_decode($startDate, true);        
-        //$start = new \DateTime($data['start-date']);
-        //$end = new \DateTime($data['end-date']);
-        //$end->modify('+1 day');  // Inclure le dernier jour
-        $start = new \DateTime("2024-12-01");
-        $end = new \DateTime("2024-12-31");
+        $start = new \DateTime($data['start-date']);
+        $end = new \DateTime($data['end-date']);
+        $end->modify('+1 day');  // Inclure le dernier jour
+        //$start = new \DateTime("2024-12-01");
+        //$end = new \DateTime("2024-12-31");
 
         $rsite =  $entityManager->getRepository(Site::class);
         $sites = $rsite->findAll();

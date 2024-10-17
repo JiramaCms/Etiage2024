@@ -97,7 +97,8 @@ class ObjectifController extends AbstractController
 
             $em->persist($objectif);
             $em->flush();
-            return $this->redirectToRoute('app_liste_objectif');
+            return $this->redirectToRoute('detail_site',['id' => $id]);
+
         }
         return $this->render('objectif/addObjectif.html.twig', [
             'form'=>$form->createView()
@@ -115,8 +116,7 @@ class ObjectifController extends AbstractController
 
             $em->persist($objectif);
             $em->flush();
-
-            return $this->redirectToRoute('app_liste_objectif');
+            return $this->redirectToRoute('app_detail_observation',['id' => $objectif->getId()]);
         }
         return $this->render('objectif/updateMateriel.html.twig',[
             'form'=>$form->createView()

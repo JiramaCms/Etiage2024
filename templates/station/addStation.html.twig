@@ -12,7 +12,7 @@
                         
                         <div class="col-6">
                             {{ form_label(form.libelle, "Libelle", {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.libelle, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'mettez le Libelle ici'}}) }}
+                            {{ form_widget(form.libelle, {'attr': {'class': 'form-control form-control', 'placeholder': 'mettez le Libelle ici'}}) }}
                             <small>{{ form_help(form.libelle) }}</small>
                             <div class="form_error">
                                 {{ form_errors(form.libelle) }}
@@ -20,7 +20,7 @@
                         </div>
                         <div class="col-6">
                             {{ form_label(form.code, " Nom de code de la station", {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.code, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'mettez le Libelle ici'}}) }}
+                            {{ form_widget(form.code, {'attr': {'class': 'form-control form-control', 'placeholder': 'mettez le Libelle ici'}}) }}
                             <small>{{ form_help(form.code) }}</small>
                             <div class="form_error">
                                 {{ form_errors(form.code) }}
@@ -29,7 +29,7 @@
 
                         <div class="col-6">
                             {{ form_label(form.sources, "Sources", {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.sources, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                            {{ form_widget(form.sources, {'attr': {'class': 'form-control form-control'}}) }}
                             <small>{{ form_help(form.sources) }}</small>
                             <div class="form_error">
                                 {{ form_errors(form.sources) }}
@@ -39,7 +39,7 @@
                         {% if form.site is defined %}
                         <div class="col-6">
                             {{ form_label(form.site, "Site", {'label_attr': {'class': 'form-label'}}) }}
-                            {{ form_widget(form.site, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                            {{ form_widget(form.site, {'attr': {'class': 'form-control form-control'}}) }}
                             <small>{{ form_help(form.site) }}</small>
                             <div class="form_error">
                                 {{ form_errors(form.site) }}

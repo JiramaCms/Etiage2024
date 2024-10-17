@@ -46,7 +46,7 @@ class SecurityAuthenticator extends AbstractLoginFormAuthenticator
         }
 
         // For example:
-         return new RedirectResponse($this->urlGenerator->generate('app_product'));
+         return new RedirectResponse($this->urlGenerator->generate('site_liste'));
         //throw new \Exception('a faire: provide a valid redirect inside '.__FILE__);
     }
 

@@ -38,6 +38,8 @@
                     <h6 id="filter-title">Menu</h6>
                   </li>
                   <li><a class="dropdown-item" href="{{ path('app_update_site', {'id': site.id}) }}"  id="filter-today">Modifier le site</a></li>
+                  <li><a class="dropdown-item" href="{{ path('app_add_stationBySite', {'id': site.id}) }}"  id="filter-today">Nouveau station</a></li>
+                  <li><a class="dropdown-item" href="{{ path('import_production') }}"  id="filter-today">Importer les productions</a></li>
                 </ul>
               </div>
               <div class="card-body">

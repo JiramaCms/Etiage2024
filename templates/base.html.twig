@@ -67,7 +67,7 @@
         </div>
         <div class="block-login" style="position: absolute; right: 30px; top: 20px; width: 70%; height: 150px;">
             <div class="row margin-left : auto;">
-            <div class="col-lg-12 text-right text-white">
+            <div class="col-lg-12 text-end text-black">
                 {% if app.user is not null %}
                 <span class="fa fa-user text-info"></span> {{app.user.username}}
                 | <a href="{{path('app_logout')}}" class="text-info"> <span class="fa fa-sign-out"></span>Deconnexion</a>

@@ -3,60 +3,67 @@
 {% block title %}Register{% endblock %}
 
 {% block body %}
-    <div class="container">
-    <h1><center>Registration form</center></h1>
-        <div class="row row-cols-2">
-            <div class="col-md-4 col-6">
-                {{form_start(registrationForm)}}
-                <div class='form-control'>
-                    {{form_label(registrationForm.nom,"Nom")}}
-                    {{form_widget(registrationForm.nom, {"attr" : {"placeholder": "mettez votre nom ici"}})}}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Formulaire d'inscription</h5>
 
-                    <small> {{form_help(registrationForm.nom)}}</small>
-                    <div class="form_error">
-                        {{form_errors(registrationForm.nom)}}
+                        {{ form_start(registrationForm, { attr: { novalidate: 'novalidate', class: 'row g-3' } }) }}
+
+                        <div class="col-12">
+                            {{ form_label(registrationForm.nom, "Nom", { 'label_attr': { 'class': 'form-label' } }) }}
+                            {{ form_widget(registrationForm.nom, { 'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Mettez votre nom ici' } }) }}
+                            <small>{{ form_help(registrationForm.nom) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(registrationForm.nom) }}
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            {{ form_label(registrationForm.prenom, "Prénom", { 'label_attr': { 'class': 'form-label' } }) }}
+                            {{ form_widget(registrationForm.prenom, { 'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Mettez votre prénom ici' } }) }}
+                            <small>{{ form_help(registrationForm.prenom) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(registrationForm.prenom) }}
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            {{ form_label(registrationForm.email, "Email", { 'label_attr': { 'class': 'form-label' } }) }}
+                            {{ form_widget(registrationForm.email, { 'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Mettez votre email ici' } }) }}
+                            <small>{{ form_help(registrationForm.email) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(registrationForm.email) }}
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            {{ form_label(registrationForm.username, "Username", { 'label_attr': { 'class': 'form-label' } }) }}
+                            {{ form_widget(registrationForm.username, { 'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Mettez votre username ici' } }) }}
+                            <small>{{ form_help(registrationForm.username) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(registrationForm.username) }}
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            {{ form_label(registrationForm.plainPassword, "Mot de passe", { 'label_attr': { 'class': 'form-label' } }) }}
+                            {{ form_widget(registrationForm.plainPassword, { 'attr': { 'class': 'form-control form-control-lg' } }) }}
+                            <small>{{ form_help(registrationForm.plainPassword) }}</small>
+                            <div class="form_error">
+                                {{ form_errors(registrationForm.plainPassword) }}
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary">S'inscrire</button>
+                        </div>
+
+                        {{ form_end(registrationForm) }}
                     </div>
                 </div>
-                <div class='form-control'>
-                    {{form_label(registrationForm.prenom,"Prenom")}}
-                    {{form_widget(registrationForm.prenom, {"attr" : {"placeholder": "mettez votre prenom ici"}})}}
-
-                    <small> {{form_help(registrationForm.prenom)}}</small>
-                    <div class="form_error">
-                        {{form_errors(registrationForm.prenom)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(registrationForm.email,"email")}}
-                    {{form_widget(registrationForm.email, {"attr" : {"placeholder": "mettez votre email ici"}})}}
-
-                    <small> {{form_help(registrationForm.email)}}</small>
-                    <div class="form_error">
-                        {{form_errors(registrationForm.email)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(registrationForm.username,"username")}}
-                    {{form_widget(registrationForm.username, {"attr" : {"placeholder": "mettez votre username ici"}})}}
-
-                    <small> {{form_help(registrationForm.username)}}</small>
-                    <div class="form_error">
-                        {{form_errors(registrationForm.username)}}
-                    </div>
-                </div>
-                <div class='form-control'>
-                    {{form_label(registrationForm.plainPassword,"Password")}}
-                    {{form_widget(registrationForm.plainPassword)}}
-
-                    <small> {{form_help(registrationForm.plainPassword)}}</small>
-                    <div class="form_error">
-                        {{form_errors(registrationForm.plainPassword)}}
-                    </div>
-                </div>
-                <div class="form-control" >
-                    <input type="submit" value="Add product" class="btn btn-primary">
-                </div>
-                {{ form_end(registrationForm) }}
             </div>
         </div>
     </div>
