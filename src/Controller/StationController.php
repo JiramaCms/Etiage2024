@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Site;
 use App\Entity\Station;
 use App\Form\StationFormType;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +20,89 @@ class StationController extends AbstractController
         return $this->render('station/index.html.twig', [
             'controller_name' => 'StationController',
         ]);
+    }
+    #[Route('/station/form', name: 'app_insert_station')]
+    public function newStationMap(EntityManagerInterface $entityManager): Response
+    {
+        $rsite =  $entityManager->getRepository(Site::class);
+        $sites = $rsite->findAll();
+        return $this->render('station/index.html.twig', [
+            'sites' => $sites,
+        ]);
+    }
+    #[Route('/station/insert', name: 'station_insert', methods: ['POST'])]
+    public function insertStationMap(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        // Récupéreration des données du formulaire
+        $libelle = $request->request->get('libelle');
+        $code = $request->request->get('code');
+        $coord = $request->request->get('coord');
+        $siteId = $request->request->get('site');
+        
+        // Convertir les coordonnées en tableau [latitude, longitude]
+        $coordArray = explode(',', str_replace(['LatLng(', ')'], '', $coord));
+        $latitude = floatval($coordArray[0]);
+        $longitude = floatval($coordArray[1]);
+        $rsite = $entityManager->getRepository(Site::class);
+        $site = $rsite->find($siteId);
+
+        // Créer une nouvelle instance de Site et définir ses propriétés
+        $station = new Station();
+        $station->setLibelle($libelle);
+        $station->setCode($code);
+        $station->setSite($site);
+        $station->setCoord(['latitude' => $latitude, 'longitude' => $longitude]);
+
+        $entityManager->getRepository(Station::class)->insert($station);
+
+
+        // Rediriger vers
+        return $this->redirectToRoute('app_insert_site');
+    }
+
+    #[Route('/station/updateStation/{id}', name: 'update_station_point')]
+    public function updateStationMap(Station $station, EntityManagerInterface $entityManager): Response
+    {
+        $coords = $station->getCoord();
+        $latitude = $coords ? $coords['latitude'] : null;
+        $longitude = $coords ? $coords['longitude'] : null;
+        return $this->render('station/update-station-point.html.twig', [
+            'station' => $station,
+            'latitude' => $latitude,
+            'longitude' => $longitude,
+        ]);
+    }
+    #[Route('/station/update/{id}', name: 'station_update', methods: ['POST'])]
+    public function updateStationPoint(Station $station,Request $request, EntityManagerInterface $entityManager): Response
+    {
+        // Récupéreration des données du formulaire
+        $libelle = $request->request->get('libelle');
+        $code = $request->request->get('code');
+        $coord = $request->request->get('coord');
+        $siteId = $request->request->get('site');
+        
+        // Convertir les coordonnées en tableau [latitude, longitude]
+        $coordArray = explode(',', str_replace(['LatLng(', ')'], '', $coord));
+        $latitude = floatval($coordArray[0]);
+        $longitude = floatval($coordArray[1]);
+
+        $site = $entityManager->getRepository(Site::class)->find($siteId);
+        if (!$site) {
+            throw $this->createNotFoundException('Le site n\'existe pas.');
+        }
+
+        // Créer une nouvelle instance de Site et définir ses propriétés
+        $station->setLibelle($libelle);
+        $station->setCode($code);
+        $station->setSite($site);
+        $station->setCoord(['latitude' => $latitude, 'longitude' => $longitude]);
+
+        $entityManager->getRepository(Station::class)->update($station);
+
+
+
+        // Rediriger vers
+        return $this->redirectToRoute('update_station_point',['id' => $station->getId()]);
     }
 
     #[Route('/addStation/{id}',name: 'app_add_stationBySite')]

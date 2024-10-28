@@ -13,7 +13,7 @@
         position: relative;
         z-index: 999;
     }
-       .legend {
+    .legend {
         position: absolute;
         bottom: 20px;
         left: 20px;
@@ -55,37 +55,22 @@
         margin-right: 8px;
     }
 
-    /* Couleurs des icônes */
-    .legend .fa-map-marker-gray {
-        color: gray;
-    }
-
-    .legend .fa-map-marker-blue {
-        color: blue;
-    }
-
-    .legend .fa-map-marker-yellow {
-        color: yellow;
-    }
-
-    .legend .fa-map-marker-orange {
-        color: orange;
-    }
-
-    .legend .fa-map-marker-red {
-        color: red;
-    }
-
     .zone-polygon {
-        background: blue; /* Couleur de remplissage du polygone */
-        clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%); /* Pentagone */
+        clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%);
         width: 15px;
         height: 15px;
         display: inline-block;
         margin-right: 8px;
         cursor: pointer;
-        text-decoration: none;    }
+        text-decoration: none;
+    }
 
+    /* Couleurs pour chaque niveau de "Gap" */
+    .polygon-gray { background-color: #b0b0b0; }   /* Gris pour "Pas de Gap" */
+    .polygon-blue { background-color: #87CEEB; }   /* Bleu pour "Production juste" */
+    .polygon-yellow { background-color: #FFE680; } /* Jaune pour "Gap < 25%" */
+    .polygon-orange { background-color: #FFB266; } /* Orange pour "25% < Gap < 50%" */
+    .polygon-red { background-color: #FF6666; }  
     .strikethrough {
         opacity: 0.3;
         text-decoration: line-through;
@@ -116,27 +101,10 @@
         font-size: 20px;
         cursor: pointer;
     }
-    .marker-icon-jump {
-        animation: jumpMarker 0.8s infinite alternate;
-    }
     #overview-content {
         display: flex;
         flex-direction: column;
     }
-
-    .source-container {
-        display: flex;
-        flex-direction: row-reverse; /* Align icons from right to left */
-        gap: 10px; /* Add some space between cards */
-    }
-
-    .source-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-
     .card-content img {
         width: 50px;
         height: 50px;
@@ -149,7 +117,6 @@
         background-color: #f9f9f9; /* Couleur de fond */
         box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Ombre légère */
     }
-
     .station-title {
         font-weight: bold;
         margin-bottom: 5px;
@@ -170,27 +137,17 @@
         padding-top: 10px;
         margin-top: 10px;
     }
-    @keyframes jumpMarker {
-        from {
-            opacity: 1;
-        }
-        to {
-            opacity: 0.3;
-        }
-    }
+
 </style>
-
     <main id="main" class="main">
-
     <div class="pagetitle">
-
         <div class="d-flex justify-content-between align-items-center mb-1">
             <h1>Map Madagascar</h1>
             <div class="filter">
                 <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li><a class="dropdown-item" href="{{ path('new_zone') }}"  id="filter-day">Nouvelle Zone</a></li>
-                <li><a class="dropdown-item" href="{{ path('app_insert_site') }}"  id="filter-month">Nouveau Site</a></li>
+                <li><a class="dropdown-item" href="{{ path('new_site_poly') }}"  id="filter-month">Nouveau Site</a></li>
+                <li><a class="dropdown-item" href="{{ path('app_insert_station') }}"  id="filter-day">Nouvelle Station</a></li>
                 </ul>
             </div>
         </div>
@@ -209,7 +166,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title">Sites Madagascar</h5>
-                        <a class="nav-link btn btn-secondary" href="{{ path('app_map_prevision') }}">
+                        <a class="nav-link btn btn-secondary" href="#">
                             Faire une Simulation sur la map
                         </a>
                         </div>
@@ -230,7 +187,6 @@
                                 </ul>
                                 <div class="tab-content">
                                     <div class="tab-pane fade show active" id="overview" role="tabpanel">
-                                        <h4>Overview : </h4>
                                         <div id="source-icons"></div> <!-- Placeholder for source icons -->
                                         <p id="overview-content"></p>
                                     </div>
@@ -239,23 +195,22 @@
                                         <p id="stations-content"></p>
                                     </div>
                                     <div class="tab-pane fade" id="statistique" role="tabpanel">
-                                        <h4>Statistique</h4>
+                                        <h4>Statistique de production d'eau</h4>
                                         <p id="reportsChart"></p>
-                                        <h5>Gap Statistics</h5>
+                                        <h5>Statistique de gap </h5>
                                         <p id="reportsChartGap"></p>
                                     </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div id="legend" class="legend">
+                       <div id="legend" class="legend">
                             <h5>Légende</h5>
-                            <div><i class="fa fa-map-marker fa-map-marker-gray"></i>Pas de Gap</div>
-                            <div><i class="fa fa-map-marker fa-map-marker-blue"></i>Production juste</div>
-                            <div><i class="fa fa-map-marker fa-map-marker-yellow"></i>Gap < 25%</div>
-                            <div><i class="fa fa-map-marker fa-map-marker-orange"></i>25% < Gap < 50%</div>
-                            <div><i class="fa fa-map-marker fa-map-marker-red"></i>Gap > 50%</div>
-                            <i class="zone-polygon" id="legend-text" onclick="toggleZonesVisibility()"></i>
+                            <div><i class="zone-polygon polygon-gray"></i>Pas de Gap</div>
+                            <div><i class="zone-polygon polygon-blue"></i>Production juste</div>
+                            <div><i class="zone-polygon polygon-yellow"></i>Gap < 25%</div>
+                            <div><i class="zone-polygon polygon-orange"></i>25% < Gap < 50%</div>
+                            <div><i class="zone-polygon polygon-red"></i>Gap > 50%</div>
                             <span id="zone-label">Zone</span>
                         </div>
                         <!-- End Table with stripped rows -->
@@ -278,26 +233,44 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
         }).addTo(map);
-
         map.addControl(new L.Control.Fullscreen());
 
-
-        var zones = {{ zone|raw }};
-        let sitesData =  {{ sites|raw }};
-        var polygons = [];
-        var zonesVisible = true;
-        var addObservationUrl = "{{ path('app_add_stationBySite', {'id': 'siteId'}) }}";
+        var sites = {{ site|raw }};
         var siteDetailUrl = "{{ path('detail_site',{'id' : 'siteId'})}}";
-        function showOverview() {
-            var siteId = currentSelectedMarker;
-            fetchSiteDetails(siteId);
+       //console.log(sites[0].coord);
+        var polygons = [];
+        var currentSelectedMarker = null;
+        let chart = null;
+        let gapChart = null;
+        var stationMarkers = [];
+
+
+
+        function removePolygons() {
+            polygons.forEach(function(polygon) {
+                map.removeLayer(polygon);
+            });
+            polygons = [];
         }
-        
+        function updateSidebarContent(siteData) {
+            var addSiteUrlWithId = siteDetailUrl.replace('siteId', siteData.id);         
+            document.getElementById('overview-content').innerHTML = `
+                <strong>Nom : ${siteData.libelle}</strong>
+                Adresse : ${siteData.adresse}<br>           
+                <center>
+                    <button class="btn btn-secondary" onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button>
+                </center>
+            `;
+            document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
+            sidebar.classList.remove('hidden2');
+            showStations();
+            showStatistics();
+            showGapStatistics();
+
+        }
         function showStations() {
             var siteId = currentSelectedMarker;
-            var siteData = sitesData.find(site => site.id === siteId);
-            console.log(siteData);
-
+            var siteData = sites.find(site => site.id === siteId);
             if (siteData && siteData.stations.length >= 1) {
                 let stationInfo = siteData.stations.map(station =>{
                     return `
@@ -323,7 +296,6 @@
                             </div>
                         </div>
                 `}).join('');
-                var addObservationUrlWithId = addObservationUrl.replace('siteId', siteData.id);
                 document.getElementById('stations-content').innerHTML = `
                     ${stationInfo}
                 `;
@@ -333,60 +305,6 @@
                 `;
             }
         }
-
-        function closeInfoCard() {
-            document.getElementById('info-card').style.display = 'none';
-        }
-        function updateSidebarContent(siteData, zoneData) {
-            var addSiteUrlWithId = siteDetailUrl.replace('siteId', siteData.id);
-            if (!Array.isArray(zoneData)) {
-                console.error('Les données de zones ne sont pas un tableau:', zoneData);
-                return;
-            }
-            let zonesInfo = zoneData.map(zone => `
-                <div>
-                    <strong>Zone : ${zone.libelle}</strong><br>
-                    Description : ${zone.description}
-                </div>
-            `);
-
-            document.getElementById('overview-content').innerHTML = `
-                <strong>Nom : ${siteData.libelle}</strong>
-                Adresse : ${siteData.adresse}<br>
-                Latitude : ${siteData.coord.latitude}<br>
-                Longitude : ${siteData.coord.longitude}<br>
-                ${zonesInfo.join('')}
-                
-                <center>
-                    <button class="btn btn-secondary" onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button>
-                </center>
-            `;
-            document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
-            sidebar.classList.remove('hidden2');
-            showStations();
-            showStatistics();
-            showGapStatistics(); // Call the function to display gap statistics
-
-        }
-
-        let chart = null;
-        let gapChart = null;
-
-        function getDataByDay() {
-            var siteId = currentSelectedMarker
-            return fetch(`/site/production/day/${siteId}`)
-            .then(response => response.json())
-            .then(data => {
-                let datas = JSON.parse(data);
-                datas.reverse();
-                return datas; 
-            })
-            .catch(error => {
-                console.error('Error fetching daily production data:', error);
-                return [];
-            });
-        }
-
         function showStatistics() {
             getDataByDay().then(dayData => {
                 // Réinitialise le conteneur du graphique avant chaque mise à jour
@@ -543,142 +461,93 @@
                 console.error('Error fetching or processing gap data:', error);
             });
         }
-
-        function fetchZoneDetails(zoneId) {
-            fetch(`/site/liste/detailZone/${zoneId}`)
-                .then(response => response.json())
-                .then(data => {
-                    let datas = JSON.parse(data);
-                    var zoneData = zones.find(zone => zone.id === zoneId);
-                    console.log(datas);
-                    if (zoneData) {
-                        showZoneSidebar(zoneData, datas);
-                    }
-                })
-                .catch(error => console.error('Erreur:', error));
-        }
-
-        function addPolygons(zones) {
+        function addPolygons(sites) {
             removePolygons();
-            zones.forEach(function(zone) {
-                var coordinates = zone.coord.map(function(coord) {
+            sites.forEach(function(site) {
+                var coordinates = site.coord.map(function(coord) {
                     return [coord.latitude, coord.longitude];
                 });
-                var polygon = L.polygon(coordinates).addTo(map).bindPopup(zone.libelle);
+                // Définir la couleur de remplissage en fonction de l'état du site
+                var fillColor = "#a9a9a9"; // gris (moins clair)
+                if (site.etat == '1') {
+                    fillColor = "#87ceeb"; // bleu (moins clair)
+                } else if (site.etat == '2') {
+                    fillColor = "#fffacd"; // jaune (moins clair)
+                } else if (site.etat == '3') {
+                    fillColor = "#ffcc99"; // orange (moins clair)
+                } else if (site.etat == '4') {
+                    fillColor = "#ff6666"; // rouge (moins clair)
+                }
+
+
+                var polygon = L.polygon(coordinates, {
+                    color: "#000000",  // couleur de bordure du polygone
+                    fillColor: fillColor,  // couleur de remplissage selon l'état
+                    fillOpacity: 0.5,  // transparence du remplissage
+                    weight: 2  // épaisseur de la bordure
+                }).addTo(map).bindPopup(site.libelle);
+
                 polygon.on('click', function(e) {
-                    fetchZoneDetails(zone.id);
-                    currentSelectedMarker = null;
+                    map.setView(e.latlng, 11);
+                    currentSelectedMarker = site.id;
+                    console.log(site);
+                    updateSidebarContent(site);
+                    showSiteStations(site);
                 });
 
                 polygons.push(polygon);
             });
         }
-
-        function showZoneSidebar(zone, siteData) {
-            let siteInfo = siteData.map(site => `
-                <div>
-                    <strong>nom : ${site.libelle}</strong><br>
-                    Adresse : ${site.adresse}<br>
-                </div>
-            `);
-
-            let zoneInfo = `
-                <div>
-                    <p> <strong>Zone : ${zone.libelle}</strong></p>
-                    Description : ${zone.description}
-                    <p>Coordonnées : ${zone.coord.map(coord => `(${coord.latitude}, ${coord.longitude})`).join(', ')}</p>
-                    Sites:
-                    ${siteInfo}
-                </div>
-            `;
-            document.getElementById('overview-content').innerHTML = zoneInfo;
-            document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
-            sidebar.classList.remove('hidden2');
-            showZoneStations(siteData);
-            //showStatistics();
-        }
-        function showZoneStations(data) {
-            // Variable pour stocker l'ensemble des stations pour chaque zone
-            let siteInf = data.map(siteData => {
-                // Vérification si le champ `stations` existe et contient au moins une station
-                if (siteData.stations && siteData.stations.length > 0) {
-                    let stationZoneInfo = siteData.stations.map(station => {
-                        return `
-                            <div class="station-card">
-                                <div class="station-title">Station : ${station.code}</div>
-                                <div class="station-description">Nom de la station : ${station.libelle}</div>
-                                ${station.sources.length > 0 ?  `
-                                    ${station.sources.map(source => {
-                                    const iconUrl = `/images/${source.nom.toLowerCase()}.svg`;
-                                    return `
-                                        <div class="source-card">
-                                            <div class="card-content">
-                                                <img src="${iconUrl}" alt="${source.nom}" style="width: 50px; height: 50px;">
-                                                <div><strong>${source.nom}</strong></div>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                                ` : 'Aucune source disponible.'}<br>
-                            </div>
-                        `;
-                    }).join(''); // Concaténation des informations des stations
-
-                    // Retourne la structure HTML complète pour chaque zone
-                    return `
-                        <div class="zone-section">
-                            <h3 style="margin-bottom: 0px;">Site : ${siteData.libelle}</h3>
-                            <div class="zone-stations">
-                                ${stationZoneInfo}
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Si aucune station n'est trouvée dans la zone
-                    return `
-                        <div class="zone-section">
-                            <h3>Site : ${siteData.libelle}</h3>
-                            <div class="zone-stations">
-                                Aucune station sur cette site.
-                            </div>
-                        </div>
-                    `;
-                }
-            }).join(''); // Concaténation des sections des zonesstations-content
-
-            // Mise à jour du contenu de l'élément avec toutes les informations des zones et stations
-            document.getElementById('stations-content').innerHTML = siteInf;
-        }
-
-        function removePolygons() {
-            polygons.forEach(function(polygon) {
-                map.removeLayer(polygon);
+        addPolygons(sites);
+        function getDataByDay() {
+            var siteId = currentSelectedMarker
+            return fetch(`/site/production/day/${siteId}`)
+            .then(response => response.json())
+            .then(data => {
+                let datas = JSON.parse(data);
+                datas.reverse();
+                return datas; 
+            })
+            .catch(error => {
+                console.error('Error fetching daily production data:', error);
+                return [];
             });
-            polygons = [];
         }
+    function removeStationMarkers() {
+        stationMarkers.forEach(function(marker) {
+            map.removeLayer(marker);
+        });
+        stationMarkers = [];
+    }
 
-        function toggleZonesVisibility() {
-            var toggleElement = document.querySelector('.zone-polygon');
-            var zoneLabel = document.getElementById('zone-label');
-            zonesVisible = !zonesVisible;
-            if (zonesVisible) {
-                addPolygons(zones);
-                toggleElement.classList.remove('strikethrough');
-                zoneLabel.classList.remove('strikethrough');
-            } else {
-                removePolygons();
-                toggleElement.classList.add('strikethrough');
-                zoneLabel.classList.add('strikethrough');
-            }
-        }
+    // Fonction pour afficher les stations du site sur la carte
+    function showSiteStations(site) {
+        // Supprimer les anciens marqueurs des stations
+        removeStationMarkers();
 
-        addPolygons(zones);
+        // Parcourir les stations du site et les ajouter à la carte
+        site.stations.forEach(function(station) {
+            const iconUrls = `/images/${station.sources[0].nom.toLowerCase()}.svg`;
+            var stationIcon = L.icon({
+                iconUrl: iconUrls, // Ton image SVG pour les stations
+                iconSize: [25, 41], // Taille de l'icône
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34]
+            });
 
+            // Créer un marqueur pour chaque station et l'ajouter à la carte
+            var marker = L.marker([station.latitude, station.longitude], { icon: stationIcon }).addTo(map);
+            
+            // Ajouter une popup ou tout autre comportement au clic sur la station
+            marker.bindPopup(station.libelle);
+            
+            // Ajouter le marqueur à la liste des marqueurs de stations pour pouvoir les supprimer ensuite
+            stationMarkers.push(marker);
+        });
+    }
+        
         var sidebar = document.getElementById('sidebar-info');
-        var markers = [];
-        var currentSelectedMarker = null;
-
-        //desactive l'interaction avec la map lorsque le curseur est sur mon sidebar
+         //desactive l'interaction avec la map lorsque le curseur est sur mon sidebar
         sidebar.addEventListener('mouseenter', function() {
             map.dragging.disable();
             map.scrollWheelZoom.disable();
@@ -691,66 +560,9 @@
             map.scrollWheelZoom.enable();
             map.doubleClickZoom.enable();
         });
-
         function closeSidebar() {
             sidebar.classList.add('hidden2');
-            markers.forEach(function(m) {
-                m.getElement().classList.remove('marker-icon-jump');
-            });
         }
-
-        
-
-        function fetchSiteDetails(siteId) {
-            fetch(`/site/liste/detailSite/${siteId}`)
-                .then(response => response.json())
-                .then(data => {
-                    let datas = JSON.parse(data);
-                    var siteData = sitesData.find(site => site.id === siteId);
-                    if (siteData) {
-                        updateSidebarContent(siteData, datas);
-                    }
-                })
-                .catch(error => console.error('Erreur:', error));
-        }
-
-        sitesData.forEach(function(site) {
-            var iconUrl = "/images/marker-gray.svg";
-            if (site.etat == '1') {
-                iconUrl = "/images/marker-blue.svg";
-            }  else if (site.etat == '2') {
-                iconUrl = "/images/marker-yellow.svg";
-            } else if (site.etat == '3') {
-                iconUrl = "/images/marker-orange.svg";
-            }
-            else if (site.etat == '4') {
-                iconUrl = "/images/marker-red.svg";
-            }
-
-            var markerIcon = L.icon({
-                iconUrl: iconUrl,
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34]
-            });
-
-            var marker = L.marker([site.latitude, site.longitude], { icon: markerIcon }).addTo(map);
-            markers.push(marker);
-
-            marker.on('click', function(e) {
-                map.setView(e.latlng, 9);
-
-                markers.forEach(function(m) {
-                    m.getElement().classList.remove('marker-icon-jump');
-                });
-
-                e.target.getElement().classList.add('marker-icon-jump');
-                currentSelectedMarker = site.id;
-                fetchSiteDetails(site.id);
-
-            });
-        });
-        
 
         map.zoomControl.setPosition('bottomright');
     </script>

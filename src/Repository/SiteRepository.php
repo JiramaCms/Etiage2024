@@ -23,46 +23,38 @@ class SiteRepository extends ServiceEntityRepository
     }
 
 
-    public function insert(Site $pointVente): void
+    public function insert($site): void
     {
-        // Construction de la requête d'insertion
-        $query = "
+        $sql = "
             INSERT INTO site (libelle, adresse, coord) 
-            VALUES (:libelle, :adresse, ST_GeomFromText(CONCAT('POINT(', :latitude, ' ', :longitude, ')'), 4326))
+            VALUES (:libelle, :adresse, ST_GeomFromText(:polygon ,4326))
         ";
 
         // Exécution de la requête avec executeStatement pour obtenir le nombre de lignes affectées
-        $result = $this->getEntityManager()->getConnection()->executeStatement($query, [
-            'libelle' => $pointVente->getLibelle(),
-            'adresse' => $pointVente->getAdresse(),
-            'latitude' => $pointVente->getLatitude(),
-            'longitude' => $pointVente->getLongitude(),
+        $result = $this->getEntityManager()->getConnection()->executeStatement($sql, [
+            'libelle' => $site->getLibelle(),
+            'adresse' => $site->getAdresse(),
+            'polygon' => $site->getCoordToWKT(),
         ]);
     }
-
-    public function getZoneOfSite($siteId)
+    public function update($site): void
     {
-        $entityManager = $this->getEntityManager();
+        $sql = "
+            UPDATE site 
+            SET libelle = :libelle, 
+                adresse = :adresse, 
+                coord = ST_GeomFromText(:polygon, 4326)
+            WHERE id = :id
+        ";
 
-         // Créez un ResultSetMapping
-         $rsm = new ResultSetMappingBuilder($this->getEntityManager());
+        // Exécution de la requête avec executeStatement pour obtenir le nombre de lignes affectées
+        $result = $this->getEntityManager()->getConnection()->executeStatement($sql, [
+            'libelle' => $site->getLibelle(),
+            'adresse' => $site->getAdresse(),
+            'polygon' => $site->getCoordToWKT(),
+            'id' => $site->getId(),  // Assure-toi que tu as l'ID du site pour identifier l'enregistrement à mettre à jour
+        ]);
 
-         // Ajoutez le mapping pour l'entité ZoneVente
-         $rsm->addRootEntityFromClassMetadata('App\Entity\Zone', 'z');
-
-        $nativeQuery = $entityManager->createNativeQuery('
-            SELECT z.*
-            FROM site s
-            JOIN zone z ON ST_Intersects(s.coord, z.coord)
-            WHERE s.id = :siteId
-        ',$rsm);
-        
-
-        $nativeQuery->setParameter('siteId', $siteId);
-        
-        $result = $nativeQuery->getResult();
-
-        return $result;
     }
 
 //    /**

@@ -1,6 +1,6 @@
 <?php
-
 namespace App\Controller;
+ini_set('memory_limit', '256M');
 
 use App\Util\Util;
 use App\Entity\Site;
@@ -54,7 +54,7 @@ class SiteController extends AbstractController
             'sites' => $site,
             'zone' => $zone,
         ]);
-    }
+    }/*
     #[Route('/predict-action', name: 'app_predict_etiage_action')]
     public function predictEtiageAction(EntityManagerInterface $entityManager,Request $request)
     {
@@ -152,7 +152,7 @@ class SiteController extends AbstractController
     
         // Convertir le tableau en JSON et retourner la réponse
         return new JsonResponse($reponse);
-    }
+    }*/
     #[Route('/site/prediction/{id}', name: 'app_prediction_production_site')]
     public function predictionProduction($id,EntityManagerInterface $entityManager): Response
     {
@@ -229,7 +229,7 @@ class SiteController extends AbstractController
         $rep = $response->toArray();
         $repon = Util::toJson($rep);
         return new JsonResponse($repon);
-    }
+    }/*
 
     #[Route('/site/test', name: 'app_site_test')]
     public function test(EntityManagerInterface $entityManager): Response
@@ -268,7 +268,7 @@ class SiteController extends AbstractController
             'pred' => $data,
         ]);
     }
-   
+   */
     #[Route('station/production/month/{stationId}', name : 'station_production_month')]
     public function stationProductionMonth($stationId,EntityManagerInterface $entityManager): Response
     {
@@ -287,7 +287,7 @@ class SiteController extends AbstractController
         $rep = Util::toJson($production);
         return new JsonResponse($rep);
     }
-    //Done mandeha
+    //Done mandeha*/
     #[Route('/site/production/day/{siteId}', name :'site_production_day')]
     public function getProductionByDay($siteId, EntityManagerInterface $entityManager): Response
     {
@@ -315,33 +315,6 @@ class SiteController extends AbstractController
         return new JsonResponse($rep);
     }
     
-    
-    #[Route('/site/insert', name: 'site_insert', methods: ['POST'])]
-    public function insertSite(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        // Récupéreration des données du formulaire
-        $libelle = $request->request->get('libelle');
-        $adresse = $request->request->get('adresse');
-        $coord = $request->request->get('coord');
-        
-        // Convertir les coordonnées en tableau [latitude, longitude]
-        $coordArray = explode(',', str_replace(['LatLng(', ')'], '', $coord));
-        $latitude = floatval($coordArray[0]);
-        $longitude = floatval($coordArray[1]);
-
-        // Créer une nouvelle instance de Site et définir ses propriétés
-        $site = new Site();
-        $site->setLibelle($libelle);
-        $site->setAdresse($adresse);
-        $site->setCoord(['latitude' => $latitude, 'longitude' => $longitude]);
-
-        $entityManager->getRepository(Site::class)->insert($site);
-
-
-        // Rediriger vers
-        return $this->redirectToRoute('site_liste');
-    }
-
     #[Route('/updateSite/{id}', name:'app_update_site')]
     public function updateSite(Site $site,Request $req,ManagerRegistry $mr): Response
     {
@@ -362,47 +335,23 @@ class SiteController extends AbstractController
         ]);
     }
 
-    
-
-    #[Route('/site/liste', name: 'site_liste')]
+     #[Route('/site/liste', name: 'site_liste')]
     public function site(Request $request,EntityManagerInterface $entityManager): Response
     {
         $rsite =  $entityManager->getRepository(Site::class);
-        $rzone = $entityManager->getRepository(Zone::class);
+        //$rzone = $entityManager->getRepository(Zone::class);
         $sites = $rsite->findAll();
-        //dd($sites);
         //$this->productionService->calulateEtatSite($sites[1]);
         foreach ($sites as $site) {
             $this->productionService->calulateEtatSite($site);
         }
         //dd($sites);
-        $zones = $rzone->findAll();
-        $zone=(Util::toJson($zones));
+        //$zones = $rzone->findAll();
+        //$zone=(Util::toJson($sites));
         $site = (Util::toJson($sites));
        // dump($site);die();
         return $this->render('site/site.html.twig', [
-            'sites' => $site,
-            'zone' => $zone,
-        ]);
-    }
-    #[Route('/site/{id}', name: 'detail_site')]
-    public function detailSite($id,EntityManagerInterface $entityManager): Response
-    {
-        $rsite = $entityManager->getRepository(Site::class);
-        $site = $rsite->find($id);
-        $rzone = $entityManager->getRepository(Zone::class);
-        $siteJ = (Util::toJson($site));
-        //dump($site->getIncidents()[0]->getLibelle());die();
-        //dump($site,$siteJ);die();
-        $zoneOfSite = $rzone->getZoneOfSite($id);
-        //dump($zoneOfSite);die();
-        //$zone = (Util::toJson($zoneOfSite));
-
-        //dump($zoneOfSite,$site);die();
-        return $this->render('site/detailSite.html.twig', [
             'site' => $site,
-            'sitej' => $siteJ,
-            'zonej' => $zoneOfSite,
         ]);
     }
 
@@ -434,26 +383,55 @@ class SiteController extends AbstractController
 
 
 
-    ///ZONE Controller part
-    #[Route('/site/zone/new', name: 'new_zone')]
-    public function newZV(EntityManagerInterface $entityManager): Response
+    ///A effacer
+    #[Route('/site/updateSite/{id}', name: 'update_site_poly')]
+    public function updateSitePolygon(Site $site, EntityManagerInterface $entityManager): Response
     {
-        $rzone =  $entityManager->getRepository(Zone::class);
-        $zone = $rzone->findAll();
-        dump($zone);
+        $rsite = $entityManager->getRepository(Site::class);
+        $queryBuilder = $rsite->createQueryBuilder('s')
+            ->where('s.coord IS NOT NULL')
+            ->getQuery();
+
+        $sites = $queryBuilder->getResult();
+        //dd($sites[1]->getCoord());
+
+        $sitete=(Util::toJson($sites));
+        return $this->render('site/update-site-polygon.html.twig', [
+            'sites' => $sitete,
+            'site' => $site,// Coordonnées du polygone pour l'affichage
+        ]);
+    }
+    #[Route('/site/updateSitePoly/{id}', name: 'update_site', methods: ['POST'])]
+    public function saveUpdatedPolygon(Request $request, Site $site, EntityManagerInterface $entityManager): Response
+    {
+        $polygonCoords = $request->request->get('coords');
+       // dd($polygonCoords);
+        $site->setCoordByStr($polygonCoords);
+        //dump($site);die();
+
+        $entityManager->getRepository(Site::class)->update($site);
+
+        return $this->redirectToRoute('update_site_poly', ['id' => $site->getId()]);
+    }
+    #[Route('/site/new', name: 'new_site_poly')]
+    public function newSite(EntityManagerInterface $entityManager): Response
+    {
+        $rsite =  $entityManager->getRepository(Site::class);
+        $site = $rsite->findAll();
+        dump($site);
         return $this->render('site/new-zone.html.twig', [
             'controller_name' => 'LocationController',
-            'zoneventes' => $zone,
+            'zoneventes' => $site,
             'message' => null,
         ]);
     }
 
-    ///Venant da la form de newZone
+    ///A effacer
     #[Route('/site/zone/insert', name: 'insert_zv', methods: ['POST'])]
     public function traitementbu(Request $request, EntityManagerInterface $em): Response
     {
         $libelle = $request->request->get('libelle');
-        $description = $request->request->get('description');
+        $description = $request->request->get('adresse');
         $coord = $request->request->get('coords');
 
         //echo "efa tonga" . $coord ;
@@ -473,10 +451,10 @@ class SiteController extends AbstractController
                  $em->getRepository(Zone::class)->insert($zoneVente);
             }
         }*/
-        $zone = new Zone($libelle, $description,$coord);
+        $site = new Site($libelle, $description,$coord);
         //dump($zone->getCoordStrWKT());die();
 
-        $em->getRepository(Zone::class)->insert($zone);
+        $em->getRepository(Site::class)->insert($site);
 
         // return $this->redirectToRoute('nouveau_zv');
         return $this->render('site/new-zone.html.twig', [
@@ -499,6 +477,26 @@ class SiteController extends AbstractController
             'zone' => $zone,
             'zoneName' => $zones,
             'sites' => $site,
+        ]);
+    }
+    #[Route('/site/{id}', name: 'detail_site')]
+    public function detailSite($id,EntityManagerInterface $entityManager): Response
+    {
+        $rsite = $entityManager->getRepository(Site::class);
+        $site = $rsite->find($id);
+        $rzone = $entityManager->getRepository(Zone::class);
+        $siteJ = (Util::toJson($site));
+        //dump($site->getIncidents()[0]->getLibelle());die();
+        //dump($site,$siteJ);die();
+        $zoneOfSite = $rzone->getZoneOfSite($id);
+        //dump($zoneOfSite);die();
+        //$zone = (Util::toJson($zoneOfSite));
+
+        //dump($zoneOfSite,$site);die();
+        return $this->render('site/detailSite.html.twig', [
+            'site' => $site,
+            'sitej' => $siteJ,
+            'zonej' => $zoneOfSite,
         ]);
     }    
     

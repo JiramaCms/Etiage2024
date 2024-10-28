@@ -33,6 +33,9 @@ class Station
     #[ORM\ManyToMany(targetEntity: Source::class, mappedBy: 'stations',cascade: ['all'])]
     private Collection $sources;
 
+    #[ORM\Column(type: 'point', nullable: true)]
+    private $coord = null;
+
     public function __construct()
     {
         $this->production = new ArrayCollection();
@@ -136,5 +139,26 @@ class Station
         }
 
         return $this;
+    }
+
+    public function getCoord()
+    {
+        return $this->coord;
+    }
+
+    public function setCoord($coord): static
+    {
+        $this->coord = $coord;
+
+        return $this;
+    }
+    public function getLatitude(): ?float
+    {
+        return $this->coord['latitude'] ?? null;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->coord['longitude'] ?? null;
     }
 }
