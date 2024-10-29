@@ -102,37 +102,26 @@
         font-size: 18px;
         margin-right: 8px;
     }
-
-    /* Couleurs des icônes */
-    .legend .fa-map-marker-gray {
-        color: gray;
-    }
-
-    .legend .fa-map-marker-blue {
-        color: blue;
-    }
-
-    .legend .fa-map-marker-yellow {
-        color: yellow;
-    }
-
-    .legend .fa-map-marker-orange {
-        color: orange;
-    }
-
-    .legend .fa-map-marker-red {
-        color: red;
-    }
-
     .zone-polygon {
-    background: blue; /* Couleur de remplissage du polygone */
+        background: blue; /* Couleur de remplissage du polygone */
         clip-path: polygon(50% 0%, 100% 38%, 81% 100%, 19% 100%, 0% 38%); /* Pentagone */
         width: 15px;
         height: 15px;
         display: inline-block;
         margin-right: 8px;
         cursor: pointer;
-        text-decoration: none;    }
+        text-decoration: none;    
+    }
+    /* Couleurs pour chaque niveau de "Gap" */
+    .polygon-gray { background-color: #b0b0b0; }   /* Gris pour "Pas de Gap" */
+    .polygon-blue { background-color: #87CEEB; }   /* Bleu pour "Production juste" */
+    .polygon-yellow { background-color: #FFE680; } /* Jaune pour "Gap < 25%" */
+    .polygon-orange { background-color: #FFB266; } /* Orange pour "25% < Gap < 50%" */
+    .polygon-red { background-color: #FF6666; }  
+    .strikethrough {
+        opacity: 0.3;
+        text-decoration: line-through;
+    }
 </style>
 
 <main id="main" class="main">
@@ -152,15 +141,13 @@
             <!-- Section Carte -->
             <div class="map-section">
                 <div id="map"></div>
-                <div id="legend" class="legend">
+                 <div id="legend" class="legend">
                     <h5>Légende</h5>
-                    <div><i class="fa fa-map-marker fa-map-marker-gray"></i>Pas de Gap</div>
-                    <div><i class="fa fa-map-marker fa-map-marker-blue"></i>Production juste</div>
-                    <div><i class="fa fa-map-marker fa-map-marker-yellow"></i>Gap < 25%</div>
-                    <div><i class="fa fa-map-marker fa-map-marker-orange"></i>25% < Gap < 50%</div>
-                    <div><i class="fa fa-map-marker fa-map-marker-red"></i>Gap > 50%</div>
-                    <i class="zone-polygon" id="legend-text" onclick="toggleZonesVisibility()"></i>
-                    <span id="zone-label">Zone</span>
+                    <div><i class="zone-polygon polygon-gray"></i>Pas de Gap</div>
+                    <div><i class="zone-polygon polygon-blue"></i>Production juste</div>
+                    <div><i class="zone-polygon polygon-yellow"></i>Gap < 25%</div>
+                    <div><i class="zone-polygon polygon-orange"></i>25% < Gap < 50%</div>
+                    <div><i class="zone-polygon polygon-red"></i>Gap > 50%</div>
                 </div>
             </div>
 
@@ -206,22 +193,9 @@
         attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    var zones = {{ zone|raw }};
     let sitesData =  {{ sites|raw }};
     var polygons = [];
     let previsions = [];
-    var zonesVisible = true;
-
-    function addPolygons(zones) {
-        removePolygons();
-        zones.forEach(function(zone) {
-            var coordinates = zone.coord.map(function(coord) {
-                return [coord.latitude, coord.longitude];
-            });
-            var polygon = L.polygon(coordinates).addTo(map).bindPopup(zone.libelle);
-            polygons.push(polygon);
-        });
-    }
 
     function removePolygons() {
         polygons.forEach(function(polygon) {
@@ -229,58 +203,45 @@
         });
         polygons = [];
     }
-
-    function toggleZonesVisibility() {
-        var toggleElement = document.querySelector('.zone-polygon');
-        var zoneLabel = document.getElementById('zone-label');
-        zonesVisible = !zonesVisible;
-        if (zonesVisible) {
-            addPolygons(zones);
-            toggleElement.classList.remove('strikethrough');
-            zoneLabel.classList.remove('strikethrough');
-        } else {
+    function addPolygons(sites) {
             removePolygons();
-            toggleElement.classList.add('strikethrough');
-            zoneLabel.classList.add('strikethrough');
-        }
-    }
+            sites.forEach(function(site) {
+                var coordinates = site.coord.map(function(coord) {
+                    return [coord.latitude, coord.longitude];
+                });
+                // Définir la couleur de remplissage en fonction de l'état du site
+                var fillColor = "#a9a9a9"; // gris (moins clair)
+                if (site.etat == '1') {
+                    fillColor = "#87ceeb"; // bleu (moins clair)
+                } else if (site.etat == '2') {
+                    fillColor = "#fffacd"; // jaune (moins clair)
+                } else if (site.etat == '3') {
+                    fillColor = "#ffcc99"; // orange (moins clair)
+                } else if (site.etat == '4') {
+                    fillColor = "#ff6666"; // rouge (moins clair)
+                }
 
-    addPolygons(zones);
 
-    var markers = [];
-    sitesData.forEach(function(site){
-        var iconUrl = "/images/marker-gray.svg";
-        if (site.etat == '1') {
-            iconUrl = "/images/marker-blue.svg";
-        }  else if (site.etat == '2') {
-            iconUrl = "/images/marker-yellow.svg";
-        } else if (site.etat == '3') {
-            iconUrl = "/images/marker-orange.svg";
-        }
-        else if (site.etat == '4') {
-            iconUrl = "/images/marker-red.svg";
-        }
-        var markerIcon = L.icon({
-            iconUrl: iconUrl,
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34]
-        });
-        var marker = L.marker([site.latitude, site.longitude], { icon: markerIcon }).addTo(map).bindPopup(site.libelle);
-        markers.push(marker);
+                var polygon = L.polygon(coordinates, {
+                    color: "#000000",  // couleur de bordure du polygone
+                    fillColor: fillColor,  // couleur de remplissage selon l'état
+                    fillOpacity: 0.5,  // transparence du remplissage
+                    weight: 2  // épaisseur de la bordure
+                }).addTo(map).bindPopup(site.libelle);
 
-        marker.on('click', function(e) {
-            map.setView(e.latlng, 12);
+                polygon.on('click', function(e) {
+                    //map.setView(e.latlng, 11);
+                    //currentSelectedMarker = site.id;
+                    console.log(site);
+                    document.getElementById('selected-site-zone').value = site.libelle;
 
-            markers.forEach(function(m) {
-                m.getElement().classList.remove('marker-icon-jump');
+                });
+
+                polygons.push(polygon);
             });
+        }
 
-            e.target.getElement().classList.add('marker-icon-jump');
-            
-        });
-    });
-
+    addPolygons(sitesData);
     document.addEventListener('DOMContentLoaded', function() {
         var minDate = "2024-01-01"; // Exemple de date minimum
         var maxDate = "2025-12-31"; // Exemple de date maximum
@@ -322,48 +283,41 @@
             previsions = datas;
             console.log('Response previsions:', previsions);
 
-            // 1. Efface les anciens marqueurs de la carte
-            markers.forEach(function(marker) {
-                map.removeLayer(marker);
-            });
-            markers = [];
-
-            // 2. Ajoute les nouveaux marqueurs avec les nouvelles données
+            removePolygons();
             datas.forEach(function(data) {
-                //console.log(data.site.etat);
-                var iconUrl = "/images/marker-gray.svg"; // Défaut
+                var coordinates = data.site.coord.map(function(coord) {
+                    return [coord.latitude, coord.longitude];
+                });
+                // Définir la couleur de remplissage en fonction de l'état du site
+                var fillColor = "#a9a9a9"; // gris (moins clair)
                 if (data.site.etat == '1') {
-                    iconUrl = "/images/marker-blue.svg";
+                    fillColor = "#87ceeb"; // bleu (moins clair)
                 } else if (data.site.etat == '2') {
-                    iconUrl = "/images/marker-yellow.svg";
+                    fillColor = "#fffacd"; // jaune (moins clair)
                 } else if (data.site.etat == '3') {
-                    iconUrl = "/images/marker-orange.svg";
+                    fillColor = "#ffcc99"; // orange (moins clair)
                 } else if (data.site.etat == '4') {
-                    iconUrl = "/images/marker-red.svg";
+                    fillColor = "#ff6666"; // rouge (moins clair)
                 }
 
-                var markerIcon = L.icon({
-                    iconUrl: iconUrl,
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34]
-                });
 
-                var marker = L.marker([data.site.latitude, data.site.longitude], { icon: markerIcon }).addTo(map).bindPopup(data.site.libelle);
-                markers.push(marker);
+                var polygon = L.polygon(coordinates, {
+                    color: "#000000",  // couleur de bordure du polygone
+                    fillColor: fillColor,  // couleur de remplissage selon l'état
+                    fillOpacity: 0.5,  // transparence du remplissage
+                    weight: 2  // épaisseur de la bordure
+                }).addTo(map).bindPopup(data.site.libelle);
 
-                marker.on('click', function(e) {
-                    map.setView(e.latlng, 9);
-
-                    markers.forEach(function(m) {
-                        m.getElement().classList.remove('marker-icon-jump');
-                    });
-                    e.target.getElement().classList.add('marker-icon-jump');
-
+               polygon.on('click', function(e) {
+                    map.setView(e.latlng, 11);
+                    //currentSelectedMarker = site.id;
+                    console.log(data.site);
                     document.querySelector('.chart-section').style.display = 'block';
                     updateChartWithForecasty(previsions, data.site.id);
 
                 });
+
+                polygons.push(polygon);
             });
 
         })

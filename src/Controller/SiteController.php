@@ -54,7 +54,7 @@ class SiteController extends AbstractController
             'sites' => $site,
             'zone' => $zone,
         ]);
-    }/*
+    }
     #[Route('/predict-action', name: 'app_predict_etiage_action')]
     public function predictEtiageAction(EntityManagerInterface $entityManager,Request $request)
     {
@@ -152,7 +152,7 @@ class SiteController extends AbstractController
     
         // Convertir le tableau en JSON et retourner la réponse
         return new JsonResponse($reponse);
-    }*/
+    }
     #[Route('/site/prediction/{id}', name: 'app_prediction_production_site')]
     public function predictionProduction($id,EntityManagerInterface $entityManager): Response
     {
