@@ -30,7 +30,6 @@
 </style>
 
 <main id="main" class="main">
-
     <div class="pagetitle">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <h1>Modifier Station</h1>
@@ -45,12 +44,19 @@
 
     <section class="section">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-6">
+                <!-- Carte -->
+                <div id="mapid" style="height: 500px;">
+                    <!-- Div de la carte -->
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <!-- Formulaire pour mise à jour de la station -->
                 <div class="card">
                     <div class="card-body">
                         <h5 class="card-title">Modifier une Station</h5>
 
-                        <!-- Formulaire pour mise à jour de la station -->
                         <form method="post" action="{{ path('station_update', {id: station.id}) }}">
                             <div class="form-row">
                                 <div class="form-group col-12 col-md-6">
@@ -65,15 +71,10 @@
                             <div class="form-row">
                                 <div class="form-group col-6 col-md-6">
                                     <label for="coord">Coordonnées</label>
-                                    <input type="text" class="form-control" id="coord" name="coord" value="{{ latitude }}, {{longitude}}">
+                                    <input type="text" class="form-control" id="coord" name="coord" value="{{ latitude }}, {{ longitude }}">
                                 </div>
                             </div>
-                            <input type="hidden" class="form-control" id="site" name="site" value="{{station.site.id}}">
-
-                            <div id="mapid" style="height: 500px;">
-                                <!-- Div de la carte -->
-                            </div>
-                            <br><br>
+                            <input type="hidden" class="form-control" id="site" name="site" value="{{ station.site.id }}">
                             <button type="submit" class="btn btn-default m-4">Mettre à jour</button>
                         </form>
                     </div>
@@ -81,8 +82,7 @@
             </div>
         </div>
     </section>
-
-</main><!-- End #main -->
+</main>
 
 <script>
     // Initialiser la carte[-18.917923, 47.522342]

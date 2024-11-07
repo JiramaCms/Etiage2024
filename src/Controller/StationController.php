@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Site;
+use App\Entity\Source;
 use App\Entity\Station;
 use App\Form\StationFormType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,8 +27,11 @@ class StationController extends AbstractController
     {
         $rsite =  $entityManager->getRepository(Site::class);
         $sites = $rsite->findAll();
+        $rsource =  $entityManager->getRepository(Source::class);
+        $sources = $rsource->findAll();
         return $this->render('station/index.html.twig', [
             'sites' => $sites,
+            'sources' => $sources,
         ]);
     }
     #[Route('/station/insert', name: 'station_insert', methods: ['POST'])]
@@ -38,6 +42,8 @@ class StationController extends AbstractController
         $code = $request->request->get('code');
         $coord = $request->request->get('coord');
         $siteId = $request->request->get('site');
+        $sourcesIds = $request->request->all('sources');
+        //dd($sourcesIds);
         
         // Convertir les coordonnées en tableau [latitude, longitude]
         $coordArray = explode(',', str_replace(['LatLng(', ')'], '', $coord));
@@ -52,12 +58,17 @@ class StationController extends AbstractController
         $station->setCode($code);
         $station->setSite($site);
         $station->setCoord(['latitude' => $latitude, 'longitude' => $longitude]);
+         // Insertion de la station et récupération de l'ID
+        $stationId = $entityManager->getRepository(Station::class)->insert($station);
 
-        $entityManager->getRepository(Station::class)->insert($station);
+        // Insérer les relations dans la table de jointure
+        foreach ($sourcesIds as $sourceId) {
+            $entityManager->getRepository(Station::class)->insertStationSourceRelation($stationId, $sourceId);
+        }
 
 
         // Rediriger vers
-        return $this->redirectToRoute('app_insert_site');
+        return $this->redirectToRoute('app_insert_station');
     }
 
     #[Route('/station/updateStation/{id}', name: 'update_station_point')]
@@ -161,7 +172,6 @@ class StationController extends AbstractController
             foreach ($station->getSources() as $existingSource) {
                     $station->removeSource($existingSource);  // Supprime la source de la station
                     $existingSource->removeStation($station); // Supprime la station de la source (bidirectionnel)
-                
             }
     
             // Ajouter les nouvelles sources
@@ -169,7 +179,7 @@ class StationController extends AbstractController
                     $station->addSource($newSource);  // Ajoute la source à la station
                     $newSource->addStation($station); // Ajoute la station à la source (bidirectionnel)
             }
-    
+    dd($station,$newstation);
             // Persister et enregistrer les modifications
             $em->persist($station);
             $em->persist($newstation);

@@ -125,8 +125,7 @@ class Station
     {
         if (!$this->sources->contains($source)) {
             $this->sources->add($source);
-            $source->addStation($this);
-
+            //$source->addStation($this);
         }
 
         return $this;

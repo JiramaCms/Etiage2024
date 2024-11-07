@@ -22,7 +22,7 @@ class StationRepository extends ServiceEntityRepository
         parent::__construct($registry, Station::class);
     }
 
-    public function insert(Station $station): void
+    public function insert(Station $station): int
     {
         // Construction de la requête d'insertion
         $query = "
@@ -37,6 +37,17 @@ class StationRepository extends ServiceEntityRepository
             'site_id' => $station->getSite()->getId(),
             'latitude' => $station->getLatitude(),
             'longitude' => $station->getLongitude(),
+        ]);
+        // Récupération de l'ID de la station nouvellement insérée
+        return (int) $this->getEntityManager()->getConnection()->lastInsertId();
+    }
+    public function insertStationSourceRelation(int $stationId, int $sourceId): void
+    {
+        $query = "INSERT INTO source_station (source_id,station_id) VALUES (:source_id , :station_id)";
+        
+        $this->getEntityManager()->getConnection()->executeStatement($query, [
+            'station_id' => $stationId,
+            'source_id' => $sourceId,
         ]);
     }
     public function update(Station $station): void

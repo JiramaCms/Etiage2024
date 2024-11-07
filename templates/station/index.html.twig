@@ -29,51 +29,54 @@
                 opacity: 0.6;
             }
         }
-    </style>
+</style>
 
-   <main id="main" class="main">
+<main id="main" class="main">
 
     <div class="pagetitle">
-
         <div class="d-flex justify-content-between align-items-center mb-2">
-            <h1>Formulaire de nouveau Station</h1>
+            <h1>Formulaire de nouvelle station</h1>
         </div>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item active"> Formulaire Station</li>
+                <li class="breadcrumb-item"><a href="#">Accueil</a></li>
+                <li class="breadcrumb-item active">Formulaire Station</li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
 
     <section class="section">
         <div class="row">
-            <div class="col-lg-12">
-
+            <div class="col-lg-8">
+                <div id="mapid" style="height: 500px; width: 100%;">
+                    <!-- Div de la carte -->
+                </div>
+            </div>
+            <div class="col-lg-4">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Ajouter une Station  </h5>
+                        <h5 class="card-title">Ajouter une Station</h5>
 
-                        <!-- Table with stripped rows -->
+                        <!-- Formulaire pour ajouter une station -->
                         <form method="post" action="{{ path('station_insert') }}">
                             <div class="form-row">
-                                <div class="form-group col-12 col-md-6">
-                                    <label for="name">Libelle</label>
-                                    <input type="text" class="form-control" value="" id="libelle" name="libelle">
+                                <div class="form-group col-12">
+                                    <label for="libelle">Libelle</label>
+                                    <input type="text" class="form-control" id="libelle" name="libelle">
                                 </div>
-                                <div class="form-group col-12 col-md-6">
-                                    <label for="name">Code</label>
-                                    <input type="text" class="form-control" value="" id="code" name="code">
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group col-6 col-md-6">
-                                    <label for="name">Coordonnées</label>
-                                    <input type="text" class="form-control" value="" id="coord" name="coord">
+                                <div class="form-group col-12">
+                                    <label for="code">Code</label>
+                                    <input type="text" class="form-control" id="code" name="code">
                                 </div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group col-12 col-md-6">
+                                <div class="form-group col-12">
+                                    <label for="coord">Coordonnées</label>
+                                    <input type="text" class="form-control" id="coord" name="coord">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-12">
                                     <label for="site">Sélectionner un Site</label>
                                     <select id="site" name="site" class="form-control">
                                         <option value="">-- Sélectionner un site --</option>
@@ -83,22 +86,27 @@
                                     </select>
                                 </div>
                             </div>
-                            <div id="mapid" style="height: 500px;">
-                                <!-- Div de la carte -->
+                            <div class="form-row">
+                                <div class="form-group col-12">
+                                    <label for="sources">Sources</label>
+                                    <!-- Champ de sélection multiple pour les sources -->
+                                    <select id="sources" name="sources[]" class="form-control" multiple>
+                                        {% for source in sources %}
+                                            <option value="{{ source.id }}">{{ source.nom }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
-                            <br><br>
-                            <button type="submit" class="btn btn-default m-4">Confirmer</button>
+                            <button type="submit" class="btn btn-primary mt-3">Confirmer</button>
                         </form>
-                        <!-- End Table with stripped rows -->
-                        
+                        <!-- Fin du formulaire -->
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
 
-</main><!-- End #main -->
+</main>
 
 <script>
         // Initialiser la carte
@@ -135,8 +143,14 @@
             // Ajouter le nouveau marqueur
             currentMarker = e.layer;
             document.getElementById('coord').value = currentMarker.getLatLng();
-
             console.log('Marqueur ajouté: ' +  currentMarker.getLatLng());
+
+            // Rendre le nouveau marqueur déplaçable
+            currentMarker.on('dragend', function(e) {
+                var latlng = currentMarker.getLatLng();
+                document.getElementById('coord').value = latlng;
+                console.log('Marqueur déplacé : ' + latlng);
+            });
         });
 
 
