@@ -50,6 +50,23 @@ class StationRepository extends ServiceEntityRepository
             'source_id' => $sourceId,
         ]);
     }
+    public function updateStationSourceRelations(int $stationId, array $newSourceIds): void
+    {
+        // 1. Supprimer les anciennes relations
+        $deleteQuery = "DELETE FROM source_station WHERE station_id = :station_id";
+        $this->getEntityManager()->getConnection()->executeStatement($deleteQuery, [
+            'station_id' => $stationId,
+        ]);
+
+        // 2. Insérer les nouvelles relations
+        foreach ($newSourceIds as $sourceId) {
+            $insertQuery = "INSERT INTO source_station (source_id, station_id) VALUES (:source_id, :station_id)";
+            $this->getEntityManager()->getConnection()->executeStatement($insertQuery, [
+                'station_id' => $stationId,
+                'source_id' => $sourceId,
+            ]);
+        }
+    }
     public function update(Station $station): void
     {
         // Construction de la requête de mise à jour
