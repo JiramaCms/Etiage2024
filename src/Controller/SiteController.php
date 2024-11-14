@@ -395,7 +395,7 @@ class SiteController extends AbstractController
         $sites = $queryBuilder->getResult();
         //dd($sites[1]->getCoord());
 
-        $sitete=(Util::toJson($sites));
+        $sitete=(Util::toJson($site));
         return $this->render('site/update-site-polygon.html.twig', [
             'sites' => $sitete,
             'site' => $site,// Coordonnées du polygone pour l'affichage

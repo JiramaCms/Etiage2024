@@ -154,7 +154,7 @@
         
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Accueil</a></li>
             </ol>
         </nav>
     </div><!-- End Page Title -->
@@ -166,7 +166,7 @@
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                         <h5 class="card-title">Sites Madagascar</h5>
-                        <a class="nav-link btn btn-secondary" href="#">
+                        <a class="nav-link btn btn-secondary" href="{{ path('app_map_prevision') }}">
                             Faire une Simulation sur la map
                         </a>
                         </div>
@@ -176,7 +176,7 @@
                                 <button class="close-btn" onclick="closeSidebar()">×</button>
                                 <ul class="nav nav-tabs" role="tablist">
                                     <li class="nav-item" role="presentation">
-                                        <a class="nav-link active" id="tabOverview" data-bs-toggle="tab" href="#overview" role="tab" aria-selected="true">Overview</a>
+                                        <a class="nav-link active" id="tabOverview" data-bs-toggle="tab" href="#overview" role="tab" aria-selected="true">Aperçu</a>
                                     </li>
                                     <li class="nav-item" role="presentation">
                                         <a class="nav-link" id="tabStation" data-bs-toggle="tab" href="#stations" role="tab" aria-selected="false">Stations</a>

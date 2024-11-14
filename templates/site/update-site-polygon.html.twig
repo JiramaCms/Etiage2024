@@ -21,7 +21,7 @@
         </div>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Accueil</a></li>
                 <li class="breadcrumb-item active">Modifier Site</li>
             </ol>
         </nav>
@@ -53,8 +53,7 @@
 </main>
 
 <script>
-    
-        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795],6);
+        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 6);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
@@ -72,33 +71,8 @@
             editPolygon: true,
             deleteLayer: true
         };
+
         var zones = {{ sites|raw }};
-        console.log(zones);
-
-        
-        // Fonction pour ajouter les polygones à la carte
-        function addPolygons(zones) {
-            
-            map.eachLayer(function(layer) {
-                if (layer instanceof L.Polygon) {
-                    map.removeLayer(layer);
-                }
-            });
-            zones.forEach(function(zone) {
-            var coordinates = zone.coord.map(function(coord) {
-                return [coord.latitude,coord.longitude];
-            });
-                L.polygon(coordinates).addTo(map).bindPopup(zone.libelle);
-            });
-
-            
-        }
-
-        // Initial display of all polygons
-        addPolygons(zones);
-        map.pm.addControls(options);
-        {# map.pm.disableDraw('Polygon'); #}
-
         var drawnPolygon;
 
         function toWKT(coords) {
@@ -109,17 +83,49 @@
                     wkt += ', ';
                 }
             });
-            
             wkt += '))';
             return wkt;
         }
 
         function updateCoordinates(layer) {
             var coords = layer.getLatLngs();
+            //var wktCoords = toWKT(coords);
             document.getElementById('coords').value = coords;
         }
 
+        // Fonction pour afficher et marquer le polygone actuel
+        function loadCurrentPolygon(zones) {
+            // Supprimer tous les anciens polygones sur la carte
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.Polygon) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Créer le polygone actuel et l'ajouter à la carte
+            var coordinates = zones.coord.map(function(coord) {
+                return [coord.latitude, coord.longitude];
+            });
+            drawnPolygon = L.polygon(coordinates).addTo(map).bindPopup(zones.libelle);
+
+            // Mettre à jour l'input des coordonnées
+            updateCoordinates(drawnPolygon);
+
+            // Activer l'édition du polygone
+            drawnPolygon.pm.enable({ allowSelfIntersection: false });
+
+            // Mettre à jour les coordonnées chaque fois que le polygone est modifié
+            drawnPolygon.on('pm:edit', function() {
+                updateCoordinates(drawnPolygon);
+                console.log('Polygone actuel édité');
+            });
+        }
+
+        loadCurrentPolygon(zones);
+        map.pm.addControls(options);
+
         map.on('pm:create', function(e) {
+            // Supprimer le polygone dessiné précédemment
             if (drawnPolygon) {
                 map.removeLayer(drawnPolygon);
             }
@@ -127,8 +133,8 @@
             updateCoordinates(e.layer);
             console.log('Nouvelle couche créée');
 
-            // Écouter les modifications sur la nouvelle couche
-            e.layer.on('pm:edit', function(x) {
+            // Activer l'édition et surveiller les modifications
+            e.layer.on('pm:edit', function() {
                 updateCoordinates(e.layer);
                 console.log('Couches éditée');
             });
@@ -140,8 +146,7 @@
                 drawnPolygon = null;
                 console.log('Couche supprimée');
             }
-            //console.log('Couche supprimée');
         });
-</script>
+    </script>
 {% endblock %}
 

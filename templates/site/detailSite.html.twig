@@ -14,8 +14,8 @@
       <h1>Site : {{site.libelle}}</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
-          <li class="breadcrumb-item active">Dashboard</li>
+          <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Accueil</a></li>
+          <li class="breadcrumb-item active">Site</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
@@ -37,7 +37,7 @@
                   <li class="dropdown-header text-start">
                     <h6 id="filter-title">Menu</h6>
                   </li>
-                  <li><a class="dropdown-item" href="{{ path('app_update_site', {'id': site.id}) }}"  id="filter-today">Modifier le site</a></li>
+                  <li><a class="dropdown-item" href="{{ path('update_site_poly', {'id': site.id}) }}"  id="filter-today">Modifier le site</a></li>
                   <li><a class="dropdown-item" href="{{ path('app_add_stationBySite', {'id': site.id}) }}"  id="filter-today">Nouveau station</a></li>
                   <li><a class="dropdown-item" href="{{ path('import_production') }}"  id="filter-today">Importer les productions</a></li>
                 </ul>
