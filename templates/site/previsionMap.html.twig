@@ -132,6 +132,8 @@
         <nav>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Accueil</a></li>
+                <li class="breadcrumb-item active"><a href="#">Prévision</a></li>
+
             </ol>
         </nav>
     </div>
@@ -139,7 +141,12 @@
     <section class="section">
         <div class="content-container">
             <!-- Section Carte -->
+        
             <div class="map-section">
+                <div id="controls">
+                    <button onclick="selectStation('pompage', 2)">Station de Pompage (+2)</button>
+                    <button onclick="selectStation('forage', 4)">Station de Forage (+4)</button>
+                </div>
                 <div id="map"></div>
                  <div id="legend" class="legend">
                     <h5>Légende</h5>
@@ -184,8 +191,11 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
 <script src="https://unpkg.com/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
 
-<!-- Chart.js or ApexCharts -->
+<!-- Chart.js or ApexCharts 
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
+
 <script>
     var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 6);
 
@@ -193,9 +203,34 @@
         attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
     }).addTo(map);
 
+    const markerIcons = {
+        pompage: L.divIcon({
+            className: 'custom-marker pompage',
+            html: `
+                <img src="/images/pompage.svg" alt="Pompage" width="40" height="40" />
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+        }),
+        forage: L.divIcon({
+            className: 'custom-marker forage',
+            html: `
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 8.84-9 13-9 13s-9-4.16-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+        }),
+    };
+
     let sitesData =  {{ sites|raw }};
     var polygons = [];
+    var polygonsB = [];
     let previsions = [];
+    let selectedStation = null;
+
 
     function removePolygons() {
         polygons.forEach(function(polygon) {
@@ -203,45 +238,80 @@
         });
         polygons = [];
     }
+    function selectStation(type, impact) {
+        selectedStation = { type, impact };
+        alert(`Type de station sélectionné : ${type} (+${impact})`);
+    }
+
+    map.on('click', (e) => {
+    if (!selectedStation) {
+        alert("Veuillez sélectionner un type de station.");
+        return;
+    }
+    
+    const { lat, lng } = e.latlng;
+    const point = L.latLng(lat, lng);
+
+    // Ajouter le marqueur
+    L.marker([lat, lng], { icon: markerIcons[selectedStation.type] }).addTo(map);
+
+    // Vérifier si le point est dans un des polygones
+    let isInsidePolygon = false;
+
+    polygons.forEach(function(polygon,index) {
+        // Convertir le polygone en GeoJSON
+        const geojsonLayer = L.geoJSON(polygon.toGeoJSON());
+
+        // Vérifier si le point est dans la couche GeoJSON
+        const results = leafletPip.pointInLayer([lng, lat], geojsonLayer);
+
+        if (results.length > 0) {
+            /*isInsidePolygon = true;
+            const site = sitesData[index]; // Associer le polygone au site correspondant
+            console.log(`Nom du site : ${site.libelle}, ID : ${site.id}`);*/
+            const site = polygon.siteData;
+            console.log(`Nom du site : ${site.libelle}, ID : ${site.id}`);
+            console.log("Le marqueur est dans une zone !");
+            //let prevision = previsions;
+        }
+    });
+
+    if (!isInsidePolygon) {
+        alert("Le marqueur n'est pas dans un site !");
+    }
+});
     function addPolygons(sites) {
             removePolygons();
             sites.forEach(function(site) {
                 var coordinates = site.coord.map(function(coord) {
                     return [coord.latitude, coord.longitude];
                 });
-                // Définir la couleur de remplissage en fonction de l'état du site
-                var fillColor = "#a9a9a9"; // gris (moins clair)
-                if (site.etat == '1') {
-                    fillColor = "#87ceeb"; // bleu (moins clair)
-                } else if (site.etat == '2') {
-                    fillColor = "#fffacd"; // jaune (moins clair)
-                } else if (site.etat == '3') {
-                    fillColor = "#ffcc99"; // orange (moins clair)
-                } else if (site.etat == '4') {
-                    fillColor = "#ff6666"; // rouge (moins clair)
-                }
-
-
+                const fillColor = getFillColor(site.etat);
                 var polygon = L.polygon(coordinates, {
                     color: "#000000",  // couleur de bordure du polygone
                     fillColor: fillColor,  // couleur de remplissage selon l'état
                     fillOpacity: 0.5,  // transparence du remplissage
                     weight: 2  // épaisseur de la bordure
-                }).addTo(map).bindPopup(site.libelle);
+                }).addTo(map)
 
-                polygon.on('click', function(e) {
-                    //map.setView(e.latlng, 11);
-                    //currentSelectedMarker = site.id;
-                    console.log(site);
-                    document.getElementById('selected-site-zone').value = site.libelle;
-
-                });
-
+                polygon.siteData = site;
                 polygons.push(polygon);
             });
+            polygonsB = polygons;
+        }
+        function getFillColor(etat) {
+            const cleanEtat = String(etat)
+            switch (cleanEtat) {
+                case '1': return "#87ceeb"; // bleu
+                case '2': return "#fffacd"; // jaune
+                case '3': return "#ffcc99"; // orange
+                case '4': return "#ff6666"; // rouge
+                default: return "#a9a9a9"; // gris
+            }
         }
 
     addPolygons(sitesData);
+
     document.addEventListener('DOMContentLoaded', function() {
         var minDate = "2024-01-01"; // Exemple de date minimum
         var maxDate = "2025-12-31"; // Exemple de date maximum
@@ -281,7 +351,7 @@
         .then(data => {
             let datas = JSON.parse(data);
             previsions = datas;
-            console.log('Response previsions:', previsions);
+            //console.log('Response previsions:', previsions);
 
             removePolygons();
             datas.forEach(function(data) {
@@ -306,17 +376,14 @@
                     fillColor: fillColor,  // couleur de remplissage selon l'état
                     fillOpacity: 0.5,  // transparence du remplissage
                     weight: 2  // épaisseur de la bordure
-                }).addTo(map).bindPopup(data.site.libelle);
+                }).addTo(map)
 
                polygon.on('click', function(e) {
                     map.setView(e.latlng, 11);
                     //currentSelectedMarker = site.id;
-                    console.log(data.site);
-                    document.querySelector('.chart-section').style.display = 'block';
-                    updateChartWithForecasty(previsions, data.site.id);
-
+                    //console.log("afaka atao ato koa");
                 });
-
+                polygon.siteData = data.site;
                 polygons.push(polygon);
             });
 
@@ -332,94 +399,6 @@
         }
     });
     });
-
-
-    let chart; // Déclaration d'une instance globale pour le graphique
-
-    function updateChartWithData(labels, data) {
-        if (chart) {
-            chart.updateSeries([{
-                name: 'Production m³',
-                data: data,
-            }]);
-            chart.updateOptions({
-                xaxis: { categories: labels },
-            });
-        } else {
-            chart = new ApexCharts(document.querySelector("#chart"), {
-                series: [{
-                    name: 'Production m³',
-                    data: data,
-                }],
-                chart: {
-                    height: 350,
-                    type: 'area',
-                    toolbar: { show: false },
-                },
-                markers: {
-            size: 4
-        },
-        colors: ['#4154f1'],
-        fill: {
-            type: "gradient",
-            gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.3,
-            opacityTo: 0.4,
-            stops: [0, 90, 100]
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'smooth',
-            width: 2
-        },
-        yaxis: {
-            title: {
-            text: 'Production en m³'
-            }
-        },
-        xaxis: { categories: labels },
-            });
-            chart.render();
-        }
-    }
-
-    // Fonction pour mettre à jour le graphique avec les prévisions
-    function updateChartWithForecasty(prevision, siteId) {
-        // 1. Extraire les prévisions pour le site correspondant
-        let production = null;
-        prevision.forEach(function(prev) {
-            if (prev.site.id === siteId) {
-                production = prev.prevision.predictions;
-                return; // Arrêter la boucle dès que le site est trouvé
-            }
-        });
-
-        // Vérifier si des données de prévision ont été trouvées pour le site
-        if (!production || production.length === 0) {
-            console.error('Aucune prévision trouvée pour le site avec l\'ID:', siteId);
-            return; // Si aucune prévision, arrêter la fonction
-        }
-        //console.log(production);
-
-         // 2. Extraire les 10 dernières données de prévision
-        const last10Data = production.slice(-10).map(item => ({
-            date: item.date, 
-            prediction: item.prediction // La quantité produite de la prévision
-        }));
-
-        // Extraire les labels (dates) et les données (prévisions)
-        const labels = last10Data.map(item => item.date);
-        const data = last10Data.map(item => item.prediction);
-
-        //console.log(labels, data);
-
-        // Mettre à jour le graphique avec les labels et les données
-        updateChartWithData(labels, data);
-    }
 
 </script>
 {% endblock %}

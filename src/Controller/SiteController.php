@@ -103,14 +103,10 @@ class SiteController extends AbstractController
     public function previsionMap(EntityManagerInterface $entityManager): Response
     {
         $rsite =  $entityManager->getRepository(Site::class);
-        $rzone = $entityManager->getRepository(Zone::class);
         $sites = $rsite->findAll();
-        $zones = $rzone->findAll();
-        $zone=(Util::toJson($zones));
         $site = (Util::toJson($sites));
         return $this->render('site/previsionMap.html.twig', [
             'sites' => $site,
-            'zone' => $zone,
         ]);
     }
     #[Route('site/prevision/etiage', name : 'site_etiage_prevision')]
@@ -229,46 +225,17 @@ class SiteController extends AbstractController
         $rep = $response->toArray();
         $repon = Util::toJson($rep);
         return new JsonResponse($repon);
-    }/*
+    }
 
     #[Route('/site/test', name: 'app_site_test')]
     public function test(EntityManagerInterface $entityManager): Response
     {
-        $rproduction = $entityManager->getRepository(ProductionMonth::class);
-        $production = $rproduction->findAll();
-        $data = [
-            [
-                'station_id' => 43,
-                'site_id' => 18,
-                'source' => 0,
-                'year' => 2024,
-                'month' => 7,
-                'day' => 9
-            ],
-            [
-                'station_id' => 43,
-                'site_id' => 18,
-                'source' => 0,
-                'year' => 2024,
-                'month' => 7,
-                'day' => 10
-            ]
-        ];
-   
-       // Appel de l'API Flask
-       $client = HttpClient::create();
-       $response = $client->request('POST', 'http://127.0.0.1:5000/predict', [
-        'json' => $data,
+        return $this->render('site/test.html.twig', [
 
         ]);
-       $data = $response->toArray();
-       #dump($data);die();
-        return $this->render('site/test.html.twig', [
-            'productions' => $production,
-            'pred' => $data,
-        ]);
     }
-   */
+
+
     #[Route('station/production/month/{stationId}', name : 'station_production_month')]
     public function stationProductionMonth($stationId,EntityManagerInterface $entityManager): Response
     {
