@@ -109,6 +109,24 @@ class SiteController extends AbstractController
             'sites' => $site,
         ]);
     }
+    #[Route('update-zone-production', name : 'update_zone_production')]
+    public function updateZoneProduction(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        // Vérifiez les clés correctes
+        if (!$data || !isset($data['siteId'], $data['previsions'])) {
+            return new JsonResponse(['error' => 'Invalid data'], 400);
+        }
+        $siteID = $data['siteId'];
+        $prediction = $data['previsions'];
+        try {
+            $besoin = $this->productionService->simulation($siteID, $prediction);
+            return new JsonResponse(['success' => true, 'rep' => $besoin]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+            
+    }
     #[Route('site/prevision/etiage', name : 'site_etiage_prevision')]
     public function siteEtiagePrediction(EntityManagerInterface $entityManager,Request $request): Response
     {   

@@ -144,8 +144,8 @@
         
             <div class="map-section">
                 <div id="controls">
-                    <button onclick="selectStation('pompage', 2)">Station de Pompage (+2)</button>
-                    <button onclick="selectStation('forage', 4)">Station de Forage (+4)</button>
+                    <button onclick="selectStation('pompage', 20)">Station de Pompage (+2)</button>
+                    <button onclick="selectStation('forage', 40)">Station de Forage (+4)</button>
                 </div>
                 <div id="map"></div>
                  <div id="legend" class="legend">
@@ -243,62 +243,121 @@
         alert(`Type de station sélectionné : ${type} (+${impact})`);
     }
 
-    map.on('click', (e) => {
-    if (!selectedStation) {
-        alert("Veuillez sélectionner un type de station.");
-        return;
-    }
-    
-    const { lat, lng } = e.latlng;
-    const point = L.latLng(lat, lng);
+    const siteProductions = {};
 
-    // Ajouter le marqueur
-    L.marker([lat, lng], { icon: markerIcons[selectedStation.type] }).addTo(map);
+    map.on('click', async (e) => {
+        if (!selectedStation) {
+            alert("Veuillez sélectionner un type de station.");
+            return;
+        }
 
-    // Vérifier si le point est dans un des polygones
-    let isInsidePolygon = false;
+        const { lat, lng } = e.latlng;
+        const point = L.latLng(lat, lng);
 
-    polygons.forEach(function(polygon,index) {
-        // Convertir le polygone en GeoJSON
-        const geojsonLayer = L.geoJSON(polygon.toGeoJSON());
+        // Ajouter le marqueur
+        L.marker([lat, lng], { icon: markerIcons[selectedStation.type] }).addTo(map);
 
-        // Vérifier si le point est dans la couche GeoJSON
-        const results = leafletPip.pointInLayer([lng, lat], geojsonLayer);
+        // Vérifier si le point est dans un des polygones
+        let isInsidePolygon = false;
 
-        if (results.length > 0) {
-            /*isInsidePolygon = true;
-            const site = sitesData[index]; // Associer le polygone au site correspondant
-            console.log(`Nom du site : ${site.libelle}, ID : ${site.id}`);*/
-            const site = polygon.siteData;
-            console.log(`Nom du site : ${site.libelle}, ID : ${site.id}`);
-            console.log("Le marqueur est dans une zone !");
-            //let prevision = previsions;
+        for (const polygon of polygons) {
+            // Convertir le polygone en GeoJSON
+            const geojsonLayer = L.geoJSON(polygon.toGeoJSON());
+
+            // Vérifier si le point est dans la couche GeoJSON
+            const results = leafletPip.pointInLayer([lng, lat], geojsonLayer);
+
+            if (results.length > 0) {
+                const siteId = polygon.siteData;
+                isInsidePolygon = true;
+
+                let predictions = previsions;
+                const matchingPrediction = predictions.find(prediction => prediction.site.id === siteId);
+                if (matchingPrediction) {
+                    try {
+                        // Si la production pour ce site n'est pas encore stockée, récupérez-la du serveur
+                        if (!siteProductions[siteId]) {
+                            const rep = await updateZoneProduction(siteId, matchingPrediction.prevision.predictions);
+                            siteProductions[siteId] = rep.production; // Initialisez la production
+                            console.log("Production initiale récupérée :", rep.production);
+                        }
+
+                        // Ajoutez l'impact localement
+                        siteProductions[siteId] += selectedStation.impact;
+                        console.log(`Production après ajout de l'impact pour le site ${siteId}:`, siteProductions[siteId]);
+
+                         if (siteProductions[siteId] >= 1000) {
+                            // Mettre à jour la couleur du polygone
+                            polygon.setStyle({
+                                fillColor: "#fffacd", // Par exemple, rouge pour indiquer un dépassement
+                                fillOpacity: 0.7
+                            });
+                            console.log(`La production pour le site ${siteId} a dépassé le seuil de 1000.`);
+                        }
+                    } catch (error) {
+                        console.error("Erreur lors de la mise à jour de la production de zone :", error);
+                    }
+                } else {
+                    console.log("Aucune prévision correspondante pour siteId :", siteId);
+                }
+            }
+        }
+
+        if (!isInsidePolygon) {
+            alert("Le marqueur n'est pas dans un site !");
         }
     });
 
-    if (!isInsidePolygon) {
-        alert("Le marqueur n'est pas dans un site !");
-    }
-});
-    function addPolygons(sites) {
-            removePolygons();
-            sites.forEach(function(site) {
-                var coordinates = site.coord.map(function(coord) {
-                    return [coord.latitude, coord.longitude];
-                });
-                const fillColor = getFillColor(site.etat);
-                var polygon = L.polygon(coordinates, {
-                    color: "#000000",  // couleur de bordure du polygone
-                    fillColor: fillColor,  // couleur de remplissage selon l'état
-                    fillOpacity: 0.5,  // transparence du remplissage
-                    weight: 2  // épaisseur de la bordure
-                }).addTo(map)
+    async function updateZoneProduction(siteId, previsions) {
+    // Préparer les données pour l'appel
+    const requestData = {
+        siteId: siteId,
+        previsions: previsions,
+    };
+    console.log("Request data:", requestData); // Vérifiez vos données ici
 
-                polygon.siteData = site;
-                polygons.push(polygon);
-            });
-            polygonsB = polygons;
+    try {
+        const response = await fetch('/update-zone-production', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        if (!response.ok) {
+            throw new Error("Erreur lors de la requête au serveur.");
         }
+
+        const data = await response.json();
+        console.log("Update zone production response:", data);
+
+        return data.rep; // Renvoie uniquement la réponse utile
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour de la production de zone :", error);
+        throw error; // Relance l'erreur pour gérer en amont
+    }
+}
+    function addPolygons(sites) {
+        removePolygons();
+        sites.forEach(function(site) {
+            var coordinates = site.coord.map(function(coord) {
+                return [coord.latitude, coord.longitude];
+            });
+            const fillColor = getFillColor(site.etat);
+            var polygon = L.polygon(coordinates, {
+                color: "#000000",  // couleur de bordure du polygone
+                fillColor: fillColor,  // couleur de remplissage selon l'état
+                fillOpacity: 0.5,  // transparence du remplissage
+                weight: 2  // épaisseur de la bordure
+            }).addTo(map)
+
+            polygon.siteData = site.id;
+            polygons.push(polygon);
+        });
+        polygonsB = polygons;
+    }
         function getFillColor(etat) {
             const cleanEtat = String(etat)
             switch (cleanEtat) {
@@ -383,7 +442,7 @@
                     //currentSelectedMarker = site.id;
                     //console.log("afaka atao ato koa");
                 });
-                polygon.siteData = data.site;
+                polygon.siteData = data.site.id;
                 polygons.push(polygon);
             });
 

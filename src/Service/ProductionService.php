@@ -35,6 +35,27 @@ class ProductionService
         $gap=($besoin - $production->getSommeProduction())/$besoin;
         return round($gap, 2);;
     }
+    public function simulation($siteId,$prevision){
+       
+        try {
+            $lastElement = end($prevision);
+            // Vérifier si le tableau n'est pas vide et que l'élément a une propriété 'date'
+            if ($lastElement && isset($lastElement['date'])) {
+                $dateProduction = \DateTime::createFromFormat('d/m/Y', $lastElement['date']);
+                //dump($dateProduction);
+                $besoin = $this->getBesoinForProduction($siteId,$dateProduction);
+                $totalPrevision = array_sum(array_column($prevision, 'prediction'));
+                $nombrePrevisions = count($prevision);
+                $prodEau = $totalPrevision / $nombrePrevisions;
+                return [
+                    'besoin' => $besoin,
+                    'production' => $prodEau,
+                ];
+            }
+        } catch (\Exception $e) {
+            throw new \RuntimeException("Error in simulation: " . $e->getMessage());
+        }
+    }
     public function gapPrevision($siteId, $production): float
     {
         // Vérifier que la clé 'predictions' existe dans le tableau de production
@@ -66,6 +87,26 @@ class ProductionService
         $besoin = $this->getBesoinForProduction($siteId, $derniereDateProduction);
         $gap = ($besoin - $prodEau) / $besoin;
         return round($gap, 2);
+    }
+    public function calulateEtat(Site $site,$production)
+    {
+        $gap = $this->gapPrevision($site->getId(), $production);
+        if($gap>0.5){
+            $site->setEtat(4);
+        }
+        elseif($gap > 0.25 && $gap < 0.5){
+            $site->setEtat(3);
+        }
+        elseif(0 < $gap &&  $gap < 0.25){
+            $site->setEtat(2);
+        }
+        elseif($gap < 0){
+            $site->setEtat(1);
+        }
+        else{
+            $site->setEtat(-1);
+        }
+        return $site;
     }
     public function calulateEtatSitePrevision(Site $site,$production)
     {
