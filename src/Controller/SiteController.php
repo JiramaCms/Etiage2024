@@ -2,6 +2,7 @@
 namespace App\Controller;
 ini_set('memory_limit', '256M');
 
+use App\Entity\Besoin;
 use App\Util\Util;
 use App\Entity\Site;
 use App\Entity\Zone;
@@ -471,6 +472,9 @@ class SiteController extends AbstractController
         $site = $rsite->find($id);
         $rzone = $entityManager->getRepository(Zone::class);
         $siteJ = (Util::toJson($site));
+        $rbesoin = $entityManager->getRepository(Besoin::class);
+        $besoin = $rbesoin->findBesoinForSiteLastDate($id);
+        $besoinj = (Util::toJson($besoin));
         //dump($site->getIncidents()[0]->getLibelle());die();
         //dump($site,$siteJ);die();
         $zoneOfSite = $rzone->getZoneOfSite($id);
@@ -481,6 +485,7 @@ class SiteController extends AbstractController
         return $this->render('site/detailSite.html.twig', [
             'site' => $site,
             'sitej' => $siteJ,
+            'besoinj' => $besoinj,
             'zonej' => $zoneOfSite,
         ]);
     }    

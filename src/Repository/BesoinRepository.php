@@ -32,4 +32,14 @@ class BesoinRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult(); // Retourne un seul résultat ou null
     }
+    public function findBesoinForSiteLastDate($siteId)
+    {
+        return $this->createQueryBuilder('b')
+            ->where('b.site = :siteId')
+            ->setParameter('siteId', $siteId)
+            ->orderBy('b.dateDebut', 'DESC') // Trier par dateDebut décroissante
+            ->setMaxResults(1) // Récupérer un seul résultat
+            ->getQuery()
+            ->getOneOrNullResult(); // Retourne un seul résultat ou null
+    }
 }

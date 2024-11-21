@@ -6,7 +6,14 @@
 <style>
   .info-card .card-body .bold {
       font-weight: 700;
-}
+  }
+  .text-success {
+      color: green;
+  }
+
+  .text-danger {
+      color: red;
+  }
 </style>
   <main id="main" class="main">
 
@@ -54,7 +61,7 @@
                                   {{ station.code }}{% if not loop.last %}, {% endif %}
                                 {% endfor %}
                           </p>
-                          <p class="mb-0"><strong style=" color:rgba(1, 41, 112, 0.6);">Région </strong>: TSISY</p>
+                          <p class="mb-0"><strong style=" color:rgba(1, 41, 112, 0.6);">Région </strong>: Analamanga</p>
                       </div>
 
                       <!-- Ligne de séparation -->
@@ -90,8 +97,8 @@
                       <i class="bi bi-water"></i>
                     </div>
                     <div class="ps-3">
-                      <h6>145</h6>
-                      <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">augmentation</span>
+                      <h6 class="eto">ETo</h6>
+                      <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1"></span>
 
                     </div>
                   </div>
@@ -113,7 +120,7 @@
                     </div>
                     <div class="ps-3">
                       <h6>1244</h6>
-                      <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">réduction</span>
+                      <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">rédction</span>
 
                     </div>
                   </div>
@@ -164,6 +171,8 @@
 
   <script>
   let site = {{sitej|raw}};
+  let besoin  = {{besoinj|raw}};
+  console.log(besoin);
   console.log(site);
   let lastProd= null;
   document.addEventListener("DOMContentLoaded", () => {
@@ -172,6 +181,7 @@
     const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
     const data = dayData.map(production => production.sommeProduction);
     //lastProd = dayData.map(production => production.sommeProduction);
+    updateProductionAndGapCards([...data].reverse()); // Mise à jour des cartes
     updateChartWithData(labels, data, 'jour');
   });
  
@@ -183,6 +193,7 @@
       getDataByDay().then(dayData => {
         const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
         const data = dayData.map(production => production.sommeProduction);
+        updateProductionAndGapCards([...data].reverse());
         updateChartWithData(labels, data, 'jour');
         showLoadingIndicator(false);
       });
@@ -225,6 +236,7 @@
       getDataByDay().then(dayData => {
         const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
         const data = dayData.map(production => production.sommeProduction);
+        updateProductionAndGapCards([...data].reverse());
         updateChartWithData(labels, data, 'jour');
         showLoadingIndicator(false);
       });
@@ -243,7 +255,10 @@
 function getDataByDay() {
   return fetch(`/site/production/day/${site.id}`)
     .then(response => response.json())
-    .then(data => JSON.parse(data).reverse())
+    .then(data => {
+      const parsedData = JSON.parse(data).reverse()
+      return parsedData;
+      })
     .catch(error => {
       console.error('Error fetching daily production data:', error);
       return [];
@@ -253,7 +268,10 @@ function getDataByDay() {
 function getDataByDayForStation(stationId) {
   return fetch(`/station/production/day/${stationId}`)
     .then(response => response.json())
-    .then(data => JSON.parse(data).reverse())
+    .then(data => {
+      const parsedData = JSON.parse(data).reverse()
+      return parsedData;
+    })
     .catch(error => {
       console.error('Error fetching daily production data for station:', error);
       return [];
@@ -263,7 +281,10 @@ function getDataByDayForStation(stationId) {
 function getDataByMonth() {
   return fetch(`/site/production/month/${site.id}`)
     .then(response => response.json())
-    .then(data => JSON.parse(data))
+    .then(data => {
+      const parsedData = JSON.parse(data).reverse()
+      return parsedData;
+      })
     .catch(error => {
       console.error('Error fetching monthly production data:', error);
       return [];
@@ -273,11 +294,62 @@ function getDataByMonth() {
 function getDataByMonthForStation(stationId) {
   return fetch(`/station/production/month/${stationId}`)
     .then(response => response.json())
-    .then(data => JSON.parse(data))
+    .then(data => {
+      const parsedData = JSON.parse(data).reverse()
+      return parsedData;
+      })
     .catch(error => {
       console.error('Error fetching monthly production data for station:', error);
       return [];
     });
+}
+function updateProductionAndGapCards(data) {
+    if (data.length >= 2) {
+        const lastProduction = data[0]; // Dernière valeur
+        const previousProduction = data[1]; // Avant-dernière valeur
+        console.log(lastProduction,previousProduction);
+
+        // Mise à jour de la carte "Productions"
+        //document.querySelector('.sales-card h6').innerText = `${lastProduction} m³`;
+        const productionElement = document.querySelector('.sales-card .eto');
+        console.log(productionElement);
+        if (productionElement) {
+            productionElement.innerText = `${lastProduction} m³`;
+        } else {
+            console.error("Élément pour la production introuvable !");
+        }
+                console.log(productionElement);
+
+        // Calcul et affichage de la variation
+        const difference = lastProduction - previousProduction;
+        const percentage = ((difference / previousProduction) * 100).toFixed(2);
+        const salesCardPercentage = document.querySelector('.sales-card .text-success');
+        if(percentage >= 0) {
+          document.querySelector('.sales-card .text-muted').innerText = 'augmentation';
+        } if (percentage < 0){
+          document.querySelector('.sales-card .text-muted').innerText = 'réduction';
+        }
+        salesCardPercentage.innerText = `${percentage}%`;
+        salesCardPercentage.classList.toggle('text-danger', percentage < 0);
+        salesCardPercentage.classList.toggle('text-success', percentage >= 0);
+
+        // Mise à jour de la carte "Gap"
+        const be = besoin.quantite
+        const gap = be - lastProduction;
+        const gapPercentage = ((gap / lastProduction) * 100).toFixed(2);
+        document.querySelector('.customers-card h6').innerText = `${gap} m³`;
+        const gapCardPercentage = document.querySelector('.customers-card .text-danger');
+        if(gapPercentage >= 0) {
+          document.querySelector('.customers-card .text-muted').innerText = 'augmentation';
+        } if (gapPercentage < 0){
+          document.querySelector('.customers-card .text-muted').innerText = 'réduction';
+        }
+        gapCardPercentage.innerText = `${gapPercentage}%`;
+        gapCardPercentage.classList.toggle('text-success', gapPercentage >= 0);
+        gapCardPercentage.classList.toggle('text-danger', gapPercentage < 0);
+    } else {
+        console.error('Pas assez de données pour calculer les productions.');
+    }
 }
 function showLoadingIndicator(show) {
     const loadingElement = document.querySelector('#loading');
