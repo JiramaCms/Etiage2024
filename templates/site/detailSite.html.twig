@@ -45,7 +45,7 @@
                     <h6 id="filter-title">Menu</h6>
                   </li>
                   <li><a class="dropdown-item" href="{{ path('update_site_poly', {'id': site.id}) }}"  id="filter-today">Modifier le site</a></li>
-                  <li><a class="dropdown-item" href="{{ path('app_add_stationBySite', {'id': site.id}) }}"  id="filter-today">Nouveau station</a></li>
+                  <li><a class="dropdown-item" href="{{ path('app_insert_station') }}"  id="filter-today">Nouveau station</a></li>
                   <li><a class="dropdown-item" href="{{ path('import_production') }}"  id="filter-today">Importer les productions</a></li>
                 </ul>
               </div>
@@ -308,9 +308,6 @@ function updateProductionAndGapCards(data) {
         const lastProduction = data[0]; // Dernière valeur
         const previousProduction = data[1]; // Avant-dernière valeur
         console.log(lastProduction,previousProduction);
-
-        // Mise à jour de la carte "Productions"
-        //document.querySelector('.sales-card h6').innerText = `${lastProduction} m³`;
         const productionElement = document.querySelector('.sales-card .eto');
         console.log(productionElement);
         if (productionElement) {
@@ -318,7 +315,6 @@ function updateProductionAndGapCards(data) {
         } else {
             console.error("Élément pour la production introuvable !");
         }
-                console.log(productionElement);
 
         // Calcul et affichage de la variation
         const difference = lastProduction - previousProduction;
@@ -335,8 +331,8 @@ function updateProductionAndGapCards(data) {
 
         // Mise à jour de la carte "Gap"
         const be = besoin.quantite
-        const gap = be - lastProduction;
-        const gapPercentage = ((gap / lastProduction) * 100).toFixed(2);
+        const gap = lastProduction - be;
+        const gapPercentage = ((gap / be) * 100).toFixed(2);
         document.querySelector('.customers-card h6').innerText = `${gap} m³`;
         const gapCardPercentage = document.querySelector('.customers-card .text-danger');
         if(gapPercentage >= 0) {

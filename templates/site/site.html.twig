@@ -137,6 +137,21 @@
         padding-top: 10px;
         margin-top: 10px;
     }
+    .nav-tabs {
+        display: flex; /* Transforme la liste en flexbox */
+        justify-content: space-between; /* Répartit l'espace */
+        gap: 10px; /* Optionnel : écart entre les onglets */
+    }
+
+    .nav-item {
+        flex: 1; /* Chaque onglet partage l'espace */
+        text-align: center; /* Centre le texte dans chaque onglet */
+        transition: flex 0.3s ease; /* Animation fluide pour les changements */
+    }
+
+    .nav-item.hidden {
+        display: none; /* Masque complètement l'onglet */
+    }
 
 </style>
     <main id="main" class="main">
@@ -178,7 +193,7 @@
                                     <li class="nav-item" role="presentation">
                                         <a class="nav-link active" id="tabOverview" data-bs-toggle="tab" href="#overview" role="tab" aria-selected="true">Aperçu</a>
                                     </li>
-                                    <li class="nav-item" role="presentation">
+                                    <li class="nav-item" role="presentation" id="stations-tab">
                                         <a class="nav-link" id="tabStation" data-bs-toggle="tab" href="#stations" role="tab" aria-selected="false">Stations</a>
                                     </li>
                                     <li class="nav-item" role="presentation">
@@ -197,7 +212,7 @@
                                     <div class="tab-pane fade" id="statistique" role="tabpanel">
                                         <h4>Statistique de production d'eau</h4>
                                         <p id="reportsChart"></p>
-                                        <h5>Statistique de gap </h5>
+                                        <h5 id="h5ito">Statistique de gap </h5>
                                         <p id="reportsChartGap"></p>
                                     </div>
                                     </div>
@@ -262,6 +277,13 @@
             `;
             document.querySelector('a[href="#overview"]').click(); // Activer l'onglet Overview
             sidebar.classList.remove('hidden2');
+            const stationsTab = document.getElementById('stations-tab');
+            const chartGapTab = document.getElementById('reportsChartGap');
+            const h5chart = document.getElementById('h5ito');
+            chartGapTab.classList.remove('hidden2');
+            h5chart.classList.remove('hidden2');
+            stationsTab.classList.remove('hidden2');
+
             showStations();
             showStatistics();
             showGapStatistics();
@@ -292,7 +314,6 @@
                                 }).join('')}
                             </div>
                         ` : '' }<br>
-                            </div>
                         </div>
                 `}).join('');
                 document.getElementById('stations-content').innerHTML = `
@@ -460,58 +481,58 @@
                 console.error('Error fetching or processing gap data:', error);
             });
         }
-        function addPolygons(sites) {
-            removePolygons();
-            sites.forEach(function(site) {
-                var coordinates = site.coord.map(function(coord) {
-                    return [coord.latitude, coord.longitude];
-                });
-                // Définir la couleur de remplissage en fonction de l'état du site
-                var fillColor = "#a9a9a9"; // gris (moins clair)
-                if (site.etat == '1') {
-                    fillColor = "#87ceeb"; // bleu (moins clair)
-                } else if (site.etat == '2') {
-                    fillColor = "#fffacd"; // jaune (moins clair)
-                } else if (site.etat == '3') {
-                    fillColor = "#ffcc99"; // orange (moins clair)
-                } else if (site.etat == '4') {
-                    fillColor = "#ff6666"; // rouge (moins clair)
-                }
-
-
-                var polygon = L.polygon(coordinates, {
-                    color: "#000000",  // couleur de bordure du polygone
-                    fillColor: fillColor,  // couleur de remplissage selon l'état
-                    fillOpacity: 0.5,  // transparence du remplissage
-                    weight: 2  // épaisseur de la bordure
-                }).addTo(map).bindPopup(site.libelle);
-
-                polygon.on('click', function(e) {
-                    map.setView(e.latlng, 11);
-                    currentSelectedMarker = site.id;
-                    console.log(site);
-                    updateSidebarContent(site);
-                    showSiteStations(site);
-                });
-
-                polygons.push(polygon);
+    function addPolygons(sites) {
+        removePolygons();
+        sites.forEach(function(site) {
+            var coordinates = site.coord.map(function(coord) {
+                return [coord.latitude, coord.longitude];
             });
-        }
-        addPolygons(sites);
-        function getDataByDay() {
-            var siteId = currentSelectedMarker
-            return fetch(`/site/production/day/${siteId}`)
-            .then(response => response.json())
-            .then(data => {
-                let datas = JSON.parse(data);
-                datas.reverse();
-                return datas; 
-            })
-            .catch(error => {
-                console.error('Error fetching daily production data:', error);
-                return [];
+            // Définir la couleur de remplissage en fonction de l'état du site
+            var fillColor = "#a9a9a9"; // gris (moins clair)
+            if (site.etat == '1') {
+                fillColor = "#87ceeb"; // bleu (moins clair)
+            } else if (site.etat == '2') {
+                fillColor = "#fffacd"; // jaune (moins clair)
+            } else if (site.etat == '3') {
+                fillColor = "#ffcc99"; // orange (moins clair)
+            } else if (site.etat == '4') {
+                fillColor = "#ff6666"; // rouge (moins clair)
+            }
+
+
+            var polygon = L.polygon(coordinates, {
+                color: "#000000",  // couleur de bordure du polygone
+                fillColor: fillColor,  // couleur de remplissage selon l'état
+                fillOpacity: 0.5,  // transparence du remplissage
+                weight: 2  // épaisseur de la bordure
+            }).addTo(map).bindPopup(site.libelle);
+
+            polygon.on('click', function(e) {
+                map.setView(e.latlng, 11);
+                currentSelectedMarker = site.id;
+                console.log(site);
+                updateSidebarContent(site);
+                showSiteStations(site);
             });
-        }
+
+            polygons.push(polygon);
+        });
+    }
+    addPolygons(sites);
+    function getDataByDay() {
+        var siteId = currentSelectedMarker
+        return fetch(`/site/production/day/${siteId}`)
+        .then(response => response.json())
+        .then(data => {
+            let datas = JSON.parse(data);
+            datas.reverse();
+            return datas; 
+        })
+        .catch(error => {
+            console.error('Error fetching daily production data:', error);
+            return [];
+        });
+    }
     function removeStationMarkers() {
         stationMarkers.forEach(function(marker) {
             map.removeLayer(marker);
@@ -538,11 +559,104 @@
             var marker = L.marker([station.latitude, station.longitude], { icon: stationIcon }).addTo(map);
             
             // Ajouter une popup ou tout autre comportement au clic sur la station
-            marker.bindPopup(station.libelle);
+            marker.on('click', function () {
+                currentSelectedMarker = station.id; // Définit l'ID de la station sélectionnée
+                updateSidebarContentForStation(station);
+            });
             
             // Ajouter le marqueur à la liste des marqueurs de stations pour pouvoir les supprimer ensuite
             stationMarkers.push(marker);
         });
+    }
+    function updateSidebarContentForStation(station) {
+        // Mettre à jour le contenu de l'onglet "Statistique"
+        document.getElementById('overview-content').innerHTML = `
+            <div class="station-card">
+                <div class="station-title">Station : ${station.code}</div>
+                <div class="station-description">Nom de la station : ${station.libelle}</div>
+                ${station.sources.length > 0 ? `
+                Sources:
+                <div id="cardContainer" style="display: flex; gap: 10px; align-items: center;"> 
+                    ${station.sources.map(source => {
+                        const iconUrl = `/images/${source.nom.toLowerCase()}.svg`;
+                        return `
+                            <div class="source-card">
+                                <div class="card-content">
+                                    <img src="${iconUrl}" alt="${source.nom}" style="width: 50px; height: 50px;">
+                                    <div><strong>${source.nom}</strong></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            ` : '' }<br>
+            </div>
+        `;
+
+        // Activer l'onglet Statistique
+        document.querySelector('a[href="#overview"]').click();
+        // Afficher la barre latérale
+        sidebar.classList.remove('hidden2');
+        const chartGapTab = document.getElementById('reportsChartGap');
+        const stationsTab = document.getElementById('stations-tab');h5ito
+        const h5chart = document.getElementById('h5ito');
+
+        stationsTab.classList.add('hidden2');
+        chartGapTab.classList.add('hidden2');
+        h5chart.classList.add('hidden2');
+
+
+        showStationStatistics(station.id);
+    }
+    function showStationStatistics(stationId) {
+        fetch(`/station/production/day/${stationId}`) // Change l'URL selon ton API
+            .then(response => response.json())
+            .then(data => {
+                // Vérifie que les données sont valides
+                let datas = JSON.parse(data);
+                datas.reverse();
+                console.log(datas);
+                if (!datas) {
+                    console.log("atove");
+                    document.getElementById('reportsChart').innerHTML = 'Aucune donnée disponible pour cette station.';
+                    if (chart) {
+                        chart.destroy();
+                        chart = null;
+                    }
+                    return;
+                }
+
+                const labels = datas.map(prod => 
+                    new Date(prod.daty.timestamp * 1000).toLocaleDateString()
+                );
+                const productionData = datas.map(prod => prod.quantite);
+                console.log(productionData);
+
+                // Met à jour ou crée le graphique de production
+                if (chart) {
+                    chart.updateSeries([{
+                        name: 'Production m³',
+                        data: productionData,
+                    }]);
+                    chart.updateOptions({
+                        xaxis: { categories: labels },
+                    });
+                } else {
+                    chart = new ApexCharts(document.querySelector("#reportsChart"), {
+                        series: [{
+                            name: 'Production m³',
+                            data: productionData,
+                        }],
+                        chart: {
+                            height: 350,
+                            type: 'area',
+                        },
+                        xaxis: { categories: labels },
+                    });
+                    chart.render();
+                }
+            })
+            .catch(error => console.error('Erreur lors du chargement des statistiques :', error));
     }
         
         var sidebar = document.getElementById('sidebar-info');
