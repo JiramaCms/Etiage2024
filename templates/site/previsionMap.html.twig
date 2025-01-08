@@ -168,6 +168,58 @@
         font-weight: bold;
         color: #6c757d;
     }
+
+    #controls {
+            display: flex;
+            gap: 20px; /* Espace entre les boutons */
+        }
+
+        /* Style pour les boutons */
+        #controls button {
+            background-color: #007BFF; /* Couleur de fond bleu */
+            color: #ffffff; /* Couleur du texte en blanc */
+            font-size: 10px;
+            font-weight: bold;
+            padding: 10px 20px; /* Espacement interne */
+            border: none; /* Suppression des bordures */
+            border-radius: 5px; /* Coins arrondis */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Effet d'ombre légère */
+            cursor: pointer; /* Curseur en forme de main */
+            transition: background-color 0.3s, transform 0.2s; /* Animation de transition */
+        }
+
+        /* Effet au survol */
+        #controls button:hover {
+            background-color: #0056b3; /* Fond bleu plus foncé */
+            transform: translateY(-2px); /* Légère élévation */
+        }
+
+        /* Effet lorsque le bouton est pressé */
+        #controls button:active {
+            background-color: #004080; /* Fond encore plus foncé */
+            transform: translateY(1px); /* Légère pression */
+        }
+    #popup {
+        position: fixed;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: #fff;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        font-size: 14px;
+        z-index: 1000;
+        animation: fadeInOut 3s;
+    }
+
+    @keyframes fadeInOut {
+        0% { opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { opacity: 0; }
+    }
 </style>
 
 <main id="main" class="main">
@@ -192,6 +244,7 @@
                 <div id="controls">
                     <button onclick="selectStation('pompage', 200)">Station de Pompage (+2)</button>
                     <button onclick="selectStation('forage', 400)">Station de Forage (+4)</button>
+                    <div id="popup" style="display: none;"></div>
                 </div>
                 <div id="map"></div>
                  <div id="legend" class="legend">
@@ -272,6 +325,8 @@
     var polygonsB = [];
     let previsions = [];
     let selectedStation = null;
+    let siteId = null;
+
     let stationCounts = {
         pompage: 0,
         forage: 0,
@@ -286,14 +341,34 @@
     }
     function selectStation(type, impact) {
         selectedStation = { type, impact };
-        alert(`Type de station sélectionné : ${type} (+${impact})`);
+
+        // Récupère l'élément pop-up
+        const popup = document.getElementById("popup");
+        popup.textContent = `Type de station sélectionné : ${type} (+${impact}m³)`;
+
+        // Affiche le pop-up pendant quelques secondes
+        popup.style.display = "block";
+
+        // Cache automatiquement le pop-up après 3 secondes
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 3000);
     }
 
 const siteProductions = {};
 
 map.on('click', async (e) => {
-    if (!selectedStation) {
-        alert("Veuillez sélectionner un type de station.");
+    if (!selectedStation && Object.keys(siteProductions).length == 0) {
+        const popup = document.getElementById("popup");
+        popup.textContent = "Veuillez sélectionner un type de station.";
+
+        // Affiche le pop-up pendant quelques secondes
+        popup.style.display = "block";
+
+        // Cache automatiquement le pop-up après 3 secondes
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 3000);
         return;
     }
 
@@ -301,7 +376,9 @@ map.on('click', async (e) => {
     const point = L.latLng(lat, lng);
 
     // Ajouter le marqueur
-    L.marker([lat, lng], { icon: markerIcons[selectedStation.type] }).addTo(map);
+    if (selectedStation) {
+        L.marker([lat, lng], { icon: markerIcons[selectedStation.type] }).addTo(map);
+    }
 
     // Vérifier si le point est dans un des polygones
     let isInsidePolygon = false;
@@ -309,9 +386,9 @@ map.on('click', async (e) => {
     for (const polygon of polygons) {
         const geojsonLayer = L.geoJSON(polygon.toGeoJSON());
         const results = leafletPip.pointInLayer([lng, lat], geojsonLayer);
+        siteId = polygon.siteData;
 
         if (results.length > 0) {
-            const siteId = polygon.siteData;
             isInsidePolygon = true;
 
             let predictions = previsions;
@@ -327,6 +404,11 @@ map.on('click', async (e) => {
                         stations: { pompage: 0, forage: 0 },
                     };
                 }
+                if (!selectedStation &&  Object.keys(siteProductions).length > 0 ) {
+                    console.log('tafiditra ato');
+                    updateDataDisplay(siteId, siteProductions[siteId]);
+                    return;
+                }
 
                 // Mettre à jour la production
                 siteProductions[siteId].production += selectedStation.impact;
@@ -336,20 +418,32 @@ map.on('click', async (e) => {
                 console.log(`Stations pour le site ${siteId} :`, siteProductions[siteId].stations);
 
                 // Mettre à jour l'affichage
+                
                 updateDataDisplay(siteId, siteProductions[siteId]);
                 updatePolygonStyle(
                     polygon,
                     siteProductions[siteId].production,
                     siteProductions[siteId].besoin
                 );
+                selectedStation = null;
             } catch (error) {
                 console.error("Erreur lors de la mise à jour de la production de zone :", error);
             }
         }
+        
     }
 
     if (!isInsidePolygon) {
-        alert("Le marqueur n'est pas dans un site !");
+        const popup = document.getElementById("popup");
+        popup.textContent = "Le marqueur n'est pas dans un site !";
+
+        // Affiche le pop-up pendant quelques secondes
+        popup.style.display = "block";
+
+        // Cache automatiquement le pop-up après 3 secondes
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 3000);
     }
 });
 function updateDataDisplay(siteId, siteData) {
@@ -539,7 +633,16 @@ function updatePolygonStyle(polygon, production, besoin) {
             errorMessageElement.textContent = 'Une erreur est survenue lors de la prévision. Veuillez réessayer.';
         });
         } else {
-            alert('Veuillez sélectionner une date de début et une date de fin.');
+            const popup = document.getElementById("popup");
+            popup.textContent = "Veuillez sélectionner une date de début et une date de fin.";
+
+            // Affiche le pop-up pendant quelques secondes
+            popup.style.display = "block";
+
+            // Cache automatiquement le pop-up après 3 secondes
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 3000);
         }
     });
     });

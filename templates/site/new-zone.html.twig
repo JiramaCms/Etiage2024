@@ -88,11 +88,13 @@
 
 <script>
     
-        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 16);
+        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 10);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
         }).addTo(map);
+        let sitesData =  {{ sites|raw }};
+        var polygons = [];
 
         map.zoomControl.setPosition('bottomright');
 
@@ -159,6 +161,30 @@
                 document.getElementById("show-exception").click();
                 console.log('{{message}}');
         {% endif %}
+        function removePolygons() {
+        polygons.forEach(function(polygon) {
+            map.removeLayer(polygon);
+        });
+        polygons = [];
+    }
+        function addPolygons(sites) {
+            removePolygons();
+            sites.forEach(function(site) {
+                var coordinates = site.coord.map(function(coord) {
+                    return [coord.latitude, coord.longitude];
+                });
+                
+
+                var polygon = L.polygon(coordinates, {
+                    color: "#000000",  // couleur de bordure du polygone
+                    fillColor: "#87ceeb",  // couleur de remplissage selon l'état
+                    fillOpacity: 0.5,  // transparence du remplissage
+                    weight: 2  // épaisseur de la bordure
+                }).addTo(map).bindPopup(site.libelle);
+                polygons.push(polygon);
+            });
+        }
+        addPolygons(sitesData);
 </script>
 {% endblock %}
 

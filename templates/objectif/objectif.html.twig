@@ -8,7 +8,7 @@
       <h1>Details de l'objectif</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="{{ path('site_liste') }}" >Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('site_liste') }}" >Accueil</a></li>
           <li class="breadcrumb-item"><a href="{{ path('detail_site', {'id': objectif.site.id}) }}" >Site</a></li>
           <li class="breadcrumb-item active">Objectif</li>
         </ol>
@@ -24,7 +24,7 @@
                 <h5 class="card-title">Objectif : {{objectif.libelle}}</h5>
                 <div>
                   {% if objectif.estimationCible %}
-                    <a href="{{ path('app_objectif_solution', {'id': objectif.id}) }}"><button type='button' class="btn btn-secondary mr-10">Voir les meilleurs solutions</button></a>
+                    <a href="{{ path('app_objectif_solution', {'id': objectif.id}) }}"><button type='button' class="btn btn-secondary mr-10">Voir les solutions proposées</button></a>
                   {% endif %}
                   <a href="{{ path('app_update_objectif', {'id': objectif.id}) }}"><button type='button' class="btn btn-secondary mr-10">Modifier l'objectif</button></a>
                   <a href="{{ path('app_add_actionByObjectif', {'id': objectif.id}) }}"><button type='button' class="btn btn-dark mr-10">Nouvelle action</button></a>

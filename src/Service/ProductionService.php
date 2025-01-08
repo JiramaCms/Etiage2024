@@ -100,7 +100,7 @@ class ProductionService
         elseif(0 < $gap &&  $gap < 0.25){
             $site->setEtat(2);
         }
-        elseif($gap < 0){
+        elseif($gap < 0 || $gap = 0){
             $site->setEtat(1);
         }
         else{

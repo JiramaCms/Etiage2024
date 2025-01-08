@@ -193,7 +193,7 @@
       getDataByDay().then(dayData => {
         const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
         const data = dayData.map(production => production.sommeProduction);
-        updateProductionAndGapCards([...data].reverse());
+        //updateProductionAndGapCards([...data].reverse());
         updateChartWithData(labels, data, 'jour');
         showLoadingIndicator(false);
       });
@@ -221,6 +221,7 @@
       getDataByMonthForStation(stationId).then(monthlyData => {
         const labels = monthlyData.map(production => new Date(production.mois.timestamp * 1000).toLocaleDateString('default', { year: 'numeric', month: 'short' }));
         const data = monthlyData.map(production => production.quantite);
+        console.log(monthlyData);
         updateChartWithData(labels, data, 'mois');
         showLoadingIndicator(false);
       });
@@ -236,7 +237,7 @@
       getDataByDay().then(dayData => {
         const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
         const data = dayData.map(production => production.sommeProduction);
-        updateProductionAndGapCards([...data].reverse());
+        //updateProductionAndGapCards([...data].reverse());
         updateChartWithData(labels, data, 'jour');
         showLoadingIndicator(false);
       });
@@ -282,7 +283,7 @@ function getDataByMonth() {
   return fetch(`/site/production/month/${site.id}`)
     .then(response => response.json())
     .then(data => {
-      const parsedData = JSON.parse(data).reverse()
+      const parsedData = JSON.parse(data)
       return parsedData;
       })
     .catch(error => {
@@ -295,7 +296,7 @@ function getDataByMonthForStation(stationId) {
   return fetch(`/station/production/month/${stationId}`)
     .then(response => response.json())
     .then(data => {
-      const parsedData = JSON.parse(data).reverse()
+      const parsedData = JSON.parse(data)
       return parsedData;
       })
     .catch(error => {
@@ -309,7 +310,7 @@ function updateProductionAndGapCards(data) {
         const previousProduction = data[1]; // Avant-dernière valeur
         console.log(lastProduction,previousProduction);
         const productionElement = document.querySelector('.sales-card .eto');
-        console.log(productionElement);
+        //console.log(productionElement);
         if (productionElement) {
             productionElement.innerText = `${lastProduction} m³`;
         } else {
@@ -467,7 +468,7 @@ function updateChartWithData(labels, data, filterType) {
   <!-- Recent Action -->
   <div class="card">
     <div class="card-body">
-      <h5 class="card-title">Action récente <span>| Today</span></h5>
+      <h5 class="card-title">Action récente</h5>
 
       <div class="activity">
 

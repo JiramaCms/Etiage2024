@@ -128,7 +128,7 @@
                             showLoadingIndicator(false);
                             displayMessage(data.error, true);
                         } else {
-                            displayMessage('Sources retrieved successfully.', false);
+                            displayMessage('Succès de la prédiction.', false);
                             let datas = JSON.parse(data);
                             showLoadingIndicator(false);
                             const labels = datas.predictions.map(item => item.date);
@@ -136,7 +136,7 @@
                             updateChartWithData(labels, predictions);
                     }})
                     .catch(error => {
-                        displayMessage('There was a problem with the fetch operation.', true);
+                        displayMessage('Prédiction impossible veuiller réessayer plus tard.', true);
                         console.error('Error during prediction:', error);
                         showLoadingIndicator(false);
                     });

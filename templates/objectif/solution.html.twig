@@ -8,7 +8,7 @@
       <h1>Data Tables</h1>
       <nav>
         <ol class="breadcrumb">
-          <li class="breadcrumb-item"><a href="{{ path('site_liste') }}" >Home</a></li>
+          <li class="breadcrumb-item"><a href="{{ path('site_liste') }}" >Accueil</a></li>
           <li class="breadcrumb-item"><a href="{{ path('detail_site', {'id': objectif.site.id}) }}" >Site</a></li>
           <li class="breadcrumb-item "><a href="{{ path('app_detail_observation', {'id': objectif.id}) }}" >Objectif</a></li>
           <li class="breadcrumb-item active">Planification</li>
@@ -57,13 +57,13 @@
                   <tr>
                     <th>Usage de {{action.libelle}}</th>
                     <td>{{action.capacite}} m³</td>
-                    <td>{{action.cout}} Ar</td>
+                    <td>{{action.cout | number_format(0, ',', ' ')}} Ar</td>
                   </tr>
                 {% endfor %}
                 <tr>
                 <td></td>
                 <th>Gain total : {{allMateriel['capacite']}} m³</th>
-                <th>Budget total : {{allMateriel['cout']}} Ar</a></th>
+                <th>Budget total : {{allMateriel['cout'] | number_format(0, ',', ' ')}} Ar</a></th>
                 </tr>
                 </tbody>
               </table>

@@ -161,8 +161,8 @@
             <div class="filter">
                 <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                <li><a class="dropdown-item" href="{{ path('new_site_poly') }}"  id="filter-month">Nouveau Site</a></li>
-                <li><a class="dropdown-item" href="{{ path('app_insert_station') }}"  id="filter-day">Nouvelle Station</a></li>
+                <li><a class="dropdown-item" href="{{ path('new_site_poly') }}"  id="filter-month">Nouveau site</a></li>
+                <li><a class="dropdown-item" href="{{ path('app_insert_station') }}"  id="filter-day">Nouvelle station</a></li>
                 </ul>
             </div>
         </div>
@@ -242,7 +242,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
     <script src="https://unpkg.com/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
     <script>
-        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 6);
+        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 8);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
@@ -267,10 +267,22 @@
             polygons = [];
         }
         function updateSidebarContent(siteData) {
-            var addSiteUrlWithId = siteDetailUrl.replace('siteId', siteData.id);         
+            var addSiteUrlWithId = siteDetailUrl.replace('siteId', siteData.id); 
+            var etatEau = "non défini";
+            if (siteData.etat == '1') {
+                    etatEau = "production juste"; // bleu (moins clair)
+                } else if (siteData.etat == '2') {
+                    etatEau = "gap < 25%"; // jaune (moins clair)
+                } else if (siteData.etat == '3') {
+                    etatEau = "25% < gap < 50%"; // orange (moins clair)
+                } else if (siteData.etat == '4') {
+                    etatEau = "gap > 50%"; // rouge (moins clair)
+                }        
             document.getElementById('overview-content').innerHTML = `
                 <strong>Nom : ${siteData.libelle}</strong>
-                Adresse : ${siteData.adresse}<br>           
+                Adresse : ${siteData.adresse}<br>
+                Nombre de stations : ${siteData.stations.length}   <br>  
+                Etat de production d'eau : ${etatEau}    
                 <center>
                     <button class="btn btn-secondary" onclick="window.location.href='${addSiteUrlWithId}'">Voir site detail</button>
                 </center>

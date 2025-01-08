@@ -398,16 +398,16 @@ class SiteController extends AbstractController
         $entityManager->getRepository(Site::class)->update($site);
 
         return $this->redirectToRoute('update_site_poly', ['id' => $site->getId()]);
+        
     }
     #[Route('/site/new', name: 'new_site_poly')]
     public function newSite(EntityManagerInterface $entityManager): Response
     {
         $rsite =  $entityManager->getRepository(Site::class);
-        $site = $rsite->findAll();
-        dump($site);
+        $sites = $rsite->findAll();
+        $site = (Util::toJson($sites));
         return $this->render('site/new-zone.html.twig', [
-            'controller_name' => 'LocationController',
-            'zoneventes' => $site,
+            'sites' => $site,
             'message' => null,
         ]);
     }
