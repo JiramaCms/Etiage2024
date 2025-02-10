@@ -9,8 +9,24 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.pm@latest/dist/leaflet.pm.css" /> <!-- Leaflet-Geoman CSS -->
     <style>
         #map {
-            position: relative;
             height: 500px; /* Assurez-vous que la carte a une hauteur définie */
+            width: 100%; /* La carte prend toute la largeur disponible */
+        }
+
+        /* Utiliser flexbox pour disposer la carte à gauche et le formulaire à droite */
+        .form-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 30px; /* Espace entre la carte et le formulaire */
+        }
+
+        .map-wrapper {
+            flex: 1; /* La carte prend toute la largeur restante */
+        }
+
+        .form-wrapper {
+            flex-basis: 300px; /* La largeur du formulaire, ajustable */
         }
     </style>
 
@@ -21,7 +37,7 @@
         </div>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{path('site_liste')}}">Accueil</a></li>
                 <li class="breadcrumb-item active">Formulaire Site</li>
             </ol>
         </nav>
@@ -33,27 +49,35 @@
                     <div class="card-body">
                         <h5 class="card-title">Ajouter un site </h5>
                         <!-- Table with stripped rows -->
-                        <form method="post" action="{{path('insert_zv')}}">
-                            <div class="form-row">
-                                <div class="form-group col-12 col-md-6">
-                                    <label for="libelle">Libelle</label>
-                                    <input type="text" class="form-control" id="libelle" name="libelle" required>
-                                </div>
-                                <div class="form-group col-12 col-md-6">
-                                    <label for="description">Adresse</label>
-                                    <input type="text" class="form-control" id="adresse" name="adresse" required>
-                                </div>
+                        <div class="form-container">
+                            <!-- Carte à gauche -->
+                            <div class="map-wrapper">
+                                <div id="map"></div>
                             </div>
-                            <div class="form-row">
-                                <div class="form-group col-12">
-                                    <label for="coords">Coordonnées (WKT)</label>
-                                    <input type="text" class="form-control" id="coords" name="coords" readonly>
-                                </div>
+
+                            <!-- Formulaire à droite -->
+                            <div class="form-wrapper">
+                                <form method="post" action="{{path('insert_zv')}}">
+                                    <div class="form-row">
+                                        <div class="form-group col-12 col-md-12">
+                                            <label for="libelle">Libelle</label>
+                                            <input type="text" class="form-control" id="libelle" name="libelle" required>
+                                        </div>
+                                        <div class="form-group col-12 col-md-12">
+                                            <label for="description">Adresse</label>
+                                            <input type="text" class="form-control" id="adresse" name="adresse" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-12">
+                                            <label for="coords">Coordonnées (WKT)</label>
+                                            <input type="text" class="form-control" id="coords" name="coords" readonly>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-secondary float-right">Confirmer</button>
+                                </form>
                             </div>
-                            <div id="map"></div>
-                            <br><br>
-                            <button type="submit" class="btn btn-secondary float-right">Confirmer</button>
-                        </form>
+                        </div>
                         <!-- End Table with stripped rows -->
                     </div>
                 </div>
@@ -64,11 +88,13 @@
 
 <script>
     
-        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 16);
+        var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 10);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
         }).addTo(map);
+        let sitesData =  {{ sites|raw }};
+        var polygons = [];
 
         map.zoomControl.setPosition('bottomright');
 
@@ -135,6 +161,30 @@
                 document.getElementById("show-exception").click();
                 console.log('{{message}}');
         {% endif %}
+        function removePolygons() {
+        polygons.forEach(function(polygon) {
+            map.removeLayer(polygon);
+        });
+        polygons = [];
+    }
+        function addPolygons(sites) {
+            removePolygons();
+            sites.forEach(function(site) {
+                var coordinates = site.coord.map(function(coord) {
+                    return [coord.latitude, coord.longitude];
+                });
+                
+
+                var polygon = L.polygon(coordinates, {
+                    color: "#000000",  // couleur de bordure du polygone
+                    fillColor: "#87ceeb",  // couleur de remplissage selon l'état
+                    fillOpacity: 0.5,  // transparence du remplissage
+                    weight: 2  // épaisseur de la bordure
+                }).addTo(map).bindPopup(site.libelle);
+                polygons.push(polygon);
+            });
+        }
+        addPolygons(sitesData);
 </script>
 {% endblock %}
 

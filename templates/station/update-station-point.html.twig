@@ -74,6 +74,25 @@
                                     <input type="text" class="form-control" id="coord" name="coord" value="{{ latitude }}, {{ longitude }}">
                                 </div>
                             </div>
+                            <div class="form-group col-12 col-md-6">
+                                    <label for="site">Site</label>
+                                    <input type="text" class="form-control" id="site" name="site" value="{{ station.site.libelle }}" disabled>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-12">
+                                    <label for="sources">Sources</label>
+                                    <!-- Champ de sélection multiple pour les sources -->
+                                    <select id="sources" name="sources[]" class="form-control" multiple>
+                                        {% for source in sources %}
+                                            <option value="{{ source.id }}"
+                                                {% if source in station.sources %} selected{% endif %}> <!-- Vérifie si la source est associée à la station -->
+                                                {{ source.nom }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
                             <input type="hidden" class="form-control" id="site" name="site" value="{{ station.site.id }}">
                             <button type="submit" class="btn btn-default m-4">Mettre à jour</button>
                         </form>

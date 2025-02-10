@@ -39,15 +39,6 @@
     .form-section {
         margin-bottom: 20px;
     }
-
-    .chart-section {
-        background-color: #ffffff;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        display : none;
-    }
-
     .marker-icon-jump {
         animation: jumpMarker 0.8s infinite alternate;
     }
@@ -60,7 +51,6 @@
             opacity: 0.3;
         }
     }
-
     /* Style pour la légende */
     .legend {
         position: absolute;
@@ -122,6 +112,114 @@
         opacity: 0.3;
         text-decoration: line-through;
     }
+    .site-data-card {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .site-id {
+        font-size: 1.2em;
+        color: #333;
+        margin-bottom: 10px;
+    }
+
+    .site-id span {
+        font-weight: bold;
+        color: #007bff;
+    }
+
+    .site-production p {
+        margin: 5px 0;
+        color: #555;
+    }
+
+    .site-production span {
+        font-weight: bold;
+        color: #28a745;
+    }
+
+    .site-stations {
+        margin-top: 15px;
+    }
+
+    .site-stations p {
+        font-size: 1.1em;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .site-stations ul {
+        list-style: none;
+        padding-left: 0;
+    }
+
+    .site-stations li {
+        margin: 5px 0;
+        display: flex;
+        justify-content: space-between;
+        color: #555;
+    }
+
+    .station-type {
+        font-weight: bold;
+        color: #6c757d;
+    }
+
+    #controls {
+            display: flex;
+            gap: 20px; /* Espace entre les boutons */
+        }
+
+        /* Style pour les boutons */
+        #controls button {
+            background-color: #007BFF; /* Couleur de fond bleu */
+            color: #ffffff; /* Couleur du texte en blanc */
+            font-size: 10px;
+            font-weight: bold;
+            padding: 10px 20px; /* Espacement interne */
+            border: none; /* Suppression des bordures */
+            border-radius: 5px; /* Coins arrondis */
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Effet d'ombre légère */
+            cursor: pointer; /* Curseur en forme de main */
+            transition: background-color 0.3s, transform 0.2s; /* Animation de transition */
+        }
+
+        /* Effet au survol */
+        #controls button:hover {
+            background-color: #0056b3; /* Fond bleu plus foncé */
+            transform: translateY(-2px); /* Légère élévation */
+        }
+
+        /* Effet lorsque le bouton est pressé */
+        #controls button:active {
+            background-color: #004080; /* Fond encore plus foncé */
+            transform: translateY(1px); /* Légère pression */
+        }
+    #popup {
+        position: fixed;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #333;
+        color: #fff;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        font-size: 14px;
+        z-index: 1000;
+        animation: fadeInOut 3s;
+    }
+
+    @keyframes fadeInOut {
+        0% { opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { opacity: 0; }
+    }
 </style>
 
 <main id="main" class="main">
@@ -131,7 +229,9 @@
         </div>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Accueil</a></li>
+                <li class="breadcrumb-item active"><a href="#">Prévision</a></li>
+
             </ol>
         </nav>
     </div>
@@ -139,7 +239,13 @@
     <section class="section">
         <div class="content-container">
             <!-- Section Carte -->
+        
             <div class="map-section">
+                <div id="controls">
+                    <button onclick="selectStation('pompage', 200)">Station de Pompage (+2)</button>
+                    <button onclick="selectStation('forage', 400)">Station de Forage (+4)</button>
+                    <div id="popup" style="display: none;"></div>
+                </div>
                 <div id="map"></div>
                  <div id="legend" class="legend">
                     <h5>Légende</h5>
@@ -169,11 +275,10 @@
                         <div id="error-message" style="color: red; display: none;"></div>
                     </form>
                 </div>
-
-                <!-- Graphique -->
-                <div class="chart-section">
-                    <div id="chart">
-                        <h5>Statistique de Prévision</h5>
+                <div class="data-display mt-3">
+                    <h5>Données de production</h5>
+                    <div id="dataDisplay">
+                        <p>Aucune donnée pour l'instant.</p>
                     </div>
                 </div>
             </div>
@@ -184,8 +289,11 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet-fullscreen/dist/leaflet.fullscreen.css" />
 <script src="https://unpkg.com/leaflet-fullscreen/dist/Leaflet.fullscreen.min.js"></script>
 
-<!-- Chart.js or ApexCharts -->
+<!-- Chart.js or ApexCharts 
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
+
 <script>
     var map = L.map('map').setView([-18.922647647936802, 47.46631766551795], 6);
 
@@ -193,9 +301,37 @@
         attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
     }).addTo(map);
 
+    const markerIcons = {
+        pompage: L.divIcon({
+            className: 'custom-marker pompage',
+            html: `
+                <img src="/images/pompage.svg" alt="Pompage" width="40" height="40" />
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+        }),
+        forage: L.divIcon({
+            className: 'custom-marker forage',
+            html: `
+                <img src="/images/forage.svg" alt="Pompage" width="40" height="40" />
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+        }),
+    };
+
     let sitesData =  {{ sites|raw }};
     var polygons = [];
+    var polygonsB = [];
     let previsions = [];
+    let selectedStation = null;
+    let siteId = null;
+
+    let stationCounts = {
+        pompage: 0,
+        forage: 0,
+    };
+
 
     function removePolygons() {
         polygons.forEach(function(polygon) {
@@ -203,45 +339,218 @@
         });
         polygons = [];
     }
-    function addPolygons(sites) {
-            removePolygons();
-            sites.forEach(function(site) {
-                var coordinates = site.coord.map(function(coord) {
-                    return [coord.latitude, coord.longitude];
-                });
-                // Définir la couleur de remplissage en fonction de l'état du site
-                var fillColor = "#a9a9a9"; // gris (moins clair)
-                if (site.etat == '1') {
-                    fillColor = "#87ceeb"; // bleu (moins clair)
-                } else if (site.etat == '2') {
-                    fillColor = "#fffacd"; // jaune (moins clair)
-                } else if (site.etat == '3') {
-                    fillColor = "#ffcc99"; // orange (moins clair)
-                } else if (site.etat == '4') {
-                    fillColor = "#ff6666"; // rouge (moins clair)
+    function selectStation(type, impact) {
+        selectedStation = { type, impact };
+
+        // Récupère l'élément pop-up
+        const popup = document.getElementById("popup");
+        popup.textContent = `Type de station sélectionné : ${type} (+${impact}m³)`;
+
+        // Affiche le pop-up pendant quelques secondes
+        popup.style.display = "block";
+
+        // Cache automatiquement le pop-up après 3 secondes
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 3000);
+    }
+
+const siteProductions = {};
+
+map.on('click', async (e) => {
+    if (!selectedStation && Object.keys(siteProductions).length == 0) {
+        const popup = document.getElementById("popup");
+        popup.textContent = "Veuillez sélectionner un type de station.";
+
+        // Affiche le pop-up pendant quelques secondes
+        popup.style.display = "block";
+
+        // Cache automatiquement le pop-up après 3 secondes
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 3000);
+        return;
+    }
+
+    const { lat, lng } = e.latlng;
+    const point = L.latLng(lat, lng);
+
+    // Ajouter le marqueur
+    if (selectedStation) {
+        L.marker([lat, lng], { icon: markerIcons[selectedStation.type] }).addTo(map);
+    }
+
+    // Vérifier si le point est dans un des polygones
+    let isInsidePolygon = false;
+
+    for (const polygon of polygons) {
+        const geojsonLayer = L.geoJSON(polygon.toGeoJSON());
+        const results = leafletPip.pointInLayer([lng, lat], geojsonLayer);
+        siteId = polygon.siteData;
+
+        if (results.length > 0) {
+            isInsidePolygon = true;
+
+            let predictions = previsions;
+            const matchingPrediction = predictions.find(prediction => prediction.site.id === siteId);
+
+            try {
+                // Initialiser les données pour le site si nécessaire
+                if (!siteProductions[siteId]) {
+                    const rep = await updateZoneProduction(siteId, matchingPrediction.prevision.predictions);
+                    siteProductions[siteId] = {
+                        production: rep.production,
+                        besoin: rep.besoin,
+                        stations: { pompage: 0, forage: 0 },
+                    };
+                }
+                if (!selectedStation &&  Object.keys(siteProductions).length > 0 ) {
+                    console.log('tafiditra ato');
+                    updateDataDisplay(siteId, siteProductions[siteId]);
+                    return;
                 }
 
+                // Mettre à jour la production
+                siteProductions[siteId].production += selectedStation.impact;
 
-                var polygon = L.polygon(coordinates, {
-                    color: "#000000",  // couleur de bordure du polygone
-                    fillColor: fillColor,  // couleur de remplissage selon l'état
-                    fillOpacity: 0.5,  // transparence du remplissage
-                    weight: 2  // épaisseur de la bordure
-                }).addTo(map).bindPopup(site.libelle);
+                // Incrémenter le compteur de stations par type pour ce site
+                siteProductions[siteId].stations[selectedStation.type]++;
+                console.log(`Stations pour le site ${siteId} :`, siteProductions[siteId].stations);
 
-                polygon.on('click', function(e) {
-                    //map.setView(e.latlng, 11);
-                    //currentSelectedMarker = site.id;
-                    console.log(site);
-                    document.getElementById('selected-site-zone').value = site.libelle;
+                // Mettre à jour l'affichage
+                
+                updateDataDisplay(siteId, siteProductions[siteId]);
+                updatePolygonStyle(
+                    polygon,
+                    siteProductions[siteId].production,
+                    siteProductions[siteId].besoin
+                );
+                selectedStation = null;
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour de la production de zone :", error);
+            }
+        }
+        
+    }
 
-                });
+    if (!isInsidePolygon) {
+        const popup = document.getElementById("popup");
+        popup.textContent = "Le marqueur n'est pas dans un site !";
 
-                polygons.push(polygon);
+        // Affiche le pop-up pendant quelques secondes
+        popup.style.display = "block";
+
+        // Cache automatiquement le pop-up après 3 secondes
+        setTimeout(() => {
+            popup.style.display = "none";
+        }, 3000);
+    }
+});
+function updateDataDisplay(siteId, siteData) {
+    const site = sitesData.find(sites => sites.id === siteId);
+    const dataDisplay = document.getElementById("dataDisplay");
+    dataDisplay.innerHTML = `
+        <div class="site-data-card">
+            <h6 class="site-id">Site : <span>${site.libelle}</span></h6>
+            <div class="site-production">
+                <p><strong>Production :</strong> <span>${Number(siteData.production).toFixed(2)} m³</span></p>
+                <p><strong>Besoin :</strong> <span>${Number(siteData.besoin).toFixed(2)} m³</span></p>
+            </div>
+            <div class="site-stations">
+                <p><strong>Stations utilisées :</strong></p>
+                <ul>
+                    <li><span class="station-type">Pompage :</span> <span>${siteData.stations.pompage}</span></li>
+                    <li><span class="station-type">Forage :</span> <span>${siteData.stations.forage}</span></li>
+                </ul>
+            </div>
+        </div>
+    `;
+}
+
+
+function updatePolygonStyle(polygon, production, besoin) {
+    if (typeof production !== 'number' || typeof besoin !== 'number' || besoin <= 0) {
+        console.error("Les paramètres 'production' et 'besoin' doivent être des nombres et 'besoin' doit être supérieur à 0.");
+        return;
+    }
+    var gap = (besoin - production) / besoin;
+    gap = parseFloat(gap.toFixed(2)); // Arrondi à 2 décimales
+
+    if (gap > 0.5) {
+        polygon.setStyle({ fillColor: "#ff6666", fillOpacity: 0.7 }); // Rouge
+    } else if (gap > 0.25 && gap <= 0.5) {
+        polygon.setStyle({ fillColor: "#ffcc99", fillOpacity: 0.7 }); // Orange
+    } else if (gap > 0 && gap <= 0.25) {
+        polygon.setStyle({ fillColor: "#fffacd", fillOpacity: 0.7 }); // Jaune
+    } else if (gap < 0) {
+        polygon.setStyle({ fillColor: "#87ceeb", fillOpacity: 0.7 }); // Bleu
+    } else {
+        polygon.setStyle({ fillColor: "#a9a9a9", fillOpacity: 0.5 }); // Gris
+    }
+}
+    async function updateZoneProduction(siteId, previsions) {
+    // Préparer les données pour l'appel
+    const requestData = {
+        siteId: siteId,
+        previsions: previsions,
+    };
+    console.log("Request data:", requestData); // Vérifiez vos données ici
+
+    try {
+        const response = await fetch('/update-zone-production', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify(requestData),
+        });
+
+        if (!response.ok) {
+            throw new Error("Erreur lors de la requête au serveur.");
+        }
+
+        const data = await response.json();
+        console.log("Update zone production response:", data);
+
+        return data.rep; // Renvoie uniquement la réponse utile
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour de la production de zone :", error);
+        throw error; // Relance l'erreur pour gérer en amont
+    }
+}
+    function addPolygons(sites) {
+        removePolygons();
+        sites.forEach(function(site) {
+            var coordinates = site.coord.map(function(coord) {
+                return [coord.latitude, coord.longitude];
             });
+            const fillColor = getFillColor(site.etat);
+            var polygon = L.polygon(coordinates, {
+                color: "#000000",  // couleur de bordure du polygone
+                fillColor: fillColor,  // couleur de remplissage selon l'état
+                fillOpacity: 0.5,  // transparence du remplissage
+                weight: 2  // épaisseur de la bordure
+            }).addTo(map)
+
+            polygon.siteData = site.id;
+            polygons.push(polygon);
+        });
+        polygonsB = polygons;
+    }
+        function getFillColor(etat) {
+            const cleanEtat = String(etat)
+            switch (cleanEtat) {
+                case '1': return "#87ceeb"; // bleu
+                case '2': return "#fffacd"; // jaune
+                case '3': return "#ffcc99"; // orange
+                case '4': return "#ff6666"; // rouge
+                default: return "#a9a9a9"; // gris
+            }
         }
 
     addPolygons(sitesData);
+
     document.addEventListener('DOMContentLoaded', function() {
         var minDate = "2024-01-01"; // Exemple de date minimum
         var maxDate = "2025-12-31"; // Exemple de date maximum
@@ -267,7 +576,6 @@
     var endDate = document.getElementById('end-date').value;
 
     if (startDate && endDate) {
-        document.querySelector('.chart-section').style.display = 'none';
 
         fetch('{{ path('site_etiage_prevision') }}', {
             method: 'POST',
@@ -281,7 +589,7 @@
         .then(data => {
             let datas = JSON.parse(data);
             previsions = datas;
-            console.log('Response previsions:', previsions);
+            //console.log('Response previsions:', previsions);
 
             removePolygons();
             datas.forEach(function(data) {
@@ -306,17 +614,14 @@
                     fillColor: fillColor,  // couleur de remplissage selon l'état
                     fillOpacity: 0.5,  // transparence du remplissage
                     weight: 2  // épaisseur de la bordure
-                }).addTo(map).bindPopup(data.site.libelle);
+                }).addTo(map)
 
                polygon.on('click', function(e) {
                     map.setView(e.latlng, 11);
                     //currentSelectedMarker = site.id;
-                    console.log(data.site);
-                    document.querySelector('.chart-section').style.display = 'block';
-                    updateChartWithForecasty(previsions, data.site.id);
-
+                    //console.log("afaka atao ato koa");
                 });
-
+                polygon.siteData = data.site.id;
                 polygons.push(polygon);
             });
 
@@ -328,98 +633,19 @@
             errorMessageElement.textContent = 'Une erreur est survenue lors de la prévision. Veuillez réessayer.';
         });
         } else {
-            alert('Veuillez sélectionner une date de début et une date de fin.');
+            const popup = document.getElementById("popup");
+            popup.textContent = "Veuillez sélectionner une date de début et une date de fin.";
+
+            // Affiche le pop-up pendant quelques secondes
+            popup.style.display = "block";
+
+            // Cache automatiquement le pop-up après 3 secondes
+            setTimeout(() => {
+                popup.style.display = "none";
+            }, 3000);
         }
     });
     });
-
-
-    let chart; // Déclaration d'une instance globale pour le graphique
-
-    function updateChartWithData(labels, data) {
-        if (chart) {
-            chart.updateSeries([{
-                name: 'Production m³',
-                data: data,
-            }]);
-            chart.updateOptions({
-                xaxis: { categories: labels },
-            });
-        } else {
-            chart = new ApexCharts(document.querySelector("#chart"), {
-                series: [{
-                    name: 'Production m³',
-                    data: data,
-                }],
-                chart: {
-                    height: 350,
-                    type: 'area',
-                    toolbar: { show: false },
-                },
-                markers: {
-            size: 4
-        },
-        colors: ['#4154f1'],
-        fill: {
-            type: "gradient",
-            gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.3,
-            opacityTo: 0.4,
-            stops: [0, 90, 100]
-            }
-        },
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'smooth',
-            width: 2
-        },
-        yaxis: {
-            title: {
-            text: 'Production en m³'
-            }
-        },
-        xaxis: { categories: labels },
-            });
-            chart.render();
-        }
-    }
-
-    // Fonction pour mettre à jour le graphique avec les prévisions
-    function updateChartWithForecasty(prevision, siteId) {
-        // 1. Extraire les prévisions pour le site correspondant
-        let production = null;
-        prevision.forEach(function(prev) {
-            if (prev.site.id === siteId) {
-                production = prev.prevision.predictions;
-                return; // Arrêter la boucle dès que le site est trouvé
-            }
-        });
-
-        // Vérifier si des données de prévision ont été trouvées pour le site
-        if (!production || production.length === 0) {
-            console.error('Aucune prévision trouvée pour le site avec l\'ID:', siteId);
-            return; // Si aucune prévision, arrêter la fonction
-        }
-        //console.log(production);
-
-         // 2. Extraire les 10 dernières données de prévision
-        const last10Data = production.slice(-10).map(item => ({
-            date: item.date, 
-            prediction: item.prediction // La quantité produite de la prévision
-        }));
-
-        // Extraire les labels (dates) et les données (prévisions)
-        const labels = last10Data.map(item => item.date);
-        const data = last10Data.map(item => item.prediction);
-
-        //console.log(labels, data);
-
-        // Mettre à jour le graphique avec les labels et les données
-        updateChartWithData(labels, data);
-    }
 
 </script>
 {% endblock %}

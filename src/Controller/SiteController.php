@@ -2,6 +2,7 @@
 namespace App\Controller;
 ini_set('memory_limit', '256M');
 
+use App\Entity\Besoin;
 use App\Util\Util;
 use App\Entity\Site;
 use App\Entity\Zone;
@@ -103,15 +104,29 @@ class SiteController extends AbstractController
     public function previsionMap(EntityManagerInterface $entityManager): Response
     {
         $rsite =  $entityManager->getRepository(Site::class);
-        $rzone = $entityManager->getRepository(Zone::class);
         $sites = $rsite->findAll();
-        $zones = $rzone->findAll();
-        $zone=(Util::toJson($zones));
         $site = (Util::toJson($sites));
         return $this->render('site/previsionMap.html.twig', [
             'sites' => $site,
-            'zone' => $zone,
         ]);
+    }
+    #[Route('update-zone-production', name : 'update_zone_production')]
+    public function updateZoneProduction(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        // Vérifiez les clés correctes
+        if (!$data || !isset($data['siteId'], $data['previsions'])) {
+            return new JsonResponse(['error' => 'Invalid data'], 400);
+        }
+        $siteID = $data['siteId'];
+        $prediction = $data['previsions'];
+        try {
+            $besoin = $this->productionService->simulation($siteID, $prediction);
+            return new JsonResponse(['success' => true, 'rep' => $besoin]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+            
     }
     #[Route('site/prevision/etiage', name : 'site_etiage_prevision')]
     public function siteEtiagePrediction(EntityManagerInterface $entityManager,Request $request): Response
@@ -229,46 +244,17 @@ class SiteController extends AbstractController
         $rep = $response->toArray();
         $repon = Util::toJson($rep);
         return new JsonResponse($repon);
-    }/*
+    }
 
     #[Route('/site/test', name: 'app_site_test')]
     public function test(EntityManagerInterface $entityManager): Response
     {
-        $rproduction = $entityManager->getRepository(ProductionMonth::class);
-        $production = $rproduction->findAll();
-        $data = [
-            [
-                'station_id' => 43,
-                'site_id' => 18,
-                'source' => 0,
-                'year' => 2024,
-                'month' => 7,
-                'day' => 9
-            ],
-            [
-                'station_id' => 43,
-                'site_id' => 18,
-                'source' => 0,
-                'year' => 2024,
-                'month' => 7,
-                'day' => 10
-            ]
-        ];
-   
-       // Appel de l'API Flask
-       $client = HttpClient::create();
-       $response = $client->request('POST', 'http://127.0.0.1:5000/predict', [
-        'json' => $data,
+        return $this->render('site/test.html.twig', [
 
         ]);
-       $data = $response->toArray();
-       #dump($data);die();
-        return $this->render('site/test.html.twig', [
-            'productions' => $production,
-            'pred' => $data,
-        ]);
     }
-   */
+
+
     #[Route('station/production/month/{stationId}', name : 'station_production_month')]
     public function stationProductionMonth($stationId,EntityManagerInterface $entityManager): Response
     {
@@ -395,7 +381,7 @@ class SiteController extends AbstractController
         $sites = $queryBuilder->getResult();
         //dd($sites[1]->getCoord());
 
-        $sitete=(Util::toJson($sites));
+        $sitete=(Util::toJson($site));
         return $this->render('site/update-site-polygon.html.twig', [
             'sites' => $sitete,
             'site' => $site,// Coordonnées du polygone pour l'affichage
@@ -412,16 +398,16 @@ class SiteController extends AbstractController
         $entityManager->getRepository(Site::class)->update($site);
 
         return $this->redirectToRoute('update_site_poly', ['id' => $site->getId()]);
+        
     }
     #[Route('/site/new', name: 'new_site_poly')]
     public function newSite(EntityManagerInterface $entityManager): Response
     {
         $rsite =  $entityManager->getRepository(Site::class);
-        $site = $rsite->findAll();
-        dump($site);
+        $sites = $rsite->findAll();
+        $site = (Util::toJson($sites));
         return $this->render('site/new-zone.html.twig', [
-            'controller_name' => 'LocationController',
-            'zoneventes' => $site,
+            'sites' => $site,
             'message' => null,
         ]);
     }
@@ -486,6 +472,9 @@ class SiteController extends AbstractController
         $site = $rsite->find($id);
         $rzone = $entityManager->getRepository(Zone::class);
         $siteJ = (Util::toJson($site));
+        $rbesoin = $entityManager->getRepository(Besoin::class);
+        $besoin = $rbesoin->findBesoinForSiteLastDate($id);
+        $besoinj = (Util::toJson($besoin));
         //dump($site->getIncidents()[0]->getLibelle());die();
         //dump($site,$siteJ);die();
         $zoneOfSite = $rzone->getZoneOfSite($id);
@@ -496,6 +485,7 @@ class SiteController extends AbstractController
         return $this->render('site/detailSite.html.twig', [
             'site' => $site,
             'sitej' => $siteJ,
+            'besoinj' => $besoinj,
             'zonej' => $zoneOfSite,
         ]);
     }    

@@ -3,38 +3,145 @@
 {% block title %}Hello SiteController!{% endblock %}
 
 {% block body %}
+
 <div class="container">
-    <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="tabOverview" data-bs-toggle="tab" data-bs-target="#tabContentOverview" aria-controls="tabContentOverview" aria-selected="true">
-                Overview
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tabPrices" data-bs-toggle="tab" data-bs-target="#tabContentPrices" aria-controls="tabContentPrices" aria-selected="false">
-                Prices
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tabReviews" data-bs-toggle="tab" data-bs-target="#tabContentReviews" aria-controls="tabContentReviews" aria-selected="false">
-                Reviews
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="tabAbout" data-bs-toggle="tab" data-bs-target="#tabContentAbout" aria-controls="tabContentAbout" aria-selected="false">
-                About
-            </button>
-        </li>
-    </ul>
-    {% for prediction in pred.predictions %}
-        {{prediction}}
-    {% endfor %}
-
-    {% for production in productions %}
-        <p> {{production.quantite}}</p>
-        <p>{{production.mois|date('m/Y') }}<p>
-    {% endfor %}
-
+   <h1>Simulation de Zones avec Marqueurs</h1>
+   <p>Sélectionnez un type de station, puis cliquez sur la carte pour ajouter un marqueur.</p>
+   <div id="controls">
+       <button onclick="selectStation('pompage', 2)">Station de Pompage (+2)</button>
+       <button onclick="selectStation('forage', 4)">Station de Forage (+4)</button>
+   </div>
+   <div id="map" style="height: 500px;"></div>
 </div>
+<script>
+    let selectedStation = null;
+    let zonesLayer = null;
 
+    // Charger la carte
+    const map = L.map('map').setView([-1.5, 36.5], 7);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(map);
+
+    // Icônes SVG pour les marqueurs
+    const markerIcons = {
+        pompage: L.divIcon({
+            className: 'custom-marker pompage',
+            html: `
+                <img src="/images/pompage.svg" alt="Pompage" width="40" height="40" />
+            `,
+
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+        }),
+        forage: L.divIcon({
+            className: 'custom-marker forage',
+            html: `
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 8.84-9 13-9 13s-9-4.16-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+            `,
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+        }),
+    };
+
+    // Charger les zones
+    fetch('/data/zones.json')
+        .then(response => response.json())
+        .then(data => {
+            zonesLayer = L.geoJSON(data, {
+                style: feature => ({
+                    color: 'white',
+                    fillColor: feature.properties.color,
+                    fillOpacity: 0.7,
+                    weight: 1
+                }),
+                onEachFeature: (feature, layer) => {
+                    layer.feature = feature; // Associer les données à la couche
+                }
+            }).addTo(map);
+        });
+
+    // Sélectionner un type de station
+    function selectStation(type, impact) {
+        selectedStation = { type, impact };
+        alert(`Type de station sélectionné : ${type} (+${impact})`);
+    }
+
+    map.on('click', (e) => {
+    if (!selectedStation) {
+        alert("Veuillez sélectionner un type de station.");
+        return;
+    }
+
+    const { lat, lng } = e.latlng;
+
+    // Ajouter le marqueur
+    L.marker([lat, lng], { icon: markerIcons[selectedStation.type] }).addTo(map);
+
+    // Vérifier si le marqueur est dans un polygone
+    let markerAdded = false;
+
+    zonesLayer.eachLayer(layer => {
+        if (layer.feature) {
+            const polygon = layer.getLatLngs(); // Récupère les coordonnées du polygone
+            const point = L.latLng(lat, lng); // Point à tester
+
+            // Utiliser la fonction Leaflet pour vérifier si le point est dans le polygone
+            if (L.polygon(polygon).getBounds().contains(point)) {
+                // Appeler la fonction pour mettre à jour la production
+                updateZoneProduction(layer.feature, layer);
+                markerAdded = true;
+            }
+        }
+    });
+
+    if (!markerAdded) {
+        alert("Le marqueur n'est pas dans une zone !");
+    }
+});
+
+
+
+    // Mise à jour de la production d'une zone
+    function updateZoneProduction(feature, layer) {
+        // Ajouter l'impact
+        feature.properties.production += selectedStation.impact;
+
+        // Mise à jour de la couleur
+        if (feature.properties.production >= feature.properties.maxProduction) {
+            feature.properties.color = 'green';
+        } else if (feature.properties.production > feature.properties.maxProduction / 2) {
+            feature.properties.color = 'orange';
+        } else {
+            feature.properties.color = 'red';
+        }
+
+        // Actualiser le style
+        layer.setStyle({ fillColor: feature.properties.color });
+
+        alert(`Production mise à jour pour ${feature.properties.name}: ${feature.properties.production}`);
+    }
+
+    // CSS pour personnaliser les marqueurs
+    const style = document.createElement('style');
+    style.textContent = `
+        .custom-marker svg {
+            color: #333; /* Couleur par défaut */
+        }
+        .custom-marker.pompage svg {
+            color: #f44336; /* Rouge */
+        }
+        .custom-marker.forage svg {
+            color: #2196f3; /* Bleu */
+        }
+        .custom-marker svg:hover {
+            transform: scale(1.2); /* Zoom au survol */
+        }
+    `;
+    document.head.appendChild(style);
+</script>
 {% endblock %}

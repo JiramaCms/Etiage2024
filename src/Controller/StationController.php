@@ -77,10 +77,13 @@ class StationController extends AbstractController
         $coords = $station->getCoord();
         $latitude = $coords ? $coords['latitude'] : null;
         $longitude = $coords ? $coords['longitude'] : null;
+        $rsource =  $entityManager->getRepository(Source::class);
+        $sources = $rsource->findAll();
         return $this->render('station/update-station-point.html.twig', [
             'station' => $station,
             'latitude' => $latitude,
             'longitude' => $longitude,
+            'sources' => $sources,
         ]);
     }
     #[Route('/station/update/{id}', name: 'station_update', methods: ['POST'])]
@@ -91,6 +94,8 @@ class StationController extends AbstractController
         $code = $request->request->get('code');
         $coord = $request->request->get('coord');
         $siteId = $request->request->get('site');
+        $sourcesIds = $request->request->all('sources');
+
         
         // Convertir les coordonnées en tableau [latitude, longitude]
         $coordArray = explode(',', str_replace(['LatLng(', ')'], '', $coord));
@@ -110,7 +115,7 @@ class StationController extends AbstractController
 
         $entityManager->getRepository(Station::class)->update($station);
 
-
+        $entityManager->getRepository(Station::class)->updateStationSourceRelations($station->getId(), $sourcesIds);
 
         // Rediriger vers
         return $this->redirectToRoute('update_station_point',['id' => $station->getId()]);

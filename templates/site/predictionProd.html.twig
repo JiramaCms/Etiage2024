@@ -9,253 +9,252 @@
       font-weight: 700;
 }
 </style>
-  <main id="main" class="main">
+<main id="main" class="main">
+<div class="pagetitle">
+    <h1>Site : {{site.libelle}}</h1>
+    <nav>
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Accueil</a></li>
+        <li class="breadcrumb-item "><a href="{{ path('detail_site', {'id':site.id}) }}">Site</a></li>
+        <li class="breadcrumb-item active">Prédiction</li>
 
-    <div class="pagetitle">
-      <h1>Site : {{site.libelle}}</h1>
-      <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
-            <li class="breadcrumb-item "><a href="{{ path('detail_site', {'id':site.id}) }}">Site</a></li>
-            <li class="breadcrumb-item active">Prédiction</li>
+    </ol>
+    </nav>
+</div><!-- End Page Title -->
 
-        </ol>
-      </nav>
-    </div><!-- End Page Title -->
-
-    <section class="section dashboard">
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Site <span>| Zone</span></h5>
-                        <div class="d-flex">
-                            <!-- Données du site à gauche -->
-                            <div class="site-data col-12">
-                                <form>
-                                    <label for="station-select" class="col-2 col-form-label">Stations : </label>
-                                    <div class="col-sm-3">
-                                        <select class="form-select" id="station-select" name="station_id">
-                                        <option value="0" selected>Toutes les stations</option>
-                                        {% for station in site.stations %}
-                                            <option value="{{ station.id }}">{{ station.code }}</option>
-                                        {% endfor %}
-                                        </select>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="start-date">Date de début:</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" id="start-date" name="start-date">
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label for="end-date">Date fin:</label>
-                                        <div class="col-sm-10">
-                                            <input type="text" id="end-date" name="end-date">
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-10">
-                                        <button type="submit" id="submitPrediction" class="btn btn-secondary">Faire une prédiction</button>
-                                    </div>
-                                    <div id="error-message" style="color: red; display: none;"></div>
-                                    <div id="success-message" style="color: green; display: none;"></div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script>
-        function displayMessage(message, isError = false) {
-            const errorMessageDiv = document.getElementById('error-message');
-            const successMessageDiv = document.getElementById('success-message');
-            
-            errorMessageDiv.textContent = '';
-            successMessageDiv.textContent = '';
-            
-            // Masquer les deux messages
-            errorMessageDiv.style.display = 'none';
-            successMessageDiv.style.display = 'none';
-
-            if (isError) {
-                errorMessageDiv.textContent = message;
-                errorMessageDiv.style.display = 'block';
-            } else {
-                successMessageDiv.textContent = message;
-                successMessageDiv.style.display = 'block';
-            }
-        }
-            document.addEventListener('DOMContentLoaded', function() {
-                var minDate = "2024-01-01"; // Exemple de date minimum
-                var maxDate = "2025-12-31"; // Exemple de date maximum
-
-                var startDatePicker = flatpickr("#start-date", {
-                    minDate: minDate,
-                    maxDate: maxDate,
-                    onChange: function(selectedDates, dateStr, instance) {
-                        var minDate = instance.selectedDates[0];
-                        minDate.setDate(minDate.getDate() + 1);
-                        endDatePicker.set('minDate', minDate);
-                    }
-                });
-
-                var endDatePicker = flatpickr("#end-date", {
-                    minDate: minDate,
-                    maxDate: maxDate
-                });
-
-                document.getElementById('submitPrediction').addEventListener('click', function(event) {
-                    event.preventDefault(); // Empêche la soumission par défaut du formulaire
-
-                    var startDate = document.getElementById('start-date').value;
-                    var endDate = document.getElementById('end-date').value;
-                    var station = document.getElementById('station-select').value;
-
-                    if (startDate && endDate) {
-                        showLoadingIndicator(true);
-                        fetch('{{ path('site_production_prediction') }}', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-Requested-With': 'XMLHttpRequest',
-                            },
-                            body: JSON.stringify({ 'start-date': startDate, 'end-date': endDate,'stationId':station })
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            console.log('Data received:', data);
-                            if (data.error) {
-                                showLoadingIndicator(false);
-                                displayMessage(data.error, true);
-                            } else {
-                                displayMessage('Sources retrieved successfully.', false);
-                                let datas = JSON.parse(data);
-                                showLoadingIndicator(false);
-                                const labels = datas.predictions.map(item => item.date);
-                                const predictions = datas.predictions.map(item => item.prediction);
-                                updateChartWithData(labels, predictions);
-                        }})
-                        .catch(error => {
-                            displayMessage('There was a problem with the fetch operation.', true);
-                            console.error('Error during prediction:', error);
-                            showLoadingIndicator(false);
-                        });
-                    } else {
-                        alert('Veuillez sélectionner une date de début et une date de fin.');
-                    }
-                });
-        });
-        </script>
-
-        <!-- Statst -->
+<section class="section dashboard">
+    <div class="row">
         <div class="col-12">
             <div class="card">
                 <div class="card-body">
-                    <h5 class="card-title">Prédiction</span></h5>
-
-                    <!-- Line Chart -->
-                    <div class="d-flex justify-content-center">
-                        <div id="loading" class="spinner-border" role="status" style="display: none;">
-                            <span class="visually-hidden">Loading...</span>
+                    <h5 class="card-title">Site <span>| Zone</span></h5>
+                    <div class="d-flex">
+                        <!-- Données du site à gauche -->
+                        <div class="site-data col-12">
+                            <form>
+                                <label for="station-select" class="col-2 col-form-label">Stations : </label>
+                                <div class="col-sm-3">
+                                    <select class="form-select" id="station-select" name="station_id">
+                                    <option value="0" selected>Toutes les stations</option>
+                                    {% for station in site.stations %}
+                                        <option value="{{ station.id }}">{{ station.code }}</option>
+                                    {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="start-date">Date de début:</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" id="start-date" name="start-date">
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label for="end-date">Date fin:</label>
+                                    <div class="col-sm-10">
+                                        <input type="text" id="end-date" name="end-date">
+                                    </div>
+                                </div>
+                                <div class="col-sm-10">
+                                    <button type="submit" id="submitPrediction" class="btn btn-secondary">Faire une prédiction</button>
+                                </div>
+                                <div id="error-message" style="color: red; display: none;"></div>
+                                <div id="success-message" style="color: green; display: none;"></div>
+                            </form>
                         </div>
                     </div>
-
-                    <div id="reportsChart"></div>
-
-                    <script>
-                    let site = {{sitej|raw}};
-                    document.addEventListener("DOMContentLoaded", () => {
-                    // Initialiser avec les données du jour
-                    getDataByDay().then(dayData => {
-                        showLoadingIndicator(true);
-                        const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
-                        const data = dayData.map(production => production.sommeProduction);
-                        updateChartWithData(labels, data);
-                        showLoadingIndicator(false);
-
-                    });
-                    });
-
-                    function showLoadingIndicator(show) {
-                    const loadingElement = document.querySelector('#loading');
-                        if (loadingElement) {
-                            loadingElement.style.display = show ? 'block' : 'none';
-                            if (!show) {
-                                setTimeout(() => {
-                                    loadingElement.style.display = 'none';
-                                }, 500); // délai de 500 ms avant de masquer le spinner
-                            }
-                        }
-                    }
-
-                    function getDataByDay() {
-                    return fetch(`/site/production/day/${site.id}`)
-                        .then(response => response.json())
-                        .then(data => {
-                        let datas = JSON.parse(data);
-                        datas.reverse();
-                        //console.log(datas[0].dateProduction.timestamp);// assuming the data structure is correct
-                        return datas; 
-                        })
-                        .catch(error => {
-                        console.error('Error fetching daily production data:', error);
-                        return [];
-                        });
-                    }
-                    let chart; // Déclaration d'une instance globale pour le graphique
-
-                    function updateChartWithData(labels, data) {
-                        if (chart) {
-                            chart.updateSeries([{
-                                name: 'Production m³',
-                                data: data,
-                            }]);
-                            chart.updateOptions({
-                                xaxis: { categories: labels },
-                            });
-                        } else {
-                            chart = new ApexCharts(document.querySelector("#reportsChart"), {
-                                series: [{
-                                    name: 'Production m³',
-                                    data: data,
-                                }],
-                                chart: {
-                                    height: 350,
-                                    type: 'area',
-                                    toolbar: { show: false },
-                                },
-                                markers: {
-                            size: 4
-                        },
-                        colors: ['#4154f1'],
-                        fill: {
-                            type: "gradient",
-                            gradient: {
-                            shadeIntensity: 1,
-                            opacityFrom: 0.3,
-                            opacityTo: 0.4,
-                            stops: [0, 90, 100]
-                            }
-                        },
-                        dataLabels: {
-                            enabled: false
-                        },
-                        stroke: {
-                            curve: 'smooth',
-                            width: 2
-                        },
-                                xaxis: { categories: labels },
-                            });
-                            chart.render();
-                        }
-                    }
-                    </script>
                 </div>
             </div>
         </div>
-    </section>
-  </main>
+    </div>
+    <script>
+    function displayMessage(message, isError = false) {
+        const errorMessageDiv = document.getElementById('error-message');
+        const successMessageDiv = document.getElementById('success-message');
+        
+        errorMessageDiv.textContent = '';
+        successMessageDiv.textContent = '';
+        
+        // Masquer les deux messages
+        errorMessageDiv.style.display = 'none';
+        successMessageDiv.style.display = 'none';
+
+        if (isError) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = 'block';
+        } else {
+            successMessageDiv.textContent = message;
+            successMessageDiv.style.display = 'block';
+        }
+    }
+        document.addEventListener('DOMContentLoaded', function() {
+            var minDate = "2024-01-01"; // Exemple de date minimum
+            var maxDate = "2025-12-31"; // Exemple de date maximum
+
+            var startDatePicker = flatpickr("#start-date", {
+                minDate: minDate,
+                maxDate: maxDate,
+                onChange: function(selectedDates, dateStr, instance) {
+                    var minDate = instance.selectedDates[0];
+                    minDate.setDate(minDate.getDate() + 1);
+                    endDatePicker.set('minDate', minDate);
+                }
+            });
+
+            var endDatePicker = flatpickr("#end-date", {
+                minDate: minDate,
+                maxDate: maxDate
+            });
+
+            document.getElementById('submitPrediction').addEventListener('click', function(event) {
+                event.preventDefault(); // Empêche la soumission par défaut du formulaire
+
+                var startDate = document.getElementById('start-date').value;
+                var endDate = document.getElementById('end-date').value;
+                var station = document.getElementById('station-select').value;
+
+                if (startDate && endDate) {
+                    showLoadingIndicator(true);
+                    fetch('{{ path('site_production_prediction') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                        body: JSON.stringify({ 'start-date': startDate, 'end-date': endDate,'stationId':station })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Data received:', data);
+                        if (data.error) {
+                            showLoadingIndicator(false);
+                            displayMessage(data.error, true);
+                        } else {
+                            displayMessage('Succès de la prédiction.', false);
+                            let datas = JSON.parse(data);
+                            showLoadingIndicator(false);
+                            const labels = datas.predictions.map(item => item.date);
+                            const predictions = datas.predictions.map(item => item.prediction);
+                            updateChartWithData(labels, predictions);
+                    }})
+                    .catch(error => {
+                        displayMessage('Prédiction impossible veuiller réessayer plus tard.', true);
+                        console.error('Error during prediction:', error);
+                        showLoadingIndicator(false);
+                    });
+                } else {
+                    alert('Veuillez sélectionner une date de début et une date de fin.');
+                }
+            });
+    });
+    </script>
+
+    <!-- Statst -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Prédiction</span></h5>
+
+                <!-- Line Chart -->
+                <div class="d-flex justify-content-center">
+                    <div id="loading" class="spinner-border" role="status" style="display: none;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+
+                <div id="reportsChart"></div>
+
+                <script>
+                let site = {{sitej|raw}};
+                document.addEventListener("DOMContentLoaded", () => {
+                // Initialiser avec les données du jour
+                getDataByDay().then(dayData => {
+                    showLoadingIndicator(true);
+                    const labels = dayData.map(production => new Date(production.dateProduction.timestamp * 1000).toLocaleDateString());
+                    const data = dayData.map(production => production.sommeProduction);
+                    updateChartWithData(labels, data);
+                    showLoadingIndicator(false);
+
+                });
+                });
+
+                function showLoadingIndicator(show) {
+                const loadingElement = document.querySelector('#loading');
+                    if (loadingElement) {
+                        loadingElement.style.display = show ? 'block' : 'none';
+                        if (!show) {
+                            setTimeout(() => {
+                                loadingElement.style.display = 'none';
+                            }, 500); // délai de 500 ms avant de masquer le spinner
+                        }
+                    }
+                }
+
+                function getDataByDay() {
+                return fetch(`/site/production/day/${site.id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                    let datas = JSON.parse(data);
+                    datas.reverse();
+                    //console.log(datas[0].dateProduction.timestamp);// assuming the data structure is correct
+                    return datas; 
+                    })
+                    .catch(error => {
+                    console.error('Error fetching daily production data:', error);
+                    return [];
+                    });
+                }
+                let chart; // Déclaration d'une instance globale pour le graphique
+
+                function updateChartWithData(labels, data) {
+                    if (chart) {
+                        chart.updateSeries([{
+                            name: 'Production m³',
+                            data: data,
+                        }]);
+                        chart.updateOptions({
+                            xaxis: { categories: labels },
+                        });
+                    } else {
+                        chart = new ApexCharts(document.querySelector("#reportsChart"), {
+                            series: [{
+                                name: 'Production m³',
+                                data: data,
+                            }],
+                            chart: {
+                                height: 350,
+                                type: 'area',
+                                toolbar: { show: false },
+                            },
+                            markers: {
+                        size: 4
+                    },
+                    colors: ['#4154f1'],
+                    fill: {
+                        type: "gradient",
+                        gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.3,
+                        opacityTo: 0.4,
+                        stops: [0, 90, 100]
+                        }
+                    },
+                    dataLabels: {
+                        enabled: false
+                    },
+                    stroke: {
+                        curve: 'smooth',
+                        width: 2
+                    },
+                            xaxis: { categories: labels },
+                        });
+                        chart.render();
+                    }
+                }
+                </script>
+            </div>
+        </div>
+    </div>
+</section>
+</main>
 </div>
 
 {% endblock %}

@@ -96,20 +96,28 @@
     }
 
     /* Style pour la légende */
+
+    .map-section {
+    width: 65%;
+    position: relative; /* Nécessaire pour les enfants en position absolue */
+}
     .legend {
-        position: absolute;
-        bottom: 0px;
-        background-color: white;
-        border: 0.5px solid #444;
-        padding: 10px;
-        border-radius: 8px;
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-        font-size: 14px;
-        line-height: 18px;
-        color: #333;
-        z-index: 1000;
-        font-family: 'Poppins', sans-serif;
-    }
+    position: absolute; /* Attachée par rapport au parent positionné */
+    bottom: 10px;       /* 10px depuis le bas de la carte */
+    left: 10px;         /* 10px depuis la gauche */
+    background-color: white;
+    border: 0.5px solid #444;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    font-size: 14px;
+    line-height: 18px;
+    color: #333;
+    z-index: 1000; /* S'assure que la légende est au-dessus de la carte */
+    font-family: 'Poppins', sans-serif;
+    pointer-events: none; /* Empêche l'interaction de la souris sur la légende */
+}
+
 
     .legend h5 {
         margin-top: 0;
@@ -165,7 +173,9 @@
         </div>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('site_liste') }}">Accueil</a></li>
+                <li class="breadcrumb-item active">Simulation étiage</li>
+
             </ol>
         </nav>
     </div>
@@ -174,7 +184,7 @@
         <div class="content-container">
             <!-- Section Carte -->
             <div class="map-section">
-                <div id="map"></div>
+                <div id="map">
                 <div id="legend" class="legend">
                     <h5>Légende</h5>
                     <div><i class="zone-polygon polygon-gray"></i>Pas de Gap</div>
@@ -183,6 +193,8 @@
                     <div><i class="zone-polygon polygon-orange"></i>25% < Gap < 50%</div>
                     <div><i class="zone-polygon polygon-red"></i>Gap > 50%</div>
                 </div>
+                </div>
+                
             </div>
 
             <!-- Section Formulaire et Graphique (Colonne de droite) -->
@@ -194,7 +206,6 @@
                             <label for="year">Sélectionnez une année :</label>
                             <select id="year" name="year" class="form-control">
                                 <!-- Liste des années -->
-                                <option value="2023">2023</option>
                                 <option value="2024">2024</option>
                                 <option value="2025">2025</option>
                                 <!-- Ajoute d'autres années -->
@@ -411,7 +422,7 @@
                             <div class="alert alert-info">
                                 <strong>Solution Proposée :</strong>
                                 <p> Gains de capacité totale : ${solutionDatas.capacite} m³</p>
-                                <p>Cout totale : ${solutionDatas.cout}</p>
+                                <p>Cout totale : ${solutionDatas.cout} Ar</p>
                                 ${typeInfo.join('')}
                             </div>
                         `;

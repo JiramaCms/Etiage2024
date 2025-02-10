@@ -31,6 +31,8 @@
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script src="{{ asset('build/vendor/apexcharts/apexcharts.min.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script src="https://unpkg.com/leaflet-pip/leaflet-pip.min.js"></script>
+
 
 
 
@@ -95,25 +97,26 @@
             <span class="navbar-toggler-bar bottom-bar"></span>
             </button>
         </div>
+        {% if app.user is not null %}
         <div class="collapse navbar-collapse justify-content-end" id="navigation"
             data-nav-image="../assets/img/blurred-image-1.jpg">
             <ul class="navbar-nav">
-            <li class="nav-item">
+            <li class="nav-item" style="flex: none;">
                 <a class="nav-link btn btn-primary" href="{{path('site_liste')}}">
                 <span class="fa fa-home"></span> Accueil
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" style="flex: none;">
                 <a class="nav-link btn btn-primary" href="{{path('app_map_etiage')}}">
                 <span class="fa fa-tint"></span> Etiage
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" style="flex: none;">
                 <a class="nav-link btn btn-primary" href="{{path('app_liste_action')}}">
                 <span class="fa fa-calendar"></span> Planification
                 </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" style="flex: none;">
                 <a class="nav-link btn btn-primary" href="{{path('app_liste_materiel')}}">
                 <span class="fa fa-cubes"></span> Equipement
                 </a>
@@ -121,6 +124,7 @@
 
             </ul>
         </div>
+        {% endif %}
         </div>
     </nav>
     <!-- End Navbar -->
